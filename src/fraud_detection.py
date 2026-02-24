@@ -70,9 +70,11 @@ FRAUD_INDICATORS = {
     ],
     'grammar_errors': [
         # Типові помилки в шахрайських листах
-        'Sehr geehrte Dame und Herren',  # Правильно: Damen und Herren
-        'hiermit mahnen wir sie',  # Правильно: Sie (велика)
+        'sehr geehrte dame und herren',  # Правильно: Damen und Herren
+        'hiermit mahnen wir sie',  # Правильно: Sie (велика) - АЛЕ це може бути офіційний лист
         'überweißen sie',  # Правильно: überweisen Sie
+        'bei nicht zahlung',  # Неправильно: bei Nichtzahlung
+        'kommen sie zur polizei',  # Дивний вираз
     ],
     'suspicious_phones': [
         r'^0900',  # Платні номери
@@ -238,9 +240,12 @@ def detect_fraud_indicators(text: str) -> Dict:
             indicators['urgent_payment'].append(indicator)
             fraud_score += 1
     
-    # Перевірка на загрозливий тон
+    # Перевірка на загрозливий тон (тільки якщо є погрози)
     for indicator in FRAUD_INDICATORS['threatening_language']:
         if indicator.lower() in text_lower:
+            # Не рахувати якщо це офіційний контекст
+            if 'gerichtsvollzieher' in indicator.lower() and 'kommt' not in text_lower:
+                continue
             indicators['threatening_language'].append(indicator)
             fraud_score += 2  # Більша вага
     
@@ -253,12 +258,18 @@ def detect_fraud_indicators(text: str) -> Dict:
     # Перевірка на підроблені офіційні назви
     for indicator in FRAUD_INDICATORS['fake_official']:
         if indicator.lower() in text_lower:
+            # Не рахувати якщо це справжній Finanzamt або офіційний контекст
+            if 'finanzamt' in indicator.lower() and '.de' in text_lower:
+                continue
             indicators['fake_official'].append(indicator)
             fraud_score += 1
     
-    # Перевірка на граматичні помилки
+    # Перевірка на граматичні помилки (тільки явні)
     for indicator in FRAUD_INDICATORS['grammar_errors']:
         if indicator.lower() in text_lower:
+            # "hiermit mahnen wir sie" - це нормальний вираз, не помилка
+            if 'hiermit mahnen wir sie' in indicator.lower():
+                continue
             indicators['grammar_errors'].append(indicator)
             fraud_score += 2
     
