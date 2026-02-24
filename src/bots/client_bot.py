@@ -79,6 +79,16 @@ INTERFACE_TRANSLATIONS = {
             'country_saved': '✅ Країна: Німеччина\n\nОберіть ваш статус:',
             'status_saved': '✅ **Реєстрація успішна!**',
             'complete': 'Тепер ви можете завантажити лист для аналізу.'
+        },
+        'upload': {
+            'title': '📤 **Завантаження листа**\n\nНадішліть:\n• 📷 Фото листа (якісне, рівне освітлення)\n• 📄 Текст листа\n• 📎 PDF файл\n\n*Порада:* Для кращого розпізнавання фото має бути чітким.',
+            'processing_photo': '⏳ Обробка фото, зачекайте...',
+            'processing_pdf': '⏳ Обробка PDF, зачекайте...',
+            'processing_translation': '⏳ Переклад тексту...',
+            'processing_analysis': '⏳ Аналіз листа, зачекайте...',
+            'error_not_recognized': '❌ Не вдалося розпізнати текст.\nСпробуйте надіслати інше фото або текст вручну.',
+            'error_no_text': '❌ Не вдалося отримати текст. Спробуйте ще раз.',
+            'error_analysis': '❌ Помилка аналізу: {}'
         }
     },
     'ru': {
@@ -105,6 +115,16 @@ INTERFACE_TRANSLATIONS = {
             'country_saved': '✅ Страна: Германия\n\nВыберите ваш статус:',
             'status_saved': '✅ **Регистрация успешна!**',
             'complete': 'Теперь вы можете загрузить письмо для анализа.'
+        },
+        'upload': {
+            'title': '📤 **Загрузка письма**\n\nОтправьте:\n• 📷 Фото письма (качественное, ровное освещение)\n• 📄 Текст письма\n• 📎 PDF файл\n\n*Совет:* Для лучшего распознавания фото должно быть четким.',
+            'processing_photo': '⏳ Обработка фото, подождите...',
+            'processing_pdf': '⏳ Обработка PDF, подождите...',
+            'processing_translation': '⏳ Перевод текста...',
+            'processing_analysis': '⏳ Анализ письма, подождите...',
+            'error_not_recognized': '❌ Не удалось распознать текст.\nПопробуйте отправить другое фото или текст вручную.',
+            'error_no_text': '❌ Не удалось получить текст. Попробуйте еще раз.',
+            'error_analysis': '❌ Ошибка анализа: {}'
         }
     },
     'de': {
@@ -406,17 +426,16 @@ async def upload_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     chat_id = update.effective_chat.id
     user = get_user(chat_id)
     
+    # Отримуємо мову користувача
+    lang = user['language'] if user else 'uk'
+    t = INTERFACE_TRANSLATIONS.get(lang, INTERFACE_TRANSLATIONS['uk'])
+
     if not user:
-        await update.message.reply_text("❌ Спочатку зареєструйтесь (/start)")
+        await update.message.reply_text(t['not_registered'])
         return ConversationHandler.END
-    
+
     await update.message.reply_text(
-        "📤 **Завантаження листа**\n\n"
-        "Надішліть:\n"
-        "• 📷 Фото листа (якісне, рівне освітлення)\n"
-        "• 📄 Текст листа\n"
-        "• 📎 PDF файл\n\n"
-        "*Порада:* Для кращого розпізнавання фото має бути чітким.",
+        t['upload']['title'],
         parse_mode='Markdown'
     )
     return WAITING_FOR_LETTER
@@ -425,12 +444,17 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     """Обробка завантаженого листа."""
     chat_id = update.effective_chat.id
     user = get_user(chat_id)
-    text = ""
     
+    # Отримуємо мову користувача
+    lang = user['language'] if user else 'uk'
+    t = INTERFACE_TRANSLATIONS.get(lang, INTERFACE_TRANSLATIONS['uk'])
+    
+    text = ""
+
     # Отримання тексту з різних джерел
     if update.message.photo:
         # Обробка фото
-        await update.message.reply_text("⏳ Обробка фото, зачекайте...")
+        await update.message.reply_text(t['upload']['processing_photo'])
         
         photo = update.message.photo[-1]  # Найкраща якість
         file = await photo.get_file()
@@ -441,23 +465,22 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         
         # OCR
         text = extract_text_from_photo(file_path, lang='deu')
-        
+
         if not text.strip():
             await update.message.reply_text(
-                "❌ Не вдалося розпізнати текст.\n"
-                "Спробуйте надіслати інше фото або текст вручну."
+                t['upload']['error_not_recognized']
             )
             return ConversationHandler.END
-            
+
     elif update.message.document:
         # Обробка документа (PDF)
-        await update.message.reply_text("⏳ Обробка PDF, зачекайте...")
-        
+        await update.message.reply_text(t['upload']['processing_pdf'])
+
         doc = update.message.document
         file = await doc.get_file()
         file_path = f'uploads/{chat_id}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
         await file.download_to_drive(file_path)
-        
+
         # Спроба витягнути текст з PDF
         try:
             from pdfminer.high_level import extract_text as pdf_extract
@@ -469,32 +492,32 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
                 text = extract_text_from_photo(file_path, lang='deu')
             except:
                 pass
-        
+
     elif update.message.text:
         # Текстовий лист
         text = update.message.text
-    
+
     if not text.strip():
-        await update.message.reply_text("❌ Не вдалося отримати текст. Спробуйте ще раз.")
+        await update.message.reply_text(t['upload']['error_no_text'])
         return ConversationHandler.END
-    
+
     logger.info(f"Отримано текст: {len(text)} символів")
 
-    # Переклад тексту на українську (якщо мова користувача українська)
+    # Переклад тексту на рідну мову користувача
     translated_text = None
-    if user['language'] == 'uk' and text.strip():
+    if user['language'] in ['uk', 'ru'] and text.strip():
         try:
-            await update.message.reply_text("⏳ Переклад тексту...")
-            # googletrans 4.0.0rc1 працює асинхронно - використовуємо sync версію
-            translation = await translator.translate(text, src='de', dest='uk')
+            await update.message.reply_text(t['upload']['processing_translation'])
+            dest_lang = 'uk' if user['language'] == 'uk' else 'ru'
+            translation = await translator.translate(text, src='de', dest=dest_lang)
             translated_text = translation.text
             logger.info(f"Переклад виконано: {len(translated_text)} символів")
         except Exception as e:
             logger.warning(f"Переклад не вдався: {e}")
             translated_text = text  # fallback
 
-    # Відправка тексту на обробку (симуляція виклику core_bot)
-    await update.message.reply_text("⏳ Аналіз листа, зачекайте...")
+    # Відправка тексту на обробку
+    await update.message.reply_text(t['upload']['processing_analysis'])
 
     # Імпортуємо модулі аналізу
     try:
