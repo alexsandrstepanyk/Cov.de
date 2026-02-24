@@ -777,10 +777,20 @@ async def settings_language_selected(update: Update, context: ContextTypes.DEFAU
     """Збереження вибору мови."""
     chat_id = update.effective_chat.id
     user = get_user(chat_id)
+    selected_text = update.message.text.strip()
     
-    selected_lang = AVAILABLE_LANGUAGES.get(update.message.text)
+    logger.info(f"Вибрано мову: {selected_text}")
+    
+    # Знаходимо мову за текстом кнопки
+    selected_lang = None
+    for btn_text, lang_code in AVAILABLE_LANGUAGES.items():
+        if btn_text in selected_text or lang_code in selected_text.lower():
+            selected_lang = lang_code
+            break
+    
+    # Якщо не знайдено мову, повертаємось в меню
     if not selected_lang:
-        # Натиснуто "Назад"
+        logger.info(f"Мову не знайдено, повернення в меню")
         return await settings_menu(update, context)
     
     # Оновлюємо мову в БД
@@ -789,6 +799,8 @@ async def settings_language_selected(update: Update, context: ContextTypes.DEFAU
     c.execute("UPDATE users SET language=? WHERE chat_id=?", (selected_lang, chat_id))
     conn.commit()
     conn.close()
+    
+    logger.info(f"Мову змінено на: {selected_lang}")
     
     # Отримуємо переклад для нової мови
     t = INTERFACE_TRANSLATIONS.get(selected_lang, INTERFACE_TRANSLATIONS['uk'])
@@ -873,6 +885,8 @@ def main():
     application.add_handler(MessageHandler(filters.Regex("^(⚙️ Налаштування|⚙️ Настройки|⚙️ Einstellungen|⚙️ Settings)$"), settings_menu))
     application.add_handler(MessageHandler(filters.Regex("^(🌐 Мова / Language|🌐 Язык / Language|🌐 Sprache / Language|🌐 Language)$"), settings_language))
     application.add_handler(MessageHandler(filters.Regex("^(🔙 Назад|🔙 Zurück|🔙 Back)$"), settings_menu))
+    # Обробка вибору мови - будь-який текст з назвою мови
+    application.add_handler(MessageHandler(filters.Regex("^(🇺🇦|🇷🇺|🇩🇪|🇬🇧|Українська|Русский|Deutsch|English|UK|RU|DE|EN)"), settings_language_selected))
     
     # Запуск
     application.run_polling(allowed_updates=Update.ALL_TYPES)
