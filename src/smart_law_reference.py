@@ -212,6 +212,16 @@ LAW_DATABASE = {
 
 # Шаблони відповідей німецькою
 RESPONSE_TEMPLATES_DE = {
+    'general': {
+        'default': '''Sehr geehrte Damen und Herren,
+
+vielen Dank für Ihr Schreiben vom [DATUM].
+
+ich beziehe mich auf Ihr Schreiben und bitte um detaillierte Information.
+
+Mit freundlichen Grüßen
+[Ihr Name]'''
+    },
     'finanzamt': {
         'steuernachzahlung': '''Sehr geehrte Damen und Herren,
 
@@ -382,6 +392,16 @@ Mit freundlichen Grüßen
 
 # Шаблони відповідей українською
 RESPONSE_TEMPLATES_UK = {
+    'general': {
+        'default': '''Шановний(а),
+
+Дякую за ваше повідомлення від [ДАТА].
+
+Посилаючись на ваш лист, прошу надати детальну інформацію.
+
+З повагою,
+[Ваше ім'я]'''
+    },
     'finanzamt': {
         'steuernachzahlung': '''Шановний(а),
 
@@ -585,7 +605,7 @@ def get_law_reference(text: str) -> Dict:
                 'keywords': law_data['keywords']
             }
     
-    # Default для general
+    # Default для general або якщо не знайдено
     return {
         'organization': 'Загальний лист',
         'organization_key': 'general',
