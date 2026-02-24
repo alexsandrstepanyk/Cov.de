@@ -867,12 +867,12 @@ def main():
     application.add_handler(conv_handler)
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CallbackQueryHandler(button_callback))
-    application.add_handler(MessageHandler(filters.Regex("^📋 Історія листів$|^📋 История писем$|^📋 Briefverlauf$|^📋 Letter history$"), show_history))
-    application.add_handler(MessageHandler(filters.Regex("^⚖️ Замовити перевірку адвоката$|^⚖️ Заказать проверку адвоката$|^⚖️ Anwalt prüfen$|^⚖️ Lawyer review$"), lawyer_help))
-    application.add_handler(MessageHandler(filters.Regex("^❓ Допомога$|^❓ Помощь$|^❓ Hilfe$|^❓ Help$"), help_command))
-    application.add_handler(MessageHandler(filters.Regex("^⚙️ Налаштування$|^⚙️ Настройки$|^⚙️ Einstellungen$|^⚙️ Settings$"), settings_menu))
-    application.add_handler(MessageHandler(filters.Regex("^🌐 Мова|^🌐 Язык|^🌐 Sprache|^🌐 Language"), settings_language))
-    application.add_handler(MessageHandler(filters.Regex("^🔙 Назад$|^🔙 Назад$|^🔙 Zurück$|^🔙 Back$"), settings_menu))
+    application.add_handler(MessageHandler(filters.Regex("^(📋 Історія листів|📋 История писем|📋 Briefverlauf|📋 Letter history)$"), show_history))
+    application.add_handler(MessageHandler(filters.Regex("^(⚖️ Замовити перевірку адвоката|⚖️ Заказать проверку адвоката|⚖️ Anwalt prüfen|⚖️ Lawyer review)$"), lawyer_help))
+    application.add_handler(MessageHandler(filters.Regex("^(❓ Допомога|❓ Помощь|❓ Hilfe|❓ Help)$"), help_command))
+    application.add_handler(MessageHandler(filters.Regex("^(⚙️ Налаштування|⚙️ Настройки|⚙️ Einstellungen|⚙️ Settings)$"), settings_menu))
+    application.add_handler(MessageHandler(filters.Regex("^(🌐 Мова / Language|🌐 Язык / Language|🌐 Sprache / Language|🌐 Language)$"), settings_language))
+    application.add_handler(MessageHandler(filters.Regex("^(🔙 Назад|🔙 Zurück|🔙 Back)$"), settings_menu))
     
     # Запуск
     application.run_polling(allowed_updates=Update.ALL_TYPES)
