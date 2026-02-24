@@ -396,11 +396,12 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         # РОЗУМНИЙ АНАЛІЗ ЗАКОНІВ
         smart_analysis = analyze_letter_smart(text, user['language'])
         law_info = smart_analysis['law_info']
+        is_personal = smart_analysis.get('is_personal', False)
         
         # Отримуємо закони на основі типу листа
         laws = get_laws_for_letter(letter_type, text)
         
-        logger.info(f"Тип листа: {letter_type}, Організація: {law_info.get('organization', 'N/A')}")
+        logger.info(f"Тип листа: {letter_type}, Організація: {law_info.get('organization', 'N/A')}, Особистий: {is_personal}")
         logger.info(f"Параграфи: {law_info.get('paragraphs', [])}")
 
         # Anti-Fraud аналіз
@@ -458,23 +459,33 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
             contacts_info = f"🔍 **Контактні дані:**\n{contacts_info}\n"
 
         # Формування результату
-        result = (
-            f"✅ **Аналіз завершено!**\n\n"
-            f"📌 **Тип листа:** {type_names.get(letter_type, letter_type)}\n"
-            f"🏢 **Організація:** {law_info.get('organization', 'Не визначено')}\n"
-            f"📋 **Ситуація:** {law_info.get('situation', 'Не визначено')}\n"
-            f"🔍 **Впевненість:** {confidence}\n\n"
-            f"📚 **ПАРАГРАФИ ДЛЯ ПОСИЛАННЯ:**\n"
-            f"{chr(10).join('• ' + para for para in law_info.get('paragraphs', []))}\n\n"
-            f"{contacts_info}"
-            f"🔍 **Ключові слова:**\n"
-            f"{', '.join(analysis['keywords'][:8]) if analysis['keywords'] else 'Не визначено'}\n\n"
-            f"⚠️ **Наслідки:**\n{law_info.get('consequences', 'Не визначено')}\n\n"
-            f"━━━━━━━━━━━━━━━━━━━━\n\n"
-            f"{fraud_warning}\n\n"
-            f"━━━━━━━━━━━━━━━━━━━━\n\n"
-            f"📝 **ВІДПОВІДЬ (двома мовами):**\n\n{response}{smart_tips}"
-        )
+        if is_personal:
+            # Особистий лист - простий формат
+            result = (
+                f"✅ **Аналіз завершено!**\n\n"
+                f"📌 **Тип листа:** 👨‍👩‍👦 Особисте листування\n"
+                f"🏢 **Організація:** {law_info.get('organization', 'Не визначено')}\n\n"
+                f"📝 **ВІДПОВІДЬ (двома мовами):**\n\n{response}{smart_tips}"
+            )
+        else:
+            # Офіційний лист - повний формат з законами
+            result = (
+                f"✅ **Аналіз завершено!**\n\n"
+                f"📌 **Тип листа:** {type_names.get(letter_type, letter_type)}\n"
+                f"🏢 **Організація:** {law_info.get('organization', 'Не визначено')}\n"
+                f"📋 **Ситуація:** {law_info.get('situation', 'Не визначено')}\n"
+                f"🔍 **Впевненість:** {confidence}\n\n"
+                f"📚 **ПАРАГРАФИ ДЛЯ ПОСИЛАННЯ:**\n"
+                f"{chr(10).join('• ' + para for para in law_info.get('paragraphs', []))}\n\n"
+                f"{contacts_info}"
+                f"🔍 **Ключові слова:**\n"
+                f"{', '.join(analysis['keywords'][:8]) if analysis['keywords'] else 'Не визначено'}\n\n"
+                f"⚠️ **Наслідки:**\n{law_info.get('consequences', 'Не визначено')}\n\n"
+                f"━━━━━━━━━━━━━━━━━━━━\n\n"
+                f"{fraud_warning}\n\n"
+                f"━━━━━━━━━━━━━━━━━━━━\n\n"
+                f"📝 **ВІДПОВІДЬ (двома мовами):**\n\n{response}{smart_tips}"
+            )
 
         # Відправка перекладу (якщо є)
         if translated_text and user['language'] == 'uk':

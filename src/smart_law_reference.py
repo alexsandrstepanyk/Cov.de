@@ -625,6 +625,48 @@ def generate_response_smart(text: str, language: str = 'uk') -> str:
     return response, law_info
 
 
+def is_personal_letter(text: str) -> bool:
+    """
+    Визначення чи лист є особистим (не потребує законів).
+    
+    Args:
+        text: Текст листа
+    
+    Returns:
+        True якщо лист особистий
+    """
+    text_lower = text.lower()
+    
+    # Ознаки особистого листа
+    personal_indicators = [
+        'sohn', 'tochter', 'kind', 'junge', 'mädchen',  # діти
+        'erfolg', 'leistung', 'note', 'zeugnis',  # успіхи
+        'geburtstag', 'feier', 'einladung',  # свята
+        'familie', 'eltern', 'oma', 'opa',  # сім'я
+        'freuen', 'gratulieren', 'toll', 'super', 'klasse',  # емоції
+        'liebe', 'lieber', 'herzliche', 'beste grüße',  # звертання
+        'urlaub', 'ferien', 'reise',  # відпустка
+        'gesund', 'besserung', 'gute besserung',  # здоров'я
+    ]
+    
+    # Ознаки офіційного листа
+    official_indicators = [
+        'hiermit', 'gemäß', 'aufgrund', 'betreffend',  # офіційний стиль
+        'frist', 'termin', 'zahlung', 'rechnung',  # терміни/оплата
+        'mahnung', 'forderung', 'bescheid',  # офіційні документи
+        'gesetz', 'paragraf', '§',  # закони
+        'konto', 'iban', 'betrag', 'euro',  # гроші
+        'unterschrift', 'stempel',  # підписи
+    ]
+    
+    # Підрахунок балів
+    personal_score = sum(1 for word in personal_indicators if word in text_lower)
+    official_score = sum(1 for word in official_indicators if word in text_lower)
+    
+    # Якщо особистих слів більше і немає офіційних - це особистий лист
+    return personal_score > 2 and official_score == 0
+
+
 def analyze_letter_smart(text: str, language: str = 'uk') -> Dict:
     """
     Повний розумний аналіз листа.
@@ -636,6 +678,64 @@ def analyze_letter_smart(text: str, language: str = 'uk') -> Dict:
     Returns:
         Dict з повною інформацією
     """
+    # Перевіряємо чи лист особистий
+    if is_personal_letter(text):
+        return analyze_personal_letter(text, language)
+    
+    # Офіційний лист - глибокий аналіз
+    return analyze_official_letter(text, language)
+
+
+def analyze_personal_letter(text: str, language: str = 'uk') -> Dict:
+    """
+    Аналіз особистого листа (без законів).
+    """
+    # Проста відповідь без законів
+    if language == 'de':
+        response = '''Vielen Dank für Ihre Nachricht!
+
+Das sind wunderbare Neuigkeiten. Ich freue mich sehr darüber!
+
+Mit herzlichen Grüßen
+[Ihr Name]'''
+    else:
+        response = '''Дякую за ваше повідомлення!
+
+Це чудові новини! Я дуже радий(а) за вас!
+
+З найкращими побажаннями,
+[Ваше ім'я]'''
+    
+    return {
+        'law_info': {
+            'organization': 'Особисте листування',
+            'organization_key': 'personal',
+            'situation': 'Особисте повідомлення',
+            'situation_key': 'personal',
+            'paragraphs': [],
+            'consequences': 'Не застосовується'
+        },
+        'response_de': response if language == 'de' else '''Vielen Dank für Ihre Nachricht!
+Das sind wunderbare Neuigkeiten!
+Mit herzlichen Grüßen
+[Ihr Name]''',
+        'response_uk': response if language == 'uk' else '''Дякую за ваше повідомлення!
+Це чудові новини!
+З найкращими побажаннями,
+[Ваше ім'я]''',
+        'tips': [
+            '📌 Збережіть лист як пам\'ять',
+            '🎉 Поділіться радістю з близькими',
+            '👏 Заохочуйте дитину/рідних'
+        ],
+        'is_personal': True
+    }
+
+
+def analyze_official_letter(text: str, language: str = 'uk') -> Dict:
+    """
+    Аналіз офіційного листа (з законами).
+    """
     # Отримуємо посилання на закон
     law_info = get_law_reference(text)
     
@@ -643,25 +743,33 @@ def analyze_letter_smart(text: str, language: str = 'uk') -> Dict:
     response_de, _ = generate_response_smart(text, 'de')
     response_uk, _ = generate_response_smart(text, 'uk')
     
-    # Формуємо поради
+    # Формуємо поради на основі ситуації
     tips = []
-    if law_info['situation_key'] == 'einladung':
+    situation = law_info.get('situation_key', '')
+    
+    if situation == 'einladung':
         tips = [
             '📅 Прийдіть на 10 хвилин раніше',
             '📄 Візьміть всі необхідні документи',
             '📝 Робіть нотатки під час зустрічі'
         ]
-    elif law_info['situation_key'] == 'mahnung':
+    elif situation == 'mahnung':
         tips = [
             '⏰ Не ігноруйте лист',
             '📞 Зв\'яжіться з кредитором',
             '💰 Домовтеся про розстрочку'
         ]
-    elif law_info['situation_key'] == 'kündigung':
+    elif situation == 'kündigung':
         tips = [
             '📋 Перевірте законність',
             '⏰ Строк на пошук нового житла',
             '⚖️ Зверніться до Mieterbund'
+        ]
+    elif situation == 'steuerbescheid':
+        tips = [
+            '📋 Перевірте всі суми',
+            '⏰ Строк на оскарження 1 місяць',
+            '💰 Зверніться до податкового консультанта'
         ]
     else:
         tips = [
@@ -676,5 +784,6 @@ def analyze_letter_smart(text: str, language: str = 'uk') -> Dict:
         'response_uk': response_uk,
         'tips': tips,
         'paragraphs': law_info['paragraphs'],
-        'consequences': law_info['consequences']
+        'consequences': law_info['consequences'],
+        'is_personal': False
     }
