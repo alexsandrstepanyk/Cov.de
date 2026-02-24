@@ -1,9 +1,5 @@
-2026-02-24 23:09:07,776 - __main__ - INFO - Запуск Client Bot...
-2026-02-24 23:09:07,777 - __main__ - INFO - База даних ініціалізована
-2026-02-24 23:09:07,942 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getMe "HTTP/1.1 200 OK"
-2026-02-24 23:09:07,984 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/deleteWebhook "HTTP/1.1 200 OK"
-2026-02-24 23:09:07,987 - telegram.ext.Application - INFO - Application started
-2026-02-24 23:09:18,302 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
-2026-02-24 23:09:28,438 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
-2026-02-24 23:09:38,577 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
-2026-02-24 23:09:48,714 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 23:15:22,468 - __main__ - INFO - Запуск Client Bot...
+2026-02-24 23:15:22,468 - __main__ - INFO - База даних ініціалізована
+2026-02-24 23:15:22,682 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getMe "HTTP/1.1 200 OK"
+2026-02-24 23:15:22,720 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/deleteWebhook "HTTP/1.1 200 OK"
+2026-02-24 23:15:22,723 - telegram.ext.Application - INFO - Application started

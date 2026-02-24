@@ -37,6 +37,30 @@ RESPONSE_TEMPLATES = {
                     '👏 Заохочуйте дитину'
                 ]
             },
+            'ru': {
+                'subject': 'Ответ на ваше сообщение',
+                'body': '''Уважаемый(ая) [Имя],
+
+📋 Спасибо за ваше сообщение и чудесные новости!
+
+🎉 Я очень рад(а) слышать об успехах вашего сына! Это замечательное достижение.
+
+💡 РЕКОМЕНДАЦИИ:
+• Сохраните это сообщение на память
+• Поделитесь радостью с семьей и друзьями
+• Поощряйте ребенка к дальнейшим успехам
+
+📞 Если у вас возникнут вопросы, пожалуйста, обращайтесь.
+
+С наилучшими пожеланиями,
+[Ваше имя]
+[Контакты]''',
+                'tips': [
+                    '📌 Сохраните письмо как память',
+                    '🎉 Поделитесь радостью с близкими',
+                    '👏 Поощряйте ребенка'
+                ]
+            },
             'de': {
                 'subject': 'Antwort auf Ihre Nachricht',
                 'body': '''Sehr geehrte(r) [Name],
@@ -59,6 +83,30 @@ Mit freundlichen Grüßen
                     '📌 Bewahren Sie den Brief als Erinnerung auf',
                     '🎉 Teilen Sie die Freude mit Liebsten',
                     '👏 Ermutigen Sie das Kind'
+                ]
+            },
+            'en': {
+                'subject': 'Response to your message',
+                'body': '''Dear [Name],
+
+📋 Thank you for your message and wonderful news!
+
+🎉 I am very happy to hear about your son's successes! This is a great achievement.
+
+💡 RECOMMENDATIONS:
+• Save this message as a memory
+• Share the joy with family and friends
+• Encourage the child to further successes
+
+📞 If you have any questions, please contact me.
+
+With best wishes,
+[Your Name]
+[Contacts]''',
+                'tips': [
+                    '📌 Save the letter as a memory',
+                    '🎉 Share the joy with loved ones',
+                    '👏 Encourage the child'
                 ]
             }
         },
@@ -471,7 +519,7 @@ def generate_response(letter_type: str, laws: Dict, language: str, country: str 
     Args:
         letter_type: Тип листа (debt_collection, tenancy, employment, administrative, general)
         laws: Словник з законами та наслідками
-        language: Мова відповіді ('uk' або 'de')
+        language: Мова відповіді ('uk', 'ru', 'de', 'en')
         country: Країна ('de' тощо)
     
     Returns:
@@ -481,8 +529,8 @@ def generate_response(letter_type: str, laws: Dict, language: str, country: str 
     country_templates = RESPONSE_TEMPLATES.get(country, RESPONSE_TEMPLATES['de'])
     template = country_templates.get(letter_type, country_templates['general'])
     
-    # Вибір мови
-    lang_template = template.get(language, template['uk'])
+    # Вибір мови (з fallback на українську)
+    lang_template = template.get(language, template.get('uk', template.get('de')))
     
     # Формування відповіді
     response = f"""📝 ШАБЛОН ВІДПОВІДІ:
