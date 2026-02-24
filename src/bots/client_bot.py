@@ -379,6 +379,7 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         sys.path.insert(0, str(Path(__file__).parent.parent))
         from ingestion import preprocess_text
         from nlp_analysis import analyze_text_advanced, classify_letter_type_advanced, get_laws_for_letter
+        from smart_law_reference import analyze_letter_smart, get_law_reference
         from response_generator import generate_response
         from fraud_detection import (
             extract_phone_numbers, extract_emails, extract_websites,
@@ -392,17 +393,26 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         analysis = analyze_text_advanced(text)
         letter_type, classification_details = classify_letter_type_advanced(text)
         
+        # РОЗУМНИЙ АНАЛІЗ ЗАКОНІВ
+        smart_analysis = analyze_letter_smart(text, user['language'])
+        law_info = smart_analysis['law_info']
+        
         # Отримуємо закони на основі типу листа
         laws = get_laws_for_letter(letter_type, text)
         
-        logger.info(f"Тип листа: {letter_type}, бали: {classification_details.get('scores', {})}")
+        logger.info(f"Тип листа: {letter_type}, Організація: {law_info.get('organization', 'N/A')}")
+        logger.info(f"Параграфи: {law_info.get('paragraphs', [])}")
 
         # Anti-Fraud аналіз
         fraud_analysis = analyze_letter_for_fraud(text, {})
         fraud_warning = generate_fraud_warning(fraud_analysis)
 
-        # Генерація відповіді
-        response = generate_response(letter_type, laws, user['language'], user['country'])
+        # Використовуємо розумну відповідь з smart_law_reference
+        response = f"**Німецькою:**\n{smart_analysis['response_de']}\n\n"
+        response += f"**Українською:**\n{smart_analysis['response_uk']}"
+        
+        # Додаємо поради з розумного аналізу
+        smart_tips = "\n\n💡 **ПОРАДИ:**\n" + "\n".join(smart_analysis['tips'])
         
         # Збереження в БД
         conn = sqlite3.connect('users.db')
@@ -451,17 +461,19 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         result = (
             f"✅ **Аналіз завершено!**\n\n"
             f"📌 **Тип листа:** {type_names.get(letter_type, letter_type)}\n"
+            f"🏢 **Організація:** {law_info.get('organization', 'Не визначено')}\n"
+            f"📋 **Ситуація:** {law_info.get('situation', 'Не визначено')}\n"
             f"🔍 **Впевненість:** {confidence}\n\n"
+            f"📚 **ПАРАГРАФИ ДЛЯ ПОСИЛАННЯ:**\n"
+            f"{chr(10).join('• ' + para for para in law_info.get('paragraphs', []))}\n\n"
             f"{contacts_info}"
             f"🔍 **Ключові слова:**\n"
             f"{', '.join(analysis['keywords'][:8]) if analysis['keywords'] else 'Не визначено'}\n\n"
-            f"📚 **Релевантні закони:**\n"
-            f"{chr(10).join('• ' + law for law in laws.get('primary', []))}\n\n"
-            f"⚠️ **Наслідки:**\n{laws.get('consequences', 'Не застосовується')}\n\n"
+            f"⚠️ **Наслідки:**\n{law_info.get('consequences', 'Не визначено')}\n\n"
             f"━━━━━━━━━━━━━━━━━━━━\n\n"
             f"{fraud_warning}\n\n"
             f"━━━━━━━━━━━━━━━━━━━━\n\n"
-            f"📝 **Пропонована відповідь:**\n\n{response}"
+            f"📝 **ВІДПОВІДЬ (двома мовами):**\n\n{response}{smart_tips}"
         )
 
         # Відправка перекладу (якщо є)

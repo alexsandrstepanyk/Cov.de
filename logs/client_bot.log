@@ -1,9 +1,9 @@
-2026-02-24 21:45:18,526 - __main__ - INFO - Запуск Client Bot...
-2026-02-24 21:45:18,527 - __main__ - INFO - База даних ініціалізована
-2026-02-24 21:45:18,752 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getMe "HTTP/1.1 200 OK"
-2026-02-24 21:45:18,787 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/deleteWebhook "HTTP/1.1 200 OK"
-2026-02-24 21:45:18,790 - telegram.ext.Application - INFO - Application started
-2026-02-24 21:45:29,001 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
-2026-02-24 21:45:39,241 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
-2026-02-24 21:45:49,379 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
-2026-02-24 21:45:59,433 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:00:17,711 - __main__ - INFO - Запуск Client Bot...
+2026-02-24 22:00:17,712 - __main__ - INFO - База даних ініціалізована
+2026-02-24 22:00:17,949 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getMe "HTTP/1.1 200 OK"
+2026-02-24 22:00:17,987 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/deleteWebhook "HTTP/1.1 200 OK"
+2026-02-24 22:00:17,990 - telegram.ext.Application - INFO - Application started
+2026-02-24 22:00:28,135 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:00:38,215 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:00:48,353 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:00:58,491 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
