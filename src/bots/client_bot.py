@@ -43,6 +43,123 @@ WAITING_FOR_LANGUAGE = 2
 WAITING_FOR_COUNTRY = 3
 WAITING_FOR_STATUS = 4
 WAITING_FOR_LETTER = 5
+WAITING_FOR_SETTINGS_LANGUAGE = 6
+
+# Доступні мови
+AVAILABLE_LANGUAGES = {
+    '🇺🇦 Українська': 'uk',
+    '🇷🇺 Русский': 'ru',
+    '🇩🇪 Deutsch': 'de',
+    '🇬🇧 English': 'en'
+}
+
+# Переклади інтерфейсу
+INTERFACE_TRANSLATIONS = {
+    'uk': {
+        'welcome': 'Вітаємо! Оберіть дію:',
+        'not_registered': 'Спочатку зареєструйтесь (/start)',
+        'menu': {
+            'register': '📝 Реєстрація',
+            'upload': '📤 Завантажити лист',
+            'history': '📋 Історія листів',
+            'lawyer': '⚖️ Замовити перевірку адвоката',
+            'help': '❓ Допомога',
+            'settings': '⚙️ Налаштування'
+        },
+        'settings': {
+            'title': '⚙️ Налаштування',
+            'language': '🌐 Мова / Language',
+            'back': '🔙 Назад',
+            'language_selected': '✅ Мову змінено на: {}'
+        },
+        'registration': {
+            'start': '📝 **Реєстрація**\n\nВведіть ваше ім\'я:',
+            'username_saved': '✅ Ім\'я: {}\n\nОберіть мову спілкування:',
+            'language_saved': '✅ Мова: {}\n\nОберіть країну проживання:',
+            'country_saved': '✅ Країна: Німеччина\n\nОберіть ваш статус:',
+            'status_saved': '✅ **Реєстрація успішна!**',
+            'complete': 'Тепер ви можете завантажити лист для аналізу.'
+        }
+    },
+    'ru': {
+        'welcome': 'Приветствуем! Выберите действие:',
+        'not_registered': 'Сначала зарегистрируйтесь (/start)',
+        'menu': {
+            'register': '📝 Регистрация',
+            'upload': '📤 Загрузить письмо',
+            'history': '📋 История писем',
+            'lawyer': '⚖️ Заказать проверку адвоката',
+            'help': '❓ Помощь',
+            'settings': '⚙️ Настройки'
+        },
+        'settings': {
+            'title': '⚙️ Настройки',
+            'language': '🌐 Язык / Language',
+            'back': '🔙 Назад',
+            'language_selected': '✅ Язык изменён на: {}'
+        },
+        'registration': {
+            'start': '📝 **Регистрация**\n\nВведите ваше имя:',
+            'username_saved': '✅ Имя: {}\n\nВыберите язык общения:',
+            'language_saved': '✅ Язык: {}\n\nВыберите страну проживания:',
+            'country_saved': '✅ Страна: Германия\n\nВыберите ваш статус:',
+            'status_saved': '✅ **Регистрация успешна!**',
+            'complete': 'Теперь вы можете загрузить письмо для анализа.'
+        }
+    },
+    'de': {
+        'welcome': 'Willkommen! Wählen Sie eine Aktion:',
+        'not_registered': 'Bitte registrieren Sie sich zuerst (/start)',
+        'menu': {
+            'register': '📝 Registrierung',
+            'upload': '📤 Brief hochladen',
+            'history': '📋 Briefverlauf',
+            'lawyer': '⚖️ Anwalt prüfen',
+            'help': '❓ Hilfe',
+            'settings': '⚙️ Einstellungen'
+        },
+        'settings': {
+            'title': '⚙️ Einstellungen',
+            'language': '🌐 Sprache / Language',
+            'back': '🔙 Zurück',
+            'language_selected': '✅ Sprache geändert zu: {}'
+        },
+        'registration': {
+            'start': '📝 **Registrierung**\n\nGeben Sie Ihren Namen ein:',
+            'username_saved': '✅ Name: {}\n\nWählen Sie die Sprache:',
+            'language_saved': '✅ Sprache: {}\n\nWählen Sie das Land:',
+            'country_saved': '✅ Land: Deutschland\n\nWählen Sie Ihren Status:',
+            'status_saved': '✅ **Registrierung erfolgreich!**',
+            'complete': 'Sie können jetzt einen Brief hochladen.'
+        }
+    },
+    'en': {
+        'welcome': 'Welcome! Choose an action:',
+        'not_registered': 'Please register first (/start)',
+        'menu': {
+            'register': '📝 Registration',
+            'upload': '📤 Upload letter',
+            'history': '📋 Letter history',
+            'lawyer': '⚖️ Lawyer review',
+            'help': '❓ Help',
+            'settings': '⚙️ Settings'
+        },
+        'settings': {
+            'title': '⚙️ Settings',
+            'language': '🌐 Language',
+            'back': '🔙 Back',
+            'language_selected': '✅ Language changed to: {}'
+        },
+        'registration': {
+            'start': '📝 **Registration**\n\nEnter your name:',
+            'username_saved': '✅ Name: {}\n\nChoose language:',
+            'language_saved': '✅ Language: {}\n\nChoose country:',
+            'country_saved': '✅ Country: Germany\n\nChoose your status:',
+            'status_saved': '✅ **Registration successful!**',
+            'complete': 'You can now upload a letter for analysis.'
+        }
+    }
+}
 
 # Database setup
 def init_db():
@@ -148,35 +265,41 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     # Перевірка реєстрації
     user = get_user(chat_id)
     
+    # Отримуємо мову користувача або за замовчуванням українська
+    lang = user['language'] if user else 'uk'
+    t = INTERFACE_TRANSLATIONS.get(lang, INTERFACE_TRANSLATIONS['uk'])
+    
     if user:
         # Зареєстрований користувач
         keyboard = [
-            ['📤 Завантажити лист'],
-            ['📋 Історія листів'],
-            ['⚖️ Замовити перевірку адвоката'],
-            ['❓ Допомога']
+            [t['menu']['upload']],
+            [t['menu']['history']],
+            [t['menu']['lawyer']],
+            [t['menu']['settings'], t['menu']['help']]
         ]
         reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+        
+        lang_names = {'uk': 'Українська', 'ru': 'Русский', 'de': 'Deutsch', 'en': 'English'}
         await update.message.reply_text(
-            f"Вітаємо, {user['username']}! 👋\n\n"
-            f"Ваш статус: {user['status']}\n"
-            f"Країна: {user['country'].upper()}\n\n"
-            f"Оберіть дію:",
+            f"{t['welcome']}\n\n"
+            f"👤 {user['username']}\n"
+            f"🌐 Мова: {lang_names.get(user['language'], 'Українська')}\n"
+            f"🏳️ Статус: {user['status']}",
             reply_markup=reply_markup
         )
     else:
         # Новий користувач
-        keyboard = [['📝 Реєстрація']]
+        keyboard = [[t['menu']['register']]]
         reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
         await update.message.reply_text(
-            "Вітаємо! 👋\n\n"
-            "Я бот для аналізу юридичних листів.\n"
-            "Я допоможу вам зрозуміти листи від:\n"
+            f"{t['welcome']}\n\n"
+            "🇺🇦 Мультикраїновий Аналізатор Юридичних Листів\n\n"
+            "Я допоможу зрозуміти листи від:\n"
             "• Jobcenter\n"
             "• Орендодавця\n"
             "• Кредиторів\n"
             "• Інших установ\n\n"
-            "Спочатку зареєструйтесь:",
+            "Підтримувані мови: 🇺🇦🇷🇺🇩🇪🇬🇧",
             reply_markup=reply_markup
         )
     
@@ -586,9 +709,14 @@ async def lawyer_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Допомога."""
+    chat_id = update.effective_chat.id
+    user = get_user(chat_id)
+    lang = user['language'] if user else 'uk'
+    t = INTERFACE_TRANSLATIONS.get(lang, INTERFACE_TRANSLATIONS['uk'])
+    
     await update.message.reply_text(
-        "❓ **Допомога**\n\n"
-        "Цей бот допомагає аналізувати юридичні листи німецькою мовою.\n\n"
+        f"❓ **{t['menu']['help']}**\n\n"
+        "Цей бот допомагає аналізувати юридичні листи.\n\n"
         "📌 **Як користуватися:**\n"
         "1. Зареєструйтесь (/start)\n"
         "2. Надішліть фото або текст листа\n"
@@ -597,9 +725,89 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
         "• Робіть фото при хорошому освітленні\n"
         "• Тримайте камеру рівно\n"
         "• Уникайте тіней та відблисків\n\n"
-        "⚠️ **Важливо:** Цей бот не замінює професійного адвоката!",
+        "⚠️ **Важливо:** Бот не замінює адвоката!",
         parse_mode='Markdown'
     )
+    return ConversationHandler.END
+
+async def settings_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Меню налаштувань."""
+    chat_id = update.effective_chat.id
+    user = get_user(chat_id)
+    lang = user['language'] if user else 'uk'
+    t = INTERFACE_TRANSLATIONS.get(lang, INTERFACE_TRANSLATIONS['uk'])
+    
+    if not user:
+        await update.message.reply_text(t['not_registered'])
+        return ConversationHandler.END
+    
+    keyboard = [
+        [t['settings']['language']],
+        [t['settings']['back']]
+    ]
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+    
+    await update.message.reply_text(
+        f"{t['settings']['title']}\n\n"
+        f"🌐 Поточна мова: {lang.upper()}",
+        reply_markup=reply_markup
+    )
+    return ConversationHandler.END
+
+async def settings_language(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Вибір мови в налаштуваннях."""
+    chat_id = update.effective_chat.id
+    user = get_user(chat_id)
+    lang = user['language'] if user else 'uk'
+    t = INTERFACE_TRANSLATIONS.get(lang, INTERFACE_TRANSLATIONS['uk'])
+    
+    keyboard = [[lang] for lang in AVAILABLE_LANGUAGES.keys()]
+    keyboard.append([t['settings']['back']])
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+    
+    await update.message.reply_text(
+        f"🌐 **{t['settings']['language']}**\n\n"
+        "Оберіть мову інтерфейсу:",
+        reply_markup=reply_markup,
+        parse_mode='Markdown'
+    )
+    return WAITING_FOR_SETTINGS_LANGUAGE
+
+async def settings_language_selected(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Збереження вибору мови."""
+    chat_id = update.effective_chat.id
+    user = get_user(chat_id)
+    
+    selected_lang = AVAILABLE_LANGUAGES.get(update.message.text)
+    if not selected_lang:
+        # Натиснуто "Назад"
+        return await settings_menu(update, context)
+    
+    # Оновлюємо мову в БД
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    c.execute("UPDATE users SET language=? WHERE chat_id=?", (selected_lang, chat_id))
+    conn.commit()
+    conn.close()
+    
+    # Отримуємо переклад для нової мови
+    t = INTERFACE_TRANSLATIONS.get(selected_lang, INTERFACE_TRANSLATIONS['uk'])
+    
+    # Повертаємо меню з новою мовою
+    keyboard = [
+        [t['menu']['upload']],
+        [t['menu']['history']],
+        [t['menu']['lawyer']],
+        [t['menu']['settings'], t['menu']['help']]
+    ]
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+    
+    lang_names = {'uk': 'Українська', 'ru': 'Русский', 'de': 'Deutsch', 'en': 'English'}
+    await update.message.reply_text(
+        t['settings']['language_selected'].format(lang_names.get(selected_lang, selected_lang)),
+        reply_markup=reply_markup
+    )
+    
     return ConversationHandler.END
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -633,7 +841,13 @@ def main():
         entry_points=[
             CommandHandler("start", start),
             MessageHandler(filters.Regex("^📝 Реєстрація$"), register_start),
+            MessageHandler(filters.Regex("^📝 Регистрация$"), register_start),
+            MessageHandler(filters.Regex("^📝 Registrierung$"), register_start),
+            MessageHandler(filters.Regex("^📝 Registration$"), register_start),
             MessageHandler(filters.Regex("^📤 Завантажити лист$"), upload_start),
+            MessageHandler(filters.Regex("^📤 Загрузить письмо$"), upload_start),
+            MessageHandler(filters.Regex("^📤 Brief hochladen$"), upload_start),
+            MessageHandler(filters.Regex("^📤 Upload letter$"), upload_start),
         ],
         states={
             WAITING_FOR_USERNAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, register_username)],
@@ -645,6 +859,7 @@ def main():
                 MessageHandler(filters.Document.ALL, handle_letter),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, handle_letter),
             ],
+            WAITING_FOR_SETTINGS_LANGUAGE: [MessageHandler(filters.TEXT & ~filters.COMMAND, settings_language_selected)],
         },
         fallbacks=[CommandHandler("cancel", cancel)],
     )
@@ -652,9 +867,12 @@ def main():
     application.add_handler(conv_handler)
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CallbackQueryHandler(button_callback))
-    application.add_handler(MessageHandler(filters.Regex("^📋 Історія листів$"), show_history))
-    application.add_handler(MessageHandler(filters.Regex("^⚖️ Замовити перевірку адвоката$"), lawyer_help))
-    application.add_handler(MessageHandler(filters.Regex("^❓ Допомога$"), help_command))
+    application.add_handler(MessageHandler(filters.Regex("^📋 Історія листів$|^📋 История писем$|^📋 Briefverlauf$|^📋 Letter history$"), show_history))
+    application.add_handler(MessageHandler(filters.Regex("^⚖️ Замовити перевірку адвоката$|^⚖️ Заказать проверку адвоката$|^⚖️ Anwalt prüfen$|^⚖️ Lawyer review$"), lawyer_help))
+    application.add_handler(MessageHandler(filters.Regex("^❓ Допомога$|^❓ Помощь$|^❓ Hilfe$|^❓ Help$"), help_command))
+    application.add_handler(MessageHandler(filters.Regex("^⚙️ Налаштування$|^⚙️ Настройки$|^⚙️ Einstellungen$|^⚙️ Settings$"), settings_menu))
+    application.add_handler(MessageHandler(filters.Regex("^🌐 Мова|^🌐 Язык|^🌐 Sprache|^🌐 Language"), settings_language))
+    application.add_handler(MessageHandler(filters.Regex("^🔙 Назад$|^🔙 Назад$|^🔙 Zurück$|^🔙 Back$"), settings_menu))
     
     # Запуск
     application.run_polling(allowed_updates=Update.ALL_TYPES)
