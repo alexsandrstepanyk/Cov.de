@@ -489,17 +489,22 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 
         # Відправка перекладу (якщо є)
         if translated_text and user['language'] == 'uk':
-            translation_msg = f"🌐 **Переклад листа (українська):**\n\n{translated_text}"
+            # Екрануємо Markdown символи
+            safe_translated = translated_text.replace('*', '\\*').replace('_', '\\_').replace('`', '\\`').replace('[', '\\[').replace(']', '\\]')
+            translation_msg = f"🌐 **Переклад листа (українська):**\n\n{safe_translated}"
             for i in range(0, len(translation_msg), 4000):
                 await update.message.reply_text(
                     translation_msg[i:i+4000],
                     parse_mode='Markdown'
                 )
 
+        # Екрануємо Markdown символи в результаті
+        safe_result = result.replace('*', '\\*').replace('_', '\\_').replace('`', '\\`').replace('[', '\\[').replace(']', '\\]')
+        
         # Відправка результату аналізу частинами
-        for i in range(0, len(result), 4000):
+        for i in range(0, len(safe_result), 4000):
             await update.message.reply_text(
-                result[i:i+4000],
+                safe_result[i:i+4000],
                 parse_mode='Markdown'
             )
         
