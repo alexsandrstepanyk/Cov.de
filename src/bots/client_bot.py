@@ -555,8 +555,10 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         fraud_warning = generate_fraud_warning(fraud_analysis)
 
         # Використовуємо розумну відповідь з smart_law_reference
-        response = f"**Німецькою:**\n{smart_analysis['response_de']}\n\n"
-        response += f"**Українською:**\n{smart_analysis['response_uk']}"
+        # Відповідь ТІЛЬКИ мовою користувача
+        user_response = smart_analysis['response_uk'] if user['language'] == 'uk' else smart_analysis['response_de'] if user['language'] == 'de' else smart_analysis['response_ru'] if user['language'] == 'ru' else smart_analysis['response_en']
+        
+        response = f"**{user['language'].upper()}:**\n{user_response}"
         
         # Додаємо поради з розумного аналізу
         smart_tips = "\n\n💡 **ПОРАДИ:**\n" + "\n".join(smart_analysis['tips'])

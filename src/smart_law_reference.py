@@ -711,20 +711,58 @@ def analyze_personal_letter(text: str, language: str = 'uk') -> Dict:
     Аналіз особистого листа (без законів).
     """
     # Проста відповідь без законів
-    if language == 'de':
-        response = '''Vielen Dank für Ihre Nachricht!
-
-Das sind wunderbare Neuigkeiten. Ich freue mich sehr darüber!
-
-Mit herzlichen Grüßen
-[Ihr Name]'''
-    else:
-        response = '''Дякую за ваше повідомлення!
+    responses = {
+        'uk': {
+            'response': '''Дякую за ваше повідомлення!
 
 Це чудові новини! Я дуже радий(а) за вас!
 
 З найкращими побажаннями,
-[Ваше ім'я]'''
+[Ваше ім'я]''',
+            'response_de': '''Vielen Dank für Ihre Nachricht!
+Das sind wunderbare Neuigkeiten!
+Mit herzlichen Grüßen
+[Ihr Name]'''
+        },
+        'ru': {
+            'response': '''Спасибо за ваше сообщение!
+
+Это чудесные новости! Я очень рад(а) за вас!
+
+С наилучшими пожеланиями,
+[Ваше имя]''',
+            'response_de': '''Vielen Dank für Ihre Nachricht!
+Das sind wunderbare Neuigkeiten!
+Mit freundlichen Grüßen
+[Ihr Name]'''
+        },
+        'de': {
+            'response': '''Vielen Dank für Ihre Nachricht!
+
+Das sind wunderbare Neuigkeiten!
+
+Mit freundlichen Grüßen
+[Ihr Name]''',
+            'response_de': '''Vielen Dank für Ihre Nachricht!
+Das sind wunderbare Neuigkeiten!
+Mit freundlichen Grüßen
+[Ihr Name]'''
+        },
+        'en': {
+            'response': '''Thank you for your message!
+
+This is wonderful news! I am very happy for you!
+
+With best wishes,
+[Your Name]''',
+            'response_de': '''Vielen Dank für Ihre Nachricht!
+Das sind wunderbare Neuigkeiten!
+Mit freundlichen Grüßen
+[Ihr Name]'''
+        }
+    }
+    
+    resp = responses.get(language, responses['uk'])
     
     return {
         'law_info': {
@@ -735,14 +773,10 @@ Mit herzlichen Grüßen
             'paragraphs': [],
             'consequences': 'Не застосовується'
         },
-        'response_de': response if language == 'de' else '''Vielen Dank für Ihre Nachricht!
-Das sind wunderbare Neuigkeiten!
-Mit herzlichen Grüßen
-[Ihr Name]''',
-        'response_uk': response if language == 'uk' else '''Дякую за ваше повідомлення!
-Це чудові новини!
-З найкращими побажаннями,
-[Ваше ім'я]''',
+        'response_de': resp['response_de'],
+        'response_uk': resp['response'],
+        'response_ru': resp['response'] if language == 'ru' else resp['response_de'],
+        'response_en': resp['response'] if language == 'en' else resp['response_de'],
         'tips': [
             '📌 Збережіть лист як пам\'ять',
             '🎉 Поділіться радістю з близькими',
@@ -759,9 +793,9 @@ def analyze_official_letter(text: str, language: str = 'uk') -> Dict:
     # Отримуємо посилання на закон
     law_info = get_law_reference(text)
     
-    # Генеруємо відповідь
+    # Генеруємо відповідь мовою користувача
     response_de, _ = generate_response_smart(text, 'de')
-    response_uk, _ = generate_response_smart(text, 'uk')
+    response_user, _ = generate_response_smart(text, language)
     
     # Формуємо поради на основі ситуації
     tips = []
@@ -798,10 +832,20 @@ def analyze_official_letter(text: str, language: str = 'uk') -> Dict:
             '⏰ Дотримуйтесь строків'
         ]
     
+    # Перекладаємо поради
+    if language == 'ru':
+        tips = [tip.replace('Прийдіть', 'Придите').replace('Візьміть', 'Возьмите').replace('Робіть', 'Делайте').replace('Зв\'яжіться', 'Свяжитесь').replace('Домовтеся', 'Договоритесь').replace('Перевірте', 'Проверьте').replace('Збережіть', 'Сохраните').replace('Дотримуйтесь', 'Соблюдайте') for tip in tips]
+    elif language == 'de':
+        tips = ['📅 Kommen Sie 10 Minuten früher', '📄 Bringen Sie alle notwendigen Dokumente mit', '📝 Machen Sie Notizen während des Treffens'] if situation == 'einladung' else ['📋 Bewahren Sie eine Kopie auf', '📞 Überprüfen Sie die Kontaktdaten', '⏰ Halten Sie die Fristen ein']
+    elif language == 'en':
+        tips = ['📅 Arrive 10 minutes early', '📄 Bring all necessary documents', '📝 Take notes during the meeting'] if situation == 'einladung' else ['📋 Keep a copy', '📞 Check contact details', '⏰ Observe deadlines']
+    
     return {
         'law_info': law_info,
         'response_de': response_de,
-        'response_uk': response_uk,
+        'response_uk': response_user if language == 'uk' else response_de,
+        'response_ru': response_user if language == 'ru' else response_de,
+        'response_en': response_user if language == 'en' else response_de,
         'tips': tips,
         'paragraphs': law_info['paragraphs'],
         'consequences': law_info['consequences'],
