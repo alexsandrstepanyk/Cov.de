@@ -793,52 +793,47 @@ def analyze_official_letter(text: str, language: str = 'uk') -> Dict:
     # Отримуємо посилання на закон
     law_info = get_law_reference(text)
     
-    # Генеруємо відповідь мовою користувача
+    # Генеруємо відповідь німецькою
     response_de, _ = generate_response_smart(text, 'de')
-    response_user, _ = generate_response_smart(text, language)
+    
+    # Генеруємо відповідь мовою користувача
+    response_user, _ = generate_response_smart(text, language if language in ['uk', 'de', 'en'] else 'uk')
+    
+    # Для російської мови - беремо українську і перекладаємо ключові фрази
+    if language == 'ru':
+        response_user = response_user.replace('Шановний', 'Уважаемый').replace('Шановна', 'Уважаемая').replace('Підтверджую', 'Подтверждаю').replace('термін', 'срок').replace('ДАТА', 'ДАТА').replace('ЧАС', 'ВРЕМЯ').replace('з\'явлюся', 'явлюсь').replace('вчасно', 'вовремя').replace('З повагою', 'С уважением').replace('Ваше ім\'я', 'Ваше имя').replace('Номер клієнта', 'Номер клиента').replace('НОМЕР', 'НОМЕР')
     
     # Формуємо поради на основі ситуації
     tips = []
     situation = law_info.get('situation_key', '')
     
     if situation == 'einladung':
-        tips = [
-            '📅 Прийдіть на 10 хвилин раніше',
-            '📄 Візьміть всі необхідні документи',
-            '📝 Робіть нотатки під час зустрічі'
-        ]
+        if language == 'uk':
+            tips = ['📅 Прийдіть на 10 хвилин раніше', '📄 Візьміть всі необхідні документи', '📝 Робіть нотатки під час зустрічі']
+        elif language == 'ru':
+            tips = ['📅 Придите на 10 минут раньше', '📄 Возьмите все необходимые документы', '📝 Делайте заметки во время встречи']
+        elif language == 'de':
+            tips = ['📅 Kommen Sie 10 Minuten früher', '📄 Bringen Sie alle notwendigen Dokumente mit', '📝 Machen Sie Notizen während des Treffens']
+        else:  # en
+            tips = ['📅 Arrive 10 minutes early', '📄 Bring all necessary documents', '📝 Take notes during the meeting']
     elif situation == 'mahnung':
-        tips = [
-            '⏰ Не ігноруйте лист',
-            '📞 Зв\'яжіться з кредитором',
-            '💰 Домовтеся про розстрочку'
-        ]
-    elif situation == 'kündigung':
-        tips = [
-            '📋 Перевірте законність',
-            '⏰ Строк на пошук нового житла',
-            '⚖️ Зверніться до Mieterbund'
-        ]
-    elif situation == 'steuerbescheid':
-        tips = [
-            '📋 Перевірте всі суми',
-            '⏰ Строк на оскарження 1 місяць',
-            '💰 Зверніться до податкового консультанта'
-        ]
+        if language == 'uk':
+            tips = ['⏰ Не ігноруйте лист', '📞 Зв\'яжіться з кредитором', '💰 Домовтеся про розстрочку']
+        elif language == 'ru':
+            tips = ['⏰ Не игнорируйте письмо', '📞 Свяжитесь с кредитором', '💰 Договоритесь о рассрочке']
+        elif language == 'de':
+            tips = ['⏰ Ignorieren Sie den Brief nicht', '📞 Kontaktieren Sie den Gläubiger', '💰 Vereinbaren Sie eine Ratenzahlung']
+        else:  # en
+            tips = ['⏰ Do not ignore the letter', '📞 Contact the creditor', '💰 Arrange a payment plan']
     else:
-        tips = [
-            '📋 Збережіть копію листа',
-            '📞 Перевірте контактні дані',
-            '⏰ Дотримуйтесь строків'
-        ]
-    
-    # Перекладаємо поради
-    if language == 'ru':
-        tips = [tip.replace('Прийдіть', 'Придите').replace('Візьміть', 'Возьмите').replace('Робіть', 'Делайте').replace('Зв\'яжіться', 'Свяжитесь').replace('Домовтеся', 'Договоритесь').replace('Перевірте', 'Проверьте').replace('Збережіть', 'Сохраните').replace('Дотримуйтесь', 'Соблюдайте') for tip in tips]
-    elif language == 'de':
-        tips = ['📅 Kommen Sie 10 Minuten früher', '📄 Bringen Sie alle notwendigen Dokumente mit', '📝 Machen Sie Notizen während des Treffens'] if situation == 'einladung' else ['📋 Bewahren Sie eine Kopie auf', '📞 Überprüfen Sie die Kontaktdaten', '⏰ Halten Sie die Fristen ein']
-    elif language == 'en':
-        tips = ['📅 Arrive 10 minutes early', '📄 Bring all necessary documents', '📝 Take notes during the meeting'] if situation == 'einladung' else ['📋 Keep a copy', '📞 Check contact details', '⏰ Observe deadlines']
+        if language == 'uk':
+            tips = ['📋 Збережіть копію листа', '📞 Перевірте контактні дані', '⏰ Дотримуйтесь строків']
+        elif language == 'ru':
+            tips = ['📋 Сохраните копию письма', '📞 Проверьте контактные данные', '⏰ Соблюдайте сроки']
+        elif language == 'de':
+            tips = ['📋 Bewahren Sie eine Kopie auf', '📞 Überprüfen Sie die Kontaktdaten', '⏰ Halten Sie die Fristen ein']
+        else:  # en
+            tips = ['📋 Keep a copy', '📞 Check contact details', '⏰ Observe deadlines']
     
     return {
         'law_info': law_info,

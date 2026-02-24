@@ -556,9 +556,21 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 
         # Використовуємо розумну відповідь з smart_law_reference
         # Відповідь ТІЛЬКИ мовою користувача
-        user_response = smart_analysis['response_uk'] if user['language'] == 'uk' else smart_analysis['response_de'] if user['language'] == 'de' else smart_analysis['response_ru'] if user['language'] == 'ru' else smart_analysis['response_en']
+        lang = user['language']
         
-        response = f"**{user['language'].upper()}:**\n{user_response}"
+        # Отримуємо відповідь з правильними ключами
+        if lang == 'uk':
+            user_response = smart_analysis.get('response_uk', smart_analysis['response_de'])
+        elif lang == 'ru':
+            user_response = smart_analysis.get('response_ru', smart_analysis.get('response_uk', smart_analysis['response_de']))
+        elif lang == 'de':
+            user_response = smart_analysis.get('response_de', '')
+        elif lang == 'en':
+            user_response = smart_analysis.get('response_en', smart_analysis.get('response_de', ''))
+        else:
+            user_response = smart_analysis.get('response_uk', smart_analysis['response_de'])
+        
+        response = f"**{lang.upper()}:**\n{user_response}"
         
         # Додаємо поради з розумного аналізу
         smart_tips = "\n\n💡 **ПОРАДИ:**\n" + "\n".join(smart_analysis['tips'])
