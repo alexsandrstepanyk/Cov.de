@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/Users/alex/Desktop/project/Gov.de/src/bots/client_bot.py", line 16, in <module>
+    from ingestion import preprocess_text
+  File "/Users/alex/Desktop/project/Gov.de/src/ingestion.py", line 8, in <module>
+    from pdfminer.high_level import extract_text
+ModuleNotFoundError: No module named 'pdfminer'

@@ -1,0 +1,13 @@
+spacy>=3.0.0
+transformers>=4.0.0
+torch>=1.9.0
+googletrans==4.0.0rc1
+pdfminer.six
+pdf2image
+pytest
+black
+flake8
+python-telegram-bot
+pytesseract
+pillow
+werkzeug
