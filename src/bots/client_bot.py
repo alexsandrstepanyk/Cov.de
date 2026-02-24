@@ -558,6 +558,14 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         # Відповідь ТІЛЬКИ мовою користувача
         lang = user['language']
         
+        # Заголовки для відповідей
+        response_titles = {
+            'uk': {'title': 'ВІДПОВІДЬ', 'lang': 'UK'},
+            'ru': {'title': 'ОТВЕТ', 'lang': 'RU'},
+            'de': {'title': 'ANTWORT', 'lang': 'DE'},
+            'en': {'title': 'RESPONSE', 'lang': 'EN'}
+        }
+        
         # Отримуємо відповідь з правильними ключами
         if lang == 'uk':
             user_response = smart_analysis.get('response_uk', smart_analysis['response_de'])
@@ -570,10 +578,13 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         else:
             user_response = smart_analysis.get('response_uk', smart_analysis['response_de'])
         
-        response = f"**{lang.upper()}:**\n{user_response}"
+        title = response_titles.get(lang, response_titles['uk'])
+        response = f"**{title['title']}:**\n\n**{title['lang']}:**\n{user_response}"
         
         # Додаємо поради з розумного аналізу
-        smart_tips = "\n\n💡 **ПОРАДИ:**\n" + "\n".join(smart_analysis['tips'])
+        tips_titles = {'uk': 'ПОРАДИ', 'ru': 'СОВЕТЫ', 'de': 'TIPPS', 'en': 'TIPS'}
+        tips_title = tips_titles.get(lang, 'ПОРАДИ')
+        smart_tips = f"\n\n💡 **{tips_title}:**\n" + "\n".join(smart_analysis['tips'])
         
         # Збереження в БД
         conn = sqlite3.connect('users.db')
@@ -619,18 +630,26 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
             contacts_info = f"🔍 **Контактні дані:**\n{contacts_info}\n"
 
         # Формування результату
+        analysis_titles = {
+            'uk': 'Аналіз завершено!',
+            'ru': 'Анализ завершен!',
+            'de': 'Analyse abgeschlossen!',
+            'en': 'Analysis complete!'
+        }
+        analysis_title = analysis_titles.get(lang, 'Аналіз завершено!')
+        
         if is_personal:
             # Особистий лист - простий формат
             result = (
-                f"✅ **Аналіз завершено!**\n\n"
+                f"✅ **{analysis_title}**\n\n"
                 f"📌 **Тип листа:** 👨‍👩‍👦 Особисте листування\n"
                 f"🏢 **Організація:** {law_info.get('organization', 'Не визначено')}\n\n"
-                f"📝 **ВІДПОВІДЬ (двома мовами):**\n\n{response}{smart_tips}"
+                f"📝 **{title['title']}:**\n\n{response}{smart_tips}"
             )
         else:
             # Офіційний лист - повний формат з законами
             result = (
-                f"✅ **Аналіз завершено!**\n\n"
+                f"✅ **{analysis_title}**\n\n"
                 f"📌 **Тип листа:** {type_names.get(letter_type, letter_type)}\n"
                 f"🏢 **Організація:** {law_info.get('organization', 'Не визначено')}\n"
                 f"📋 **Ситуація:** {law_info.get('situation', 'Не визначено')}\n"
@@ -644,7 +663,7 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
                 f"━━━━━━━━━━━━━━━━━━━━\n\n"
                 f"{fraud_warning}\n\n"
                 f"━━━━━━━━━━━━━━━━━━━━\n\n"
-                f"📝 **ВІДПОВІДЬ (двома мовами):**\n\n{response}{smart_tips}"
+                f"📝 **{title['title']}:**\n\n{response}{smart_tips}"
             )
 
         # Відправка перекладу (якщо є)
