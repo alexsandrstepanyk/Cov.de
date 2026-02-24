@@ -381,6 +381,10 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         from nlp_analysis import analyze_text, classify_letter_type
         from legal_db import get_relevant_laws
         from response_generator import generate_response
+        from fraud_detection import (
+            extract_phone_numbers, extract_emails, extract_websites,
+            analyze_letter_for_fraud, generate_fraud_warning
+        )
 
         # Попередня обробка
         text = preprocess_text(text)
@@ -389,6 +393,10 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         analysis = analyze_text(text)
         letter_type = classify_letter_type(text)
         laws = get_relevant_laws(letter_type, user['country'])
+
+        # Anti-Fraud аналіз
+        fraud_analysis = analyze_letter_for_fraud(text, {})
+        fraud_warning = generate_fraud_warning(fraud_analysis)
 
         # Генерація відповіді
         response = generate_response(letter_type, laws, user['language'], user['country'])
@@ -411,16 +419,35 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
             'administrative': '📋 Адміністративний лист',
             'general': '📄 Загальний лист'
         }
-        
+
+        # Витягнуті контактні дані
+        phones = extract_phone_numbers(text)
+        emails = extract_emails(text)
+        websites = extract_websites(text)
+
+        contacts_info = ""
+        if phones:
+            contacts_info += f"📞 **Телефони:** {', '.join(phones)}\n"
+        if emails:
+            contacts_info += f"📧 **Email:** {', '.join(emails)}\n"
+        if websites:
+            contacts_info += f"🌐 **Сайти:** {', '.join(websites)}\n"
+
+        if contacts_info:
+            contacts_info = f"🔍 **Контактні дані:**\n{contacts_info}\n"
+
         # Формування результату
         result = (
             f"✅ **Аналіз завершено!**\n\n"
             f"📌 **Тип листа:** {type_names.get(letter_type, letter_type)}\n\n"
+            f"{contacts_info}"
             f"🔍 **Ключові слова:**\n"
             f"{', '.join(analysis['keywords'][:5]) if analysis['keywords'] else 'Не визначено'}\n\n"
             f"📚 **Релевантні закони:**\n"
             f"{chr(10).join('• ' + law for law in laws['laws'])}\n\n"
             f"⚠️ **Наслідки:**\n{laws['consequences']}\n\n"
+            f"━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"{fraud_warning}\n\n"
             f"━━━━━━━━━━━━━━━━━━━━\n\n"
             f"📝 **Пропонована відповідь:**\n\n{response}"
         )
