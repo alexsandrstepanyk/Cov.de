@@ -12,6 +12,56 @@ translator = Translator()
 # Детальні шаблони відповідей
 RESPONSE_TEMPLATES = {
     'de': {
+        'personal': {
+            'uk': {
+                'subject': 'Відповідь на ваше повідомлення',
+                'body': '''Шановний(а) [Ім'я],
+
+📋 Дякую за ваше повідомлення та чудові новини!
+
+🎉 Я дуже радий(а) чути про успіхи вашого сина! Це чудове досягнення.
+
+💡 РЕКОМЕНДАЦІЇ:
+• Збережіть це повідомлення на пам'ять
+• Поділіться радістю з родиною та друзями
+• Заохочуйте дитину до подальших успіхів
+
+📞 Якщо у вас виникнуть питання, будь ласка, звертайтеся.
+
+З найкращими побажаннями,
+[Ваше ім'я]
+[Контакти]''',
+                'tips': [
+                    '📌 Збережіть лист як пам\'ять',
+                    '🎉 Поділіться радістю з близькими',
+                    '👏 Заохочуйте дитину'
+                ]
+            },
+            'de': {
+                'subject': 'Antwort auf Ihre Nachricht',
+                'body': '''Sehr geehrte(r) [Name],
+
+📋 Vielen Dank für Ihre Nachricht und die wunderbaren Neuigkeiten!
+
+🎉 Ich freue mich sehr über die Erfolge Ihres Sohnes! Das ist eine großartige Leistung.
+
+💡 EMPFEHLUNGEN:
+• Bewahren Sie diese Nachricht als Erinnerung auf
+• Teilen Sie die Freude mit Familie und Freunden
+• Ermutigen Sie Ihr Kind zu weiteren Erfolgen
+
+📞 Bei Fragen wenden Sie sich bitte an mich.
+
+Mit freundlichen Grüßen
+[Ihr Name]
+[Kontakte]''',
+                'tips': [
+                    '📌 Bewahren Sie den Brief als Erinnerung auf',
+                    '🎉 Teilen Sie die Freude mit Liebsten',
+                    '👏 Ermutigen Sie das Kind'
+                ]
+            }
+        },
         'debt_collection': {
             'uk': {
                 'subject': 'Щодо вашого повідомлення про сплату боргу',

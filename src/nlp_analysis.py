@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 """
-NLP Analysis Module
-Використовує spaCy для аналізу німецьких текстів, витягування сутностей та класифікації.
+Advanced NLP Analysis Module for Gov.de
+Використовує контекстний аналіз для точної класифікації листів
 """
 
 import spacy
 import logging
 from typing import Dict, List, Tuple
+from collections import Counter
 
-# Налаштування логування
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Завантаження німецької моделі
@@ -18,43 +17,380 @@ try:
     logger.info("spaCy модель de_core_news_sm завантажена")
 except OSError:
     logger.error("Модель de_core_news_sm не знайдено!")
-    logger.error("Встановіть командою: python3 -m spacy download de_core_news_sm")
     raise
 
-# Ключові слова для класифікації
-KEYWORDS = {
-    'debt_collection': [
-        'schuld', 'forderung', 'zahlung', 'rechnung', 'mahnung', 'verzug',
-        'überweisung', 'betrag', 'offen', 'bezahlen', 'konto', 'bank',
-        'gläubiger', 'schulden', 'mahnen', 'frist', 'zahlen'
-    ],
-    'tenancy': [
-        'miete', 'wohnung', 'mietvertrag', 'kündigung', 'nebenkosten',
-        'hausmeister', 'vermieter', 'mieter', 'kaution', 'abrechnung',
-        'heizkosten', 'warmwasser', 'renovierung', 'mangel', 'defekt'
-    ],
-    'employment': [
-        'jobcenter', 'einladung', 'termin', 'bewerbung', 'gespräch',
-        'interview', 'arbeitsamt', 'leistungen', 'hartz', 'arbeitsvertrag',
-        'kündigung', 'gehalt', 'lohn', 'arbeitgeber', 'arbeitnehmer',
-        'urlaub', 'krankheit', 'rente', 'sozial', 'beratung'
-    ],
-    'administrative': [
-        'behörde', 'amt', 'bescheid', 'antrag', 'genehmigung',
-        'steuer', 'finanzamt', 'ausländerbehörde', 'anmeldung',
-        'dokument', 'unterlage', 'frist', 'einspruch', 'bescheid'
-    ]
+# Розширені ключові слова з контекстом
+KEYWORDSWithContext = {
+    'debt_collection': {
+        'strong': [
+            'mahnung', 'forderung', 'zahlung', 'schuld', 'rechnung',
+            'überweisung', 'betrag', 'konto', 'bank', 'gläubiger',
+            'inkasso', 'vollstreckung', 'pfändung', 'mahnen'
+        ],
+        'medium': [
+            'offen', 'bezahlen', 'frist', 'zahlen', 'kredit',
+            'darlehen', 'zinsen', 'säumnis', 'verzug'
+        ],
+        'context': [
+            'sie schulden', 'zahlen sie', 'überweisen sie',
+            'innerhalb von', 'tagen', 'euro', '€'
+        ]
+    },
+    'tenancy': {
+        'strong': [
+            'miete', 'wohnung', 'mieter', 'vermieter', 'mietvertrag',
+            'kündigung', 'nebenkosten', 'kaution', 'hausmeister',
+            'mietzins', 'wohnraum'
+        ],
+        'medium': [
+            'abrechnung', 'heizkosten', 'warmwasser', 'renovierung',
+            'mangel', 'defekt', 'reparatur', 'mieterhöhung'
+        ],
+        'context': [
+            'mieter', 'vermieter', 'wohnung', 'haus', 'zimmer',
+            'quadratmeter', 'm²'
+        ]
+    },
+    'employment': {
+        'strong': [
+            'jobcenter', 'arbeitsagentur', 'arbeitslos', 'bewerbung',
+            'kündigung', 'arbeitsvertrag', 'gehalt', 'lohn',
+            'arbeitgeber', 'arbeitnehmer', 'hartz'
+        ],
+        'medium': [
+            'einladung', 'termin', 'gespräch', 'interview',
+            'leistungen', 'arbeitsamt', 'vermittlung', 'beratung',
+            'urlaub', 'krankheit', 'rente', 'sozial'
+        ],
+        'context': [
+            'sgb', '§ 59', '§ 31', '§ 32', 'kundennummer',
+            'vermittlungs', 'arbeitslosengeld'
+        ]
+    },
+    'administrative': {
+        'strong': [
+            'behörde', 'amt', 'bescheid', 'antrag', 'genehmigung',
+            'steuer', 'finanzamt', 'ausländerbehörde', 'anmeldung',
+            'gericht', 'urteil', 'beschluss', 'anwalt'
+        ],
+        'medium': [
+            'dokument', 'unterlage', 'frist', 'einspruch',
+            'aktenzeichen', 'geschäftszeichen', 'satzung', 'verordnung'
+        ],
+        'context': [
+            'vg', 'vwvfg', 'sbg', 'ao', 'gg', 'lvwvfg',
+            'rechtsmittel', 'einspruchs'
+        ]
+    },
+    'personal': {
+        'strong': [
+            'sohn', 'tochter', 'kind', 'familie', 'eltern',
+            'schule', 'lehrer', 'zeugnis', 'note', 'klasse',
+            'geburtstag', 'feier', 'einladung', 'gratulation'
+        ],
+        'medium': [
+            'erfolg', 'leistung', 'fortschritt', 'entwicklung',
+            'teilnahme', 'projekt', 'veranstaltung', 'aktivität',
+            'brief', 'nachricht', 'persönlich'
+        ],
+        'context': [
+            'ihr kind', 'mein sohn', 'meine tochter', 'wir freuen',
+            'herzlichen glückwunsch', 'liebe', 'beste grüße'
+        ]
+    },
+    'insurance': {
+        'strong': [
+            'versicherung', 'kasse', 'beitrag', 'leistung', 'tarif',
+            'aok', 'tk', 'barmer', 'dak', 'krankenkasse'
+        ],
+        'medium': [
+            'versichert', 'abrechnung', 'rezept', 'behandlung',
+            'arzt', 'klinik', 'spital', 'gesund'
+        ],
+        'context': [
+            'versichertennummer', 'kassennummer', 'sgb v', 'bema',
+            'gebührenordnung'
+        ]
+    },
+    'utility': {
+        'strong': [
+            'strom', 'gas', 'wasser', 'heizung', 'energie',
+            'stadtwerk', 'versorger', 'zähler', 'verbrauch'
+        ],
+        'medium': [
+            'rechnung', 'abschlag', 'nachzahlung', 'guthaben',
+            'tarif', 'vertrag', 'lieferant'
+        ],
+        'context': [
+            'kilowattstunde', 'kwh', 'zählerstand', 'grundversorgung'
+        ]
+    }
 }
 
-def analyze_text(text: str) -> Dict:
+# Закони та коди для кожного типу
+LAWS_BY_TYPE = {
+    'debt_collection': {
+        'primary': [
+            'BGB § 286 (Прострочення боржника)',
+            'BGB § 288 (Проценти у простроченні)',
+            'BGB § 241 (Обов\'язки зі зобов\'язання)'
+        ],
+        'secondary': [
+            'BGB § 433 (Купівля-продаж)',
+            'BGB § 488 (Кредитний договір)',
+            'BGB § 823 (Відшкодування збитків)',
+            'ZPO § 42 (Судовий процес)'
+        ]
+    },
+    'tenancy': {
+        'primary': [
+            'BGB § 535 (Обов\'язки орендодавця)',
+            'BGB § 536 (Зниження оренди при дефектах)',
+            'BGB § 558 (Підвищення оренди)'
+        ],
+        'secondary': [
+            'BGB § 543 (Позачергове розірвання)',
+            'BGB § 573 (Розірвання орендодавцем)',
+            'BGB § 555 (Модернізація)',
+            'WoHG § 1 (Закон про житлове господарство)'
+        ]
+    },
+    'employment': {
+        'primary': [
+            '§ 59 SGB II (Обов\'язок явки на Jobcenter)',
+            '§ 31 SGB II (Наслідки неявки)',
+            'BGB § 611 (Трудовий договір)'
+        ],
+        'secondary': [
+            'KSchG § 1 (Захист від звільнення)',
+            'BGB § 620 (Припинення трудових відносин)',
+            '§ 309 SGB III (Офіційні запрошення)',
+            'SGB III § 130 (Арbeitslosengeld)'
+        ]
+    },
+    'administrative': {
+        'primary': [
+            'VwVfG § 35 (Адміністративний акт)',
+            'VwGO § 42 (Право на оскарження)',
+            'VwVfG § 28 (Право на вислуховування)'
+        ],
+        'secondary': [
+            'VwVfG § 29 (Доступ до файлів)',
+            'VwVfG § 44 (Недійсність акту)',
+            'GG § 19 (Основне право на звернення)',
+            'SGB X (Соціальний кодекс)'
+        ]
+    },
+    'personal': {
+        'primary': [
+            'Не застосовується (особисте листування)'
+        ],
+        'secondary': [
+            'BGB § 823 (Загальні права особистості)',
+            'GG § 1 (Гідність людини)',
+            'GG § 2 (Вільний розвиток особистості)'
+        ]
+    },
+    'insurance': {
+        'primary': [
+            'SGB V § 1 (Обов\'язкове страхування)',
+            'SGB V § 19 (Реєстрація)',
+            'BGB § 779 (Договір страхування)'
+        ],
+        'secondary': [
+            'VVG § 1 (Закон про страхування)',
+            'SGB V § 25 (Медичне обслуговування)',
+            'BGB § 611 (Договір про надання послуг)'
+        ]
+    },
+    'utility': {
+        'primary': [
+            'BGB § 535 (Постачання енергії)',
+            'EnWG § 1 (Закон про енергетику)',
+            'BGB § 433 (Договір постачання)'
+        ],
+        'secondary': [
+            'StromGVV § 1 (Постачання електроенергії)',
+            'GasGVV § 1 (Постачання газу)',
+            'BGB § 241 (Зобов\'язання з договору)'
+        ]
+    }
+}
+
+def analyze_context(doc) -> Dict[str, float]:
     """
-    Аналіз тексту для витягування юридичних сутностей та ключових слів.
-    
-    Args:
-        text: Текст для аналізу
+    Аналіз контексту документа.
     
     Returns:
-        Словник з результатами аналізу
+        Dict з оцінками для кожного типу листа
+    """
+    scores = {}
+    
+    # Отримуємо частини мови
+    nouns = [token.lemma_.lower() for token in doc if token.pos_ == 'NOUN']
+    verbs = [token.lemma_.lower() for token in doc if token.pos_ == 'VERB']
+    adjectives = [token.lemma_.lower() for token in doc if token.pos_ == 'ADJ']
+    
+    # Аналіз іменованих сутностей
+    entities = {ent.label_: ent.text for ent in doc.ents}
+    
+    # Перевірка на особисті звертання
+    has_personal_address = any(
+        word in ' '.join(adjectives + nouns)
+        for word in ['liebe', 'lieber', 'herzliche', 'persönlich', 'familie']
+    )
+    
+    # Перевірка на офіційний стиль
+    has_formal_style = any(
+        word in ' '.join(doc.text.lower().split())
+        for word in ['hiermit', 'gemäß', 'aufgrund', 'betreffend', 'bezugnehmend']
+    )
+    
+    # Перевірка на емоційне забарвлення
+    emotional_words = ['freuen', 'glückwunsch', 'erfolg', 'toll', 'super', 'klasse']
+    has_emotional = any(word in ' '.join(verbs + adjectives) for word in emotional_words)
+    
+    return {
+        'personal': 0.8 if (has_personal_address or has_emotional) else 0.1,
+        'formal': 0.8 if has_formal_style else 0.2,
+        'entities': entities,
+        'nouns': nouns,
+        'verbs': verbs,
+    }
+
+def classify_letter_type_advanced(text: str) -> Tuple[str, Dict]:
+    """
+    Розширена класифікація типу листа з контекстним аналізом.
+    
+    Args:
+        text: Текст листа
+    
+    Returns:
+        (тип листа, детальна інформація)
+    """
+    doc = nlp(text)
+    text_lower = text.lower()
+    
+    # Контекстний аналіз
+    context = analyze_context(doc)
+    
+    # Підрахунок балів для кожного типу
+    type_scores = {}
+    
+    for letter_type, keywords in KEYWORDSWithContext.items():
+        score = 0
+        details = {
+            'strong_matches': [],
+            'medium_matches': [],
+            'context_matches': [],
+            'context_bonus': 0
+        }
+        
+        # Strong keywords (3 бали кожен)
+        for keyword in keywords['strong']:
+            if keyword in text_lower:
+                score += 3
+                details['strong_matches'].append(keyword)
+        
+        # Medium keywords (1 бал кожен)
+        for keyword in keywords['medium']:
+            if keyword in text_lower:
+                score += 1
+                details['medium_matches'].append(keyword)
+        
+        # Context keywords (2 бали кожен)
+        for keyword in keywords['context']:
+            if keyword in text_lower:
+                score += 2
+                details['context_matches'].append(keyword)
+        
+        # Context bonus
+        if letter_type == 'personal' and context['personal'] > 0.5:
+            score += 5
+            details['context_bonus'] = 5
+        elif letter_type != 'personal' and context['formal'] > 0.5:
+            score += 2
+        
+        # Penalize personal for formal documents
+        if letter_type == 'personal' and context['formal'] > 0.5:
+            score -= 10
+        
+        type_scores[letter_type] = score
+        details['total_score'] = score
+    
+    # Визначаємо переможця
+    max_score = max(type_scores.values())
+    
+    if max_score == 0:
+        return 'general', {'scores': type_scores, 'details': {}}
+    
+    # Отримуємо всі типи з максимальним score
+    top_types = [t for t, s in type_scores.items() if s == max_score]
+    
+    # Пріоритетність при однакових балах
+    priority = ['personal', 'employment', 'administrative', 'tenancy', 'debt_collection', 'insurance', 'utility']
+    
+    winner = None
+    for ptype in priority:
+        if ptype in top_types:
+            winner = ptype
+            break
+    
+    if not winner:
+        winner = top_types[0]
+    
+    logger.info(f"Класифікація: {type_scores}")
+    logger.info(f"Обрано категорію: {winner}")
+    
+    return winner, {
+        'scores': type_scores,
+        'details': type_scores,
+        'context': context,
+        'winner_details': KEYWORDSWithContext.get(winner, {})
+    }
+
+def get_laws_for_letter(letter_type: str, text: str) -> Dict:
+    """
+    Отримання релевантних законів для типу листа.
+    
+    Args:
+        letter_type: Тип листа
+        text: Текст листа (для додаткового аналізу)
+    
+    Returns:
+        Dict з законами
+    """
+    laws = LAWS_BY_TYPE.get(letter_type, LAWS_BY_TYPE['general'])
+    
+    # Додатковий аналіз для уточнення законів
+    text_lower = text.lower()
+    
+    specific_laws = {
+        'jobcenter': '§ 59 SGB II',
+        'arbeitsagentur': 'SGB III',
+        'finanzamt': 'AO (Abgabenordnung)',
+        'gericht': 'ZPO / StPO',
+        'miete': 'BGB Mietrecht',
+        'strom': 'EnWG',
+        'versicherung': 'SGB V / VVG',
+    }
+    
+    for key, law in specific_laws.items():
+        if key in text_lower:
+            laws['specific'] = law
+            break
+    
+    return laws
+
+def analyze_text_advanced(text: str) -> Dict:
+    """
+    Розширений аналіз тексту.
+    
+    Args:
+        text: Текст листа
+    
+    Returns:
+        Dict з результатами аналізу
     """
     doc = nlp(text)
     
@@ -63,10 +399,10 @@ def analyze_text(text: str) -> Dict:
     
     # Витягування ключових слів (іменники та дієслова)
     keywords = [
-        token.lemma_.lower() 
-        for token in doc 
+        token.lemma_.lower()
+        for token in doc
         if token.pos_ in ['NOUN', 'VERB'] and not token.is_stop
-    ][:15]  # Обмежуємо до 15
+    ][:20]
     
     # Витягування дат
     dates = [ent.text for ent in doc.ents if ent.label_ == 'DATE']
@@ -77,7 +413,12 @@ def analyze_text(text: str) -> Dict:
     # Витягування організацій
     organizations = [ent.text for ent in doc.ents if ent.label_ == 'ORG']
     
-    logger.info(f"Аналіз завершено: {len(entities)} сутностей, {len(keywords)} ключових слів")
+    # Витягування осіб
+    persons = [ent.text for ent in doc.ents if ent.label_ == 'PERSON']
+    
+    # Аналіз тону (простий)
+    formal_indicators = ['hiermit', 'gemäß', 'aufgrund', 'sehr geehrte']
+    is_formal = any(ind in text.lower() for ind in formal_indicators)
     
     return {
         'entities': entities,
@@ -85,96 +426,9 @@ def analyze_text(text: str) -> Dict:
         'dates': dates,
         'money': money,
         'organizations': organizations,
+        'persons': persons,
         'text_length': len(text),
-        'sentence_count': len(list(doc.sents))
+        'sentence_count': len(list(doc.sents)),
+        'is_formal': is_formal,
+        'language': 'de'  # Припускаємо німецьку
     }
-
-def classify_letter_type(text: str) -> str:
-    """
-    Класифікація типу листа на основі ключових слів.
-    
-    Args:
-        text: Текст листа
-    
-    Returns:
-        Тип листа: 'debt_collection', 'tenancy', 'employment', 'administrative', 'general'
-    """
-    text_lower = text.lower()
-    
-    # Підрахунок збігів для кожної категорії
-    scores = {}
-    
-    for category, keywords in KEYWORDS.items():
-        score = sum(1 for keyword in keywords if keyword in text_lower)
-        scores[category] = score
-    
-    logger.info(f"Класифікація: {scores}")
-    
-    # Вибір категорії з найвищим score
-    max_score = max(scores.values())
-    
-    if max_score == 0:
-        logger.info("Не знайдено збігів, повертаємо 'general'")
-        return 'general'
-    
-    # Отримуємо всі категорії з максимальним score
-    top_categories = [cat for cat, score in scores.items() if score == max_score]
-    
-    # Пріоритетність категорій
-    priority = ['employment', 'debt_collection', 'tenancy', 'administrative']
-    
-    for cat in priority:
-        if cat in top_categories:
-            logger.info(f"Обрано категорію: {cat}")
-            return cat
-    
-    return top_categories[0]
-
-def extract_important_info(text: str) -> Dict:
-    """
-    Витягування важливої інформації з тексту.
-    
-    Args:
-        text: Текст листа
-    
-    Returns:
-        Словник з важливою інформацією
-    """
-    doc = nlp(text)
-    
-    info = {
-        'dates': [],
-        'money': [],
-        'organizations': [],
-        'locations': [],
-        'persons': [],
-        'reference_numbers': []
-    }
-    
-    for ent in doc.ents:
-        if ent.label_ == 'DATE':
-            info['dates'].append(ent.text)
-        elif ent.label_ == 'MONEY':
-            info['money'].append(ent.text)
-        elif ent.label_ == 'ORG':
-            info['organizations'].append(ent.text)
-        elif ent.label_ == 'LOC':
-            info['locations'].append(ent.text)
-        elif ent.label_ == 'PERSON':
-            info['persons'].append(ent.text)
-    
-    # Пошук номерів справ/посилань (наприклад, AZ: 123/2024)
-    import re
-    ref_patterns = [
-        r'[A-Z]{1,3}\s*[:.]?\s*\d+/\d+',  # AZ: 123/2024
-        r'Nr\.\s*\d+',  # Nr. 12345
-        r'Aktenzeichen\s*[:.]?\s*\S+',  # Aktenzeichen: ...
-        r'Az\.\s*\S+'  # Az. ...
-    ]
-    
-    for pattern in ref_patterns:
-        matches = re.findall(pattern, text, re.IGNORECASE)
-        info['reference_numbers'].extend(matches)
-    
-    logger.info(f"Витягнуто інформацію: {info}")
-    return info
