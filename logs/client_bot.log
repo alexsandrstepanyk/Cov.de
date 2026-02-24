@@ -3,3 +3,215 @@
 2026-02-24 22:29:54,910 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getMe "HTTP/1.1 200 OK"
 2026-02-24 22:29:54,948 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/deleteWebhook "HTTP/1.1 200 OK"
 2026-02-24 22:29:54,950 - telegram.ext.Application - INFO - Application started
+2026-02-24 22:30:05,100 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:30:15,177 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:30:25,308 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:30:35,445 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:30:45,685 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:30:55,831 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:31:06,063 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:31:15,662 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:31:15,870 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/sendMessage "HTTP/1.1 200 OK"
+2026-02-24 22:31:25,032 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:31:25,221 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/sendMessage "HTTP/1.1 200 OK"
+2026-02-24 22:31:25,265 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getFile "HTTP/1.1 200 OK"
+2026-02-24 22:31:25,307 - httpx - INFO - HTTP Request: GET https://api.telegram.org/file/bot8594681397%3AAAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/photos/file_10.jpg "HTTP/1.1 200 OK"
+2026-02-24 22:31:25,371 - __main__ - WARNING - tesseract не доступний: tesseract is not installed or it's not in your PATH. See README file for more information.
+/Users/alex/Library/Python/3.9/lib/python/site-packages/torch/utils/data/dataloader.py:684: UserWarning: 'pin_memory' argument is set as true but not supported on MPS now, then device pinned memory won't be used.
+  warnings.warn(warn_msg)
+2026-02-24 22:31:28,800 - __main__ - INFO - OCR (easyocr): витягнуто 833 символів
+2026-02-24 22:31:28,800 - __main__ - INFO - Отримано текст: 833 символів
+2026-02-24 22:31:28,862 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/sendMessage "HTTP/1.1 200 OK"
+2026-02-24 22:31:30,577 - httpx - INFO - HTTP Request: GET https://translate.googleapis.com/translate_a/single?client=gtx&sl=de&tl=uk&hl=uk&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&ie=UTF-8&oe=UTF-8&otf=1&ssel=0&tsel=0&tk=xxxx&q=Wolfgang+M%C3%BCller+Vermi+SchillerstraBe+80336+M%C3%BCnchen+Familie+Kowalenko+Leopoldstra%C3%9Fe+45+80802M%C3%BCnchen+M%C3%BCnchen+%2C+2024+%2A%23Mieterh%C3%B6hung+gem%C3%A4%C3%9F+%24+558+BGBvk+Sehr+geehrte+Familie+Kowalenko%2C+hiermit+k%C3%BCndige+ich+eine+Erh%C3%B6hung+der+Mi+Wohnung+%28Leopoldstra%C3%9Fe+45%2C+80802+k%23Aktuelle+Miete+%28seit+01.01.2022%29%3A%2A%2A+Kaltmiete+550+00+Euro+Nebenkosten%3A+150+Euro+JkGesantmiete%3A+700+Euroxk+k%23Neue+Miete+%28ab+01.05.2024%29+%3A+k%23+Kaltmiete+680+00+Euro+%28%2B130+Euro%29+Nebenkosten%3A+150+Euro+JkGesamtmiete%3A+830+Euroxk+k%23Begr%C3%BCndung%3A%2A%2A+Die+orts%C3%BCbliche+Vergleichsmiete+f%C3%BCr+verg+Wohnungen+in+dieser+Lage+liegt+bei+13%2C+50+Ihre+Wohnung+hat+50+qm+%2C+betr%C3%A4gt+di+Miete+675+Euro+%28+50+13+%2C+50%29+Gem%C3%A4%C3%9F+BGB+%24+558+++kann+die+Miete+bis+ZUI+Vergleichsmiete+erh%C3%B6ht+werden+Die+Erh%C3%B6hung+liegt+innerhalb+der+Kappung+BGB+%24+558+Abs+_+Sie+haben+der+Erh%C3%B6hung+bis+zum+%2A%2A31+zuzustimnen+eter+somit+gem%C3%A4%C3%9F "HTTP/2 200 OK"
+2026-02-24 22:31:30,580 - __main__ - INFO - Переклад виконано: 761 символів
+2026-02-24 22:31:30,728 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/sendMessage "HTTP/1.1 200 OK"
+/Users/alex/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+2026-02-24 22:31:31,469 - nlp_analysis - INFO - spaCy модель de_core_news_sm завантажена
+2026-02-24 22:31:31,473 - ingestion - INFO - Текст оброблено: 827 символів
+2026-02-24 22:31:31,510 - nlp_analysis - INFO - Класифікація: {'debt_collection': 4, 'tenancy': 19, 'employment': 2, 'administrative': 5, 'personal': -2, 'insurance': 2, 'utility': 2}
+2026-02-24 22:31:31,510 - nlp_analysis - INFO - Обрано категорію: tenancy
+2026-02-24 22:31:31,510 - __main__ - INFO - Тип листа: tenancy, Організація: Vermieter (Орендодавець), Особистий: False
+2026-02-24 22:31:31,510 - __main__ - INFO - Параграфи: ['BGB § 558', 'BGB § 559', 'BGB § 560']
+2026-02-24 22:31:31,576 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/sendMessage "HTTP/1.1 200 OK"
+2026-02-24 22:31:31,725 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/sendMessage "HTTP/1.1 200 OK"
+2026-02-24 22:31:31,728 - __main__ - INFO - Аналіз завершено для chat_id=8217182079, тип=tenancy
+2026-02-24 22:31:31,798 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/sendMessage "HTTP/1.1 200 OK"
+2026-02-24 22:31:35,086 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:31:45,197 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:31:55,334 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:32:05,455 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:32:15,593 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:32:26,038 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:32:36,278 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:32:46,416 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:32:56,457 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:33:06,691 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:33:08,267 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:33:08,475 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/sendMessage "HTTP/1.1 200 OK"
+2026-02-24 22:33:18,468 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:33:24,172 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:33:24,355 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/sendMessage "HTTP/1.1 200 OK"
+2026-02-24 22:33:24,489 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getFile "HTTP/1.1 200 OK"
+2026-02-24 22:33:24,531 - httpx - INFO - HTTP Request: GET https://api.telegram.org/file/bot8594681397%3AAAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/photos/file_11.jpg "HTTP/1.1 200 OK"
+2026-02-24 22:33:24,601 - __main__ - WARNING - tesseract не доступний: tesseract is not installed or it's not in your PATH. See README file for more information.
+/Users/alex/Library/Python/3.9/lib/python/site-packages/torch/utils/data/dataloader.py:684: UserWarning: 'pin_memory' argument is set as true but not supported on MPS now, then device pinned memory won't be used.
+  warnings.warn(warn_msg)
+2026-02-24 22:33:26,910 - __main__ - INFO - OCR (easyocr): витягнуто 1054 символів
+2026-02-24 22:33:26,910 - __main__ - INFO - Отримано текст: 1054 символів
+2026-02-24 22:33:26,969 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/sendMessage "HTTP/1.1 200 OK"
+2026-02-24 22:33:29,529 - httpx - INFO - HTTP Request: GET https://translate.googleapis.com/translate_a/single?client=gtx&sl=de&tl=uk&hl=uk&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&ie=UTF-8&oe=UTF-8&otf=1&ssel=0&tsel=0&tk=xxxx&q=Finanzamt+M%C3%BCnchen+Steuerabteilung+Maximilianstra%C3%9Fe+78+80539+M%C3%BCnchen+Herrn+Oleksandr+Kowalenko+Leopoldstra%C3%9Fe+45+30802M%C3%BCnchen+M%C3%BCnchen%2C++18.02.2024+%2A%23Steuerbescheid+2023%2A%2A+Sehr+geehrter+Herr+Kowalenko+%2C+vir+beziehen+uns+auf+Ihre+Einkommensteuererkl%C3%A4rung+f%C3%BCr+das+Jahr+2023+.+Nach+Pr%C3%BCfung+Ihrer+Unterlagen+ergibt+sich+eine+k%23Steuernachzahlung+in+H%C3%B6he+von+1.250+00+Euro%2Ak+.+K%23Bitte+%C3%9Cberweisen+Sie+den+Betrag+bis+zum+15+03.2024+auf+folgendes+Konto%3A%2A%2A+%23%2AKontoinhaber%3A%2A%2A+Finanzamt+M%C3%BCnchen+%23kIBAN%3A%2Ak+DE89+3704+0044+0532+0130+%23kBIC%3A%2A%2A+COBADEFFXXX+%23%2AVerwendungszweck%3A%2A%2A+Steuernummer+123%2F456%2F7890+Gem%C3%A4%C3%9F++AO+150+sind+Sie+zur+Zahlung+verpflichtet.+Bei+Nichtzahlung+innerhalb+der+Frist+werden+S%C3%A4umniszuschl%C3%A4ge+gem%C3%A4%C3%9F+AO+240+berechnet+%280%2C+5%25+pro+Monat%29+Sie+k%C3%B6nnen+gegen+diesen+Bescheid+innerhalb+eines+Monats+Niderspruch+einlegen+%285+355+Ao%29+.+Bei+Fragen+stehen+wir+Ihnen+gerne+zur+Verf%C3%BCgung+.+Mit+freundlichen+Gr%C3%BC%C3%9Fen+Ihr+Finanzamt+k%23Steuernummer%3A%2A%2A+123%2F456%2F7890+K%23Telefon%3A%2A++089+123456-0+k%23Email%3A%2A%2A+poststelle%40finanzamt-muenchen.de+%23%23Internet%3A%2A%2A+VnNW.finanzamt-muenchen.de "HTTP/2 200 OK"
+2026-02-24 22:33:29,533 - __main__ - INFO - Переклад виконано: 1072 символів
+2026-02-24 22:33:29,594 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/sendMessage "HTTP/1.1 200 OK"
+2026-02-24 22:33:29,597 - ingestion - INFO - Текст оброблено: 1046 символів
+2026-02-24 22:33:29,680 - nlp_analysis - INFO - Класифікація: {'debt_collection': 17, 'tenancy': 2, 'employment': 2, 'administrative': 18, 'personal': -10, 'insurance': 2, 'utility': 3}
+2026-02-24 22:33:29,680 - nlp_analysis - INFO - Обрано категорію: administrative
+2026-02-24 22:33:29,680 - __main__ - INFO - Тип листа: administrative, Організація: Finanzamt (Податкова), Особистий: False
+2026-02-24 22:33:29,680 - __main__ - INFO - Параграфи: ['AO § 150', 'AO § 172', 'EStG § 25']
+2026-02-24 22:33:29,747 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/sendMessage "HTTP/1.1 200 OK"
+2026-02-24 22:33:29,810 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/sendMessage "HTTP/1.1 200 OK"
+2026-02-24 22:33:29,810 - __main__ - INFO - Аналіз завершено для chat_id=8217182079, тип=administrative
+2026-02-24 22:33:29,874 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/sendMessage "HTTP/1.1 200 OK"
+2026-02-24 22:33:34,220 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:33:44,292 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:33:54,430 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:34:04,469 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:34:14,583 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:34:24,822 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:34:34,861 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:34:44,995 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:34:47,145 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:34:55,340 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:34:55,568 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/sendMessage "HTTP/1.1 200 OK"
+2026-02-24 22:35:01,788 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:35:02,067 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/sendMessage "HTTP/1.1 200 OK"
+2026-02-24 22:35:02,111 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getFile "HTTP/1.1 200 OK"
+2026-02-24 22:35:02,157 - httpx - INFO - HTTP Request: GET https://api.telegram.org/file/bot8594681397%3AAAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/photos/file_8.jpg "HTTP/1.1 200 OK"
+2026-02-24 22:35:02,273 - __main__ - WARNING - tesseract не доступний: tesseract is not installed or it's not in your PATH. See README file for more information.
+/Users/alex/Library/Python/3.9/lib/python/site-packages/torch/utils/data/dataloader.py:684: UserWarning: 'pin_memory' argument is set as true but not supported on MPS now, then device pinned memory won't be used.
+  warnings.warn(warn_msg)
+2026-02-24 22:35:06,952 - __main__ - INFO - OCR (easyocr): витягнуто 1790 символів
+2026-02-24 22:35:06,953 - __main__ - INFO - Отримано текст: 1790 символів
+2026-02-24 22:35:07,018 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/sendMessage "HTTP/1.1 200 OK"
+2026-02-24 22:35:08,053 - httpx - INFO - HTTP Request: GET https://translate.googleapis.com/translate_a/single?client=gtx&sl=de&tl=uk&hl=uk&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&ie=UTF-8&oe=UTF-8&otf=1&ssel=0&tsel=0&tk=xxxx&q=0%7B31+Zolchen+72a8+ae+Hune+75806%2F0018480+~ngeden+Antor+bfte+eder+%40urerhd+Strpan+Tellon+8095+2050101+Wonneu+Telola%3A+Wuizbura+24.10+2024+Sozialgesetzbuch+%285G8+%22%29+Bewilligung+des+Sofortzuschlages+nach+72+Zweites+Buch+Schr+gcehner+Herr+Slepatiluk%2C+Muglreder+Ihrer+Bedartsgemeinschaft+Leislsngere+zei+Sie+emhallen+als+Bevolimachliler+und+gegebenentails+lur+die+Bedartsgemeinschaft+erhaiten+Sie+diesen+Sichutung+des+Lebensunterhalles+.+Iuger+Egenschatt+als+Vertreter+der+Aeschfn+Kinder%3B+Jugendliche+und+junge+Erwachsene+durch+einen+Nach+72+Absatz+SCB+werden+lecstungsterechtige+Sotortzuschla+g+unlerstutzl+dlese+Drn+Solorzuschlau+eraten+Kinder%2C+Jugendliche+und+junge+Envachsene%2C+wenn+67u+Hinen+Anspruch+auf+Burgergeld+habendem+ein+Regelbedarf+nach+den+Regelbedartsstufen+oder+Grunde+%2855+20%2C+23+Nummier+5G8+Verbindung+mnit+28+Sozialgesetzbuch+Zw%C3%B6lltes+Buch+in+Ver-+Urnoungmit+Regelbedartsernittlungsgesetz%29+oder+einen+Ansprucn+eine+Bidungs-+Tedhabelaislung+haben+ouer+Incs+deshalb+keien+Anspruch+auf+Bumergeld+haben%2C+weil+im+Rahmen+der+Pr%C3%BCfung+der+Hiltebed%C3%BCrttigkeit+Kuni-+dereid+berucksichtigl+wurde+%285+11+Absalz+Salz+SGB+Il%29+%2C+Fur+die+nachlolgend+aufgetuhnte+Person+bewillige+Ich+den+zusatzlicher+Solonzuschlag+wle+folgt%3A+Person+Zeiraum+Zahlbetrag+mnonallich+in+Euro+Siepanauk+%2C+Nkre+06+08%2C2016+01%2C11%2C2024++28+02+2025+20%2C00+7590328595+Da+Sie+bis+31+10+2024+Burpergeld+Soforzuschlag+Jobcenter+Landkreis+Wurzburg+erhalten+haben.+kann+KeM+Sofortzuschlag+l%C3%BCr+09%2F24%2B10%2F24+durch+uns+berucksichtigt+werden+Den+Betrag+zahle+ich+uber+den+hier+huterleglen+Zahlweg+an+Sle+aus+Lotanded+1n+E+Eeec+7euIcc+00709n+Tnhaksnnins+%5Baiquoa%5D+2441+Vspoin+W%C3%BCrzburg+~Grundschule+%22NISCHENZEUGNIS+allmatuich+%2C+Fanny-Koenig-+auzubruot+gich+ennnen+hkonntntsse+teradon+botomat+%2C+stepaniuk+aute++vam+2025%2F+cener+Job+Sozla%27+7p00o "HTTP/2 200 OK"
+2026-02-24 22:35:08,057 - __main__ - INFO - Переклад виконано: 1756 символів
+2026-02-24 22:35:08,134 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/sendMessage "HTTP/1.1 200 OK"
+2026-02-24 22:35:08,138 - ingestion - INFO - Текст оброблено: 1783 символів
+2026-02-24 22:35:08,237 - nlp_analysis - INFO - Класифікація: {'debt_collection': 5, 'tenancy': 0, 'employment': 6, 'administrative': 0, 'personal': 9, 'insurance': 0, 'utility': 0}
+2026-02-24 22:35:08,237 - nlp_analysis - INFO - Обрано категорію: personal
+2026-02-24 22:35:08,237 - __main__ - INFO - Тип листа: personal, Організація: Jobcenter / Arbeitsagentur, Особистий: False
+2026-02-24 22:35:08,237 - __main__ - INFO - Параграфи: ['§ 19 SGB II', '§ 20 SGB II', '§ 22 SGB II']
+2026-02-24 22:35:08,343 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/sendMessage "HTTP/1.1 200 OK"
+2026-02-24 22:35:08,412 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/sendMessage "HTTP/1.1 200 OK"
+2026-02-24 22:35:08,413 - __main__ - INFO - Аналіз завершено для chat_id=312248641, тип=personal
+2026-02-24 22:35:08,491 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/sendMessage "HTTP/1.1 200 OK"
+2026-02-24 22:35:11,832 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:35:22,065 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:35:32,248 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:35:42,371 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:35:52,477 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:36:02,614 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:36:12,743 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:36:12,784 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:36:15,723 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:36:15,988 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/sendMessage "HTTP/1.1 200 OK"
+2026-02-24 22:36:20,249 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:36:20,320 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/sendMessage "HTTP/1.1 200 OK"
+2026-02-24 22:36:20,362 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getFile "HTTP/1.1 200 OK"
+2026-02-24 22:36:20,428 - httpx - INFO - HTTP Request: GET https://api.telegram.org/file/bot8594681397%3AAAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/photos/file_5.jpg "HTTP/1.1 200 OK"
+2026-02-24 22:36:20,530 - __main__ - WARNING - tesseract не доступний: tesseract is not installed or it's not in your PATH. See README file for more information.
+/Users/alex/Library/Python/3.9/lib/python/site-packages/torch/utils/data/dataloader.py:684: UserWarning: 'pin_memory' argument is set as true but not supported on MPS now, then device pinned memory won't be used.
+  warnings.warn(warn_msg)
+2026-02-24 22:36:24,043 - __main__ - INFO - OCR (easyocr): витягнуто 911 символів
+2026-02-24 22:36:24,043 - __main__ - INFO - Отримано текст: 911 символів
+2026-02-24 22:36:24,103 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/sendMessage "HTTP/1.1 200 OK"
+2026-02-24 22:36:25,026 - httpx - INFO - HTTP Request: GET https://translate.googleapis.com/translate_a/single?client=gtx&sl=de&tl=uk&hl=uk&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&ie=UTF-8&oe=UTF-8&otf=1&ssel=0&tsel=0&tk=xxxx&q=Familienkasse+pavern+Nord+Lne+Mni++laisline+Yanheeritimir+4+9565+J1%5D%22+Konnn+Lle+Dic+Uhoruinibiyosius+aitsehet+8i%E2%82%AC+VI+Voie++Dua%3F+Oucfkinaa%5D+0+nfn+Intormntionon+zuhrem+Kindergeld+In+Doutschland+Seht+peehrter+Men+Slepanuk%2C+Si0+amhallen+von+dor+Fanilienk+pero+Deulschlond+Kindetgeld+Aitte+antwonen+hurWenn+S10+ein0+der+folgendon+Fragen+mt+%2CJa%22+beantworten+konnen%3B+Sind+Sle+oder+Ihre+Kindor+Innernalb+Detitschlands+umgazogen%3F+Sind+odar+Ihra+Kinder+au3+Deutschland+weggazagen%3F+Haben+personich+elnen+Aulenthallsutal%3F+H0l+sich+Ihro+Bankverbindung+geandert%3F+Auto+nicht+antworton+wenn+keina+dieser+Anderungen+oingetreten+%26indl+Anderungen+Konnen+Sle+der+Famillenkasse+Jederzoll+online+unter+wwwamlllenhusse+se+mitteilen+konnen+uuch+0as+Ailwortscheibon+nutzen+Translotion+nlo+Ukralnian+Russlan+and+Englts+%3B+hups+wwva+arbeisagentur+delukraiholukraine-klndergeld-un+houniulichela+GGrullen+Crlaorucsbe+1+Lr+Wufluno+Si+Si+nclen "HTTP/2 200 OK"
+2026-02-24 22:36:25,029 - __main__ - INFO - Переклад виконано: 688 символів
+2026-02-24 22:36:25,098 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/sendMessage "HTTP/1.1 200 OK"
+2026-02-24 22:36:25,101 - ingestion - INFO - Текст оброблено: 907 символів
+2026-02-24 22:36:25,167 - nlp_analysis - INFO - Класифікація: {'debt_collection': 5, 'tenancy': 0, 'employment': 0, 'administrative': 4, 'personal': 11, 'insurance': 3, 'utility': 0}
+2026-02-24 22:36:25,167 - nlp_analysis - INFO - Обрано категорію: personal
+2026-02-24 22:36:25,167 - __main__ - INFO - Тип листа: personal, Організація: Загальний лист, Особистий: False
+2026-02-24 22:36:25,167 - __main__ - INFO - Параграфи: ['BGB § 241', 'BGB § 242']
+2026-02-24 22:36:25,227 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/sendMessage "HTTP/1.1 200 OK"
+2026-02-24 22:36:25,328 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/sendMessage "HTTP/1.1 200 OK"
+2026-02-24 22:36:25,331 - __main__ - INFO - Аналіз завершено для chat_id=312248641, тип=personal
+2026-02-24 22:36:25,393 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/sendMessage "HTTP/1.1 200 OK"
+2026-02-24 22:36:30,296 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:36:40,383 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:36:50,574 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:37:00,698 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:37:10,736 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:37:20,952 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:37:30,991 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:37:37,856 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:37:47,988 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:37:58,225 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:38:08,363 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:38:18,603 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:38:28,741 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:38:38,877 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:38:48,982 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:38:59,051 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:39:09,188 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:39:19,428 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:39:29,466 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:39:39,503 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:39:49,543 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:39:59,666 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:40:09,721 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:40:19,844 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:40:29,981 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:40:40,022 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:40:50,092 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:41:00,128 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:41:10,172 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:41:20,226 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:41:30,296 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:41:40,335 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:41:50,470 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:42:00,609 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:42:10,745 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:42:20,882 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:42:30,924 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:42:40,966 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:42:51,091 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:43:01,228 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:43:11,269 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:43:21,314 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:43:31,436 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:43:41,574 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:43:51,712 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:44:01,849 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:44:11,987 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:44:22,125 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:44:32,262 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:44:42,400 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:44:52,538 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:45:02,675 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:45:12,763 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:45:22,805 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:45:32,985 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:45:43,226 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:45:53,363 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:46:03,706 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:46:13,844 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:46:24,084 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:46:34,222 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:46:44,258 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:46:54,496 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:47:04,634 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:47:14,772 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:47:24,909 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:47:34,949 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:47:45,083 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:47:55,323 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:48:05,461 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:48:15,499 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:48:25,538 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:48:35,578 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:48:45,689 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:48:55,739 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:49:05,778 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:49:15,814 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-24 22:49:25,997 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
