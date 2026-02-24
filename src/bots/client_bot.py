@@ -103,15 +103,42 @@ def get_user(chat_id: int) -> dict:
         }
     return None
 
-def extract_text_from_photo(photo_path: str, lang: str = 'deu') -> str:
+def extract_text_from_photo(photo_path: str, lang: str = 'de') -> str:
     """Витягти текст з фото за допомогою OCR."""
+    text = ""
+    
+    # Спроба 1: pytesseract (якщо встановлено)
     try:
+        import pytesseract
+        from PIL import Image
         img = Image.open(photo_path)
-        text = pytesseract.image_to_string(img, lang=lang)
-        logger.info(f"OCR витягнуто {len(text)} символів")
-        return text
+        text = pytesseract.image_to_string(img, lang='deu+eng')
+        logger.info(f"OCR (tesseract): витягнуто {len(text)} символів")
+        if text.strip():
+            return text
     except Exception as e:
-        logger.error(f"OCR помилка: {e}")
+        logger.warning(f"tesseract не доступний: {e}")
+    
+    # Спроба 2: EasyOCR (не потребує системних залежностей)
+    try:
+        import easyocr
+        reader = easyocr.Reader(['en', 'de'], gpu=False, verbose=False)
+        results = reader.readtext(photo_path)
+        text = ' '.join([r[1] for r in results])
+        logger.info(f"OCR (easyocr): витягнуто {len(text)} символів")
+        if text.strip():
+            return text
+    except Exception as e:
+        logger.warning(f"easyocr не доступний: {e}")
+    
+    # Спроба 3: PIL + простий аналіз
+    try:
+        from PIL import Image
+        img = Image.open(photo_path)
+        logger.info(f"Фото відкрито: {img.size}, формат: {img.format}")
+        return f"[Фото отримано: {img.size[0]}x{img.size[1]} пікселів. Будь ласка, надішліть текст листа вручну або встановіть tesseract для автоматичного розпізнавання.]"
+    except Exception as e:
+        logger.error(f"Помилка відкриття фото: {e}")
         return ""
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -329,10 +356,23 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         return ConversationHandler.END
     
     logger.info(f"Отримано текст: {len(text)} символів")
-    
+
+    # Переклад тексту на українську (якщо мова користувача українська)
+    translated_text = None
+    if user['language'] == 'uk' and text.strip():
+        try:
+            await update.message.reply_text("⏳ Переклад тексту...")
+            # googletrans 4.0.0rc1 працює асинхронно - використовуємо sync версію
+            translation = await translator.translate(text, src='de', dest='uk')
+            translated_text = translation.text
+            logger.info(f"Переклад виконано: {len(translated_text)} символів")
+        except Exception as e:
+            logger.warning(f"Переклад не вдався: {e}")
+            translated_text = text  # fallback
+
     # Відправка тексту на обробку (симуляція виклику core_bot)
     await update.message.reply_text("⏳ Аналіз листа, зачекайте...")
-    
+
     # Імпортуємо модулі аналізу
     try:
         import sys
@@ -341,15 +381,15 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         from nlp_analysis import analyze_text, classify_letter_type
         from legal_db import get_relevant_laws
         from response_generator import generate_response
-        
+
         # Попередня обробка
         text = preprocess_text(text)
-        
+
         # Аналіз
         analysis = analyze_text(text)
         letter_type = classify_letter_type(text)
         laws = get_relevant_laws(letter_type, user['country'])
-        
+
         # Генерація відповіді
         response = generate_response(letter_type, laws, user['language'], user['country'])
         
@@ -372,6 +412,7 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
             'general': '📄 Загальний лист'
         }
         
+        # Формування результату
         result = (
             f"✅ **Аналіз завершено!**\n\n"
             f"📌 **Тип листа:** {type_names.get(letter_type, letter_type)}\n\n"
@@ -383,8 +424,17 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
             f"━━━━━━━━━━━━━━━━━━━━\n\n"
             f"📝 **Пропонована відповідь:**\n\n{response}"
         )
-        
-        # Відправка частинами якщо довгий текст
+
+        # Відправка перекладу (якщо є)
+        if translated_text and user['language'] == 'uk':
+            translation_msg = f"🌐 **Переклад листа (українська):**\n\n{translated_text}"
+            for i in range(0, len(translation_msg), 4000):
+                await update.message.reply_text(
+                    translation_msg[i:i+4000],
+                    parse_mode='Markdown'
+                )
+
+        # Відправка результату аналізу частинами
         for i in range(0, len(result), 4000):
             await update.message.reply_text(
                 result[i:i+4000],

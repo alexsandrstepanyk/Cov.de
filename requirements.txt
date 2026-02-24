@@ -11,3 +11,4 @@ python-telegram-bot
 pytesseract
 pillow
 werkzeug
+easyocr
