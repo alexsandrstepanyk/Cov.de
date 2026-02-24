@@ -508,7 +508,7 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     if user['language'] in ['uk', 'ru'] and text.strip():
         try:
             await update.message.reply_text(t['upload']['processing_translation'])
-            dest_lang = 'uk' if user['language'] == 'uk' else 'ru'
+            dest_lang = user['language']
             translation = await translator.translate(text, src='de', dest=dest_lang)
             translated_text = translation.text
             logger.info(f"Переклад виконано: {len(translated_text)} символів")
@@ -648,10 +648,11 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
             )
 
         # Відправка перекладу (якщо є)
-        if translated_text and user['language'] == 'uk':
+        if translated_text and user['language'] in ['uk', 'ru']:
             # Екрануємо Markdown символи
             safe_translated = translated_text.replace('*', '\\*').replace('_', '\\_').replace('`', '\\`').replace('[', '\\[').replace(']', '\\]')
-            translation_msg = f"🌐 **Переклад листа (українська):**\n\n{safe_translated}"
+            lang_name = 'українська' if user['language'] == 'uk' else 'русский'
+            translation_msg = f"🌐 **Переклад листа ({lang_name}):**\n\n{safe_translated}"
             for i in range(0, len(translation_msg), 4000):
                 await update.message.reply_text(
                     translation_msg[i:i+4000],
