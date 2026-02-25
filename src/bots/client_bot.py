@@ -697,19 +697,23 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
             "Спробуйте ще раз або зверніться до підтримки."
         )
     
-    # Повернення до меню
+    # Повернення до меню з урахуванням мови користувача
+    lang = user['language'] if user else 'uk'
+    t = INTERFACE_TRANSLATIONS.get(lang, INTERFACE_TRANSLATIONS['uk'])
+    
     keyboard = [
-        ['📤 Завантажити лист'],
-        ['📋 Історія листів'],
-        ['⚖️ Замовити перевірку адвоката'],
-        ['❓ Допомога']
+        [t['menu']['upload']],
+        [t['menu']['history']],
+        [t['menu']['lawyer']],
+        [t['menu']['settings'], t['menu']['help']]
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     await update.message.reply_text(
+        f"{t['welcome']}\n\n"
         "Що ще бажаєте зробити?",
         reply_markup=reply_markup
     )
-    
+
     return ConversationHandler.END
 
 async def show_history(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:

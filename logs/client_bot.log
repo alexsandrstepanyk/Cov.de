@@ -1,5 +1,11 @@
-2026-02-24 23:53:07,450 - __main__ - INFO - Запуск Client Bot...
-2026-02-24 23:53:07,451 - __main__ - INFO - База даних ініціалізована
-2026-02-24 23:53:07,600 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getMe "HTTP/1.1 200 OK"
-2026-02-24 23:53:07,635 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/deleteWebhook "HTTP/1.1 200 OK"
-2026-02-24 23:53:07,638 - telegram.ext.Application - INFO - Application started
+2026-02-25 22:31:48,575 - __main__ - INFO - Запуск Client Bot...
+2026-02-25 22:31:48,577 - __main__ - INFO - База даних ініціалізована
+2026-02-25 22:31:48,805 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getMe "HTTP/1.1 200 OK"
+2026-02-25 22:31:49,026 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/deleteWebhook "HTTP/1.1 200 OK"
+2026-02-25 22:31:49,029 - telegram.ext.Application - INFO - Application started
+2026-02-25 22:31:59,180 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-25 22:32:09,254 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-25 22:32:19,297 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-25 22:32:29,357 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-25 22:32:39,494 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+2026-02-25 22:32:49,621 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
