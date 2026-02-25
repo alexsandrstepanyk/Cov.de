@@ -7,6 +7,7 @@ Client Bot for Gov.de
 import os
 import logging
 import sqlite3
+import asyncio
 from pathlib import Path
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -14,11 +15,11 @@ import pytesseract
 from PIL import Image
 from telegram import Update, ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import (
-    Application, 
-    CommandHandler, 
-    MessageHandler, 
-    filters, 
-    ContextTypes, 
+    Application,
+    CommandHandler,
+    MessageHandler,
+    filters,
+    ContextTypes,
     ConversationHandler,
     CallbackQueryHandler
 )
@@ -210,6 +211,7 @@ def init_db():
             analysis TEXT,
             response TEXT,
             lawyer_review TEXT,
+            photo_path TEXT,
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     ''')
@@ -590,9 +592,9 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         conn = sqlite3.connect('users.db')
         c = conn.cursor()
         c.execute("""
-            INSERT INTO letters (chat_id, text, letter_type, analysis, response) 
-            VALUES (?, ?, ?, ?, ?)
-        """, (chat_id, text[:500], letter_type, str(analysis), response))
+            INSERT INTO letters (chat_id, text, letter_type, analysis, response, photo_path)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (chat_id, text[:500], letter_type, str(analysis), response, file_path if update.message.photo else None))
         conn.commit()
         conn.close()
         
@@ -719,15 +721,17 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 async def show_history(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Показати історію листів."""
     chat_id = update.effective_chat.id
+    user = get_user(chat_id)
+    lang = user['language'] if user else 'uk'
     
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
     c.execute("""
-        SELECT id, letter_type, timestamp 
-        FROM letters 
-        WHERE chat_id=? 
-        ORDER BY timestamp DESC 
-        LIMIT 10
+        SELECT id, letter_type, timestamp, text
+        FROM letters
+        WHERE chat_id=?
+        ORDER BY timestamp DESC
+        LIMIT 20
     """, (chat_id,))
     letters = c.fetchall()
     conn.close()
@@ -736,19 +740,132 @@ async def show_history(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
         await update.message.reply_text("📋 Історія порожня.\n\nВи ще не завантажували листи.")
         return ConversationHandler.END
     
-    result = "📋 **Ваша історія листів:**\n\n"
-    for i, (id, letter_type, timestamp) in enumerate(letters, 1):
-        type_names = {
-            'debt_collection': '💰 Боргові',
-            'tenancy': '🏠 Оренда',
-            'employment': '💼 Jobcenter',
-            'administrative': '📋 Адмін',
-            'general': '📄 Загальний'
-        }
-        result += f"{i}. {type_names.get(letter_type, letter_type)} — {timestamp}\n"
+    # Створення кнопок для кожного листа
+    type_names = {
+        'debt_collection': '💰 Боргові',
+        'tenancy': '🏠 Оренда',
+        'employment': '💼 Jobcenter',
+        'administrative': '📋 Адмін',
+        'personal': '👨‍👩‍👦 Особистий',
+        'general': '📄 Загальний'
+    }
     
-    await update.message.reply_text(result, parse_mode='Markdown')
+    # Переклад назв типів
+    type_names_translated = {
+        'uk': type_names,
+        'ru': {
+            'debt_collection': '💰 Долговые',
+            'tenancy': '🏠 Аренда',
+            'employment': '💼 Jobcenter',
+            'administrative': '📋 Админ',
+            'personal': '👨‍👩‍👦 Личный',
+            'general': '📄 Общий'
+        },
+        'de': {
+            'debt_collection': '💰 Schulden',
+            'tenancy': '🏠 Miete',
+            'employment': '💼 Jobcenter',
+            'administrative': '📋 Verwaltung',
+            'personal': '👨‍👩‍👦 Persönlich',
+            'general': '📄 Allgemein'
+        },
+        'en': {
+            'debt_collection': '💰 Debt',
+            'tenancy': '🏠 Tenancy',
+            'employment': '💼 Jobcenter',
+            'administrative': '📋 Admin',
+            'personal': '👨‍👩‍👦 Personal',
+            'general': '📄 General'
+        }
+    }
+    
+    names = type_names_translated.get(lang, type_names)
+    
+    # Формування повідомлення з кнопками
+    await update.message.reply_text("📋 **Ваша історія листів:**\n\nОберіть лист для перегляду:")
+    
+    # Створення кнопок для кожного листа
+    for i, (id, letter_type, timestamp, text) in enumerate(letters, 1):
+        type_name = names.get(letter_type, '📄 Лист')
+        preview = text[:50].replace('\n', ' ') if text else 'Фото листа'
+        
+        keyboard = [[InlineKeyboardButton(f"{type_name} #{i} — {preview}...", callback_data=f'letter_{id}')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await update.message.reply_text(
+            f"**{type_name} #{i}**\n📅 {timestamp}\n\n_{preview}_...",
+            reply_markup=reply_markup,
+            parse_mode='Markdown'
+        )
+        await asyncio.sleep(0.5)  # Невелика затримка між повідомленнями
+    
     return ConversationHandler.END
+
+async def view_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Перегляд конкретного листа."""
+    query = update.callback_query
+    await query.answer()
+    
+    letter_id = query.data.replace('letter_', '')
+    chat_id = query.message.chat_id
+    user = get_user(chat_id)
+    lang = user['language'] if user else 'uk'
+    
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    c.execute("""
+        SELECT text, letter_type, analysis, response, photo_path, timestamp
+        FROM letters
+        WHERE id=? AND chat_id=?
+    """, (letter_id, chat_id))
+    letter = c.fetchone()
+    conn.close()
+    
+    if not letter:
+        await query.edit_message_text("❌ Лист не знайдено.")
+        return
+    
+    text, letter_type, analysis, response, photo_path, timestamp = letter
+    
+    # Перевідправка фото якщо є
+    if photo_path and Path(photo_path).exists():
+        try:
+            with open(photo_path, 'rb') as f:
+                await context.bot.send_photo(chat_id=chat_id, photo=f, caption=f"📅 {timestamp}")
+        except Exception as e:
+            logger.error(f"Помилка відправки фото: {e}")
+    
+    # Відправка аналізу
+    type_names = {
+        'debt_collection': '💰 Боргові зобов\'язання',
+        'tenancy': '🏠 Оренда житла',
+        'employment': '💼 Праця / Jobcenter',
+        'administrative': '📋 Адміністративний лист',
+        'personal': '👨‍👩‍👦 Особисте листування',
+        'general': '📄 Загальний лист'
+    }
+    
+    await query.edit_message_text(
+        f"📋 **Аналіз листа #{letter_id}**\n\n"
+        f"📌 **Тип:** {type_names.get(letter_type, letter_type)}\n"
+        f"📅 **Дата:** {timestamp}\n\n"
+        f"📝 **Відповідь:**\n{response}",
+        parse_mode='Markdown'
+    )
+    
+    # Кнопка повернення
+    keyboard = [[InlineKeyboardButton("🔙 Назад до історії", callback_data='back_to_history')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await context.bot.send_message(
+        chat_id=chat_id,
+        text="Що бажаєте зробити далі?",
+        reply_markup=reply_markup
+    )
+
+async def back_to_history(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Повернення до історії."""
+    query = update.callback_query
+    await query.answer()
+    await show_history(update, context)
 
 async def lawyer_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Інформація про допомогу адвоката."""
@@ -899,6 +1016,14 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             "Наш менеджер зв'яжеться з вами протягом 24 годин."
         )
 
+async def letter_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Обробка вибору листа."""
+    query = update.callback_query
+    if query.data.startswith('letter_'):
+        await view_letter(update, context)
+    elif query.data == 'back_to_history':
+        await back_to_history(update, context)
+
 def main():
     """Запуск бота."""
     logger.info("Запуск Client Bot...")
@@ -940,6 +1065,7 @@ def main():
     application.add_handler(conv_handler)
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CallbackQueryHandler(button_callback))
+    application.add_handler(CallbackQueryHandler(letter_callback))
     application.add_handler(MessageHandler(filters.Regex("^(📋 Історія листів|📋 История писем|📋 Briefverlauf|📋 Letter history)$"), show_history))
     application.add_handler(MessageHandler(filters.Regex("^(⚖️ Замовити перевірку адвоката|⚖️ Заказать проверку адвоката|⚖️ Anwalt prüfen|⚖️ Lawyer review)$"), lawyer_help))
     application.add_handler(MessageHandler(filters.Regex("^(❓ Допомога|❓ Помощь|❓ Hilfe|❓ Help)$"), help_command))
