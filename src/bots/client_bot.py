@@ -216,6 +216,13 @@ def init_db():
         )
     ''')
     
+    # Додаємо photo_path якщо колонки немає
+    try:
+        c.execute('ALTER TABLE letters ADD COLUMN photo_path TEXT')
+        logger.info("Додано колонку photo_path")
+    except sqlite3.OperationalError:
+        pass  # Колонка вже існує
+    
     conn.commit()
     conn.close()
     logger.info("База даних ініціалізована")
