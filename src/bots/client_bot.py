@@ -801,7 +801,7 @@ async def show_history(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     return ConversationHandler.END
 
 async def view_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Перегляд конкретного листа."""
+    """Перегляд конкретного листа з повною інформацією."""
     query = update.callback_query
     await query.answer()
     
@@ -826,40 +826,100 @@ async def view_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     
     text, letter_type, analysis, response, photo_path, timestamp = letter
     
-    # Перевідправка фото якщо є
+    # Переклад назв типів
+    type_names = {
+        'uk': {
+            'debt_collection': '💰 Боргові зобов\'язання',
+            'tenancy': '🏠 Оренда житла',
+            'employment': '💼 Праця / Jobcenter',
+            'administrative': '📋 Адміністративний лист',
+            'personal': '👨‍👩‍👦 Особисте листування',
+            'general': '📄 Загальний лист'
+        },
+        'ru': {
+            'debt_collection': '💰 Долговые обязательства',
+            'tenancy': '🏠 Аренда жилья',
+            'employment': '💼 Трудовые отношения',
+            'administrative': '📋 Административный лист',
+            'personal': '👨‍👩‍👦 Личная переписка',
+            'general': '📄 Общее письмо'
+        },
+        'de': {
+            'debt_collection': '💰 Schulden',
+            'tenancy': '🏠 Mietwohnung',
+            'employment': '💼 Arbeit / Jobcenter',
+            'administrative': '📋 Verwaltungsdokument',
+            'personal': '👨‍👩‍👦 Persönliche Korrespondenz',
+            'general': '📄 Allgemeines Schreiben'
+        },
+        'en': {
+            'debt_collection': '💰 Debt Collection',
+            'tenancy': '🏠 Tenancy Agreement',
+            'employment': '💼 Employment / Jobcenter',
+            'administrative': '📋 Administrative Letter',
+            'personal': '👨‍👩‍👦 Personal Correspondence',
+            'general': '📄 General Letter'
+        }
+    }
+    
+    names = type_names.get(lang, type_names['uk'])
+    type_name = names.get(letter_type, letter_type)
+    
+    # Спочатку показуємо фото якщо є
     if photo_path and Path(photo_path).exists():
         try:
             with open(photo_path, 'rb') as f:
-                await context.bot.send_photo(chat_id=chat_id, photo=f, caption=f"📅 {timestamp}")
+                await context.bot.send_photo(
+                    chat_id=chat_id,
+                    photo=f,
+                    caption=f"📄 **Лист #{letter_id}**\n📅 {timestamp}\n📌 {type_name}",
+                    parse_mode='Markdown'
+                )
         except Exception as e:
             logger.error(f"Помилка відправки фото: {e}")
     
-    # Відправка аналізу
-    type_names = {
-        'debt_collection': '💰 Боргові зобов\'язання',
-        'tenancy': '🏠 Оренда житла',
-        'employment': '💼 Праця / Jobcenter',
-        'administrative': '📋 Адміністративний лист',
-        'personal': '👨‍👩‍👦 Особисте листування',
-        'general': '📄 Загальний лист'
-    }
-    
-    await query.edit_message_text(
-        f"📋 **Аналіз листа #{letter_id}**\n\n"
-        f"📌 **Тип:** {type_names.get(letter_type, letter_type)}\n"
-        f"📅 **Дата:** {timestamp}\n\n"
-        f"📝 **Відповідь:**\n{response}",
-        parse_mode='Markdown'
-    )
+    # Формуємо повну інформацію про лист
+    full_info = f"""📋 **ІНФОРМАЦІЯ ПРО ЛИСТ #{letter_id}**
+
+📌 **Тип:** {type_name}
+📅 **Дата отримання:** {timestamp}
+
+━━━━━━━━━━━━━━━━━━━━
+
+📝 **ОРИГІНАЛЬНИЙ ТЕКСТ:**
+_{text[:500 if len(text) > 500 else len(text)]}{'...' if len(text) > 500 else ''}_
+
+━━━━━━━━━━━━━━━━━━━━
+
+📊 **АНАЛІЗ:**
+{analysis[:1000 if len(analysis) > 1000 else len(analysis)]}
+
+━━━━━━━━━━━━━━━━━━━━
+
+📝 **ВІДПОВІДЬ БОТА:**
+{response}
+
+━━━━━━━━━━━━━━━━━━━━
+
+🔙 Натисніть кнопку нижче щоб повернутися до історії."""
     
     # Кнопка повернення
     keyboard = [[InlineKeyboardButton("🔙 Назад до історії", callback_data='back_to_history')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    # Відправка повної інформації
     await context.bot.send_message(
         chat_id=chat_id,
-        text="Що бажаєте зробити далі?",
-        reply_markup=reply_markup
+        text=full_info,
+        reply_markup=reply_markup,
+        parse_mode='Markdown'
     )
+    
+    # Видаляємо повідомлення з кнопкою вибору
+    try:
+        await query.delete_message()
+    except:
+        pass
 
 async def back_to_history(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Повернення до історії."""
