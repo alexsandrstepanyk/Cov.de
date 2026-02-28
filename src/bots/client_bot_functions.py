@@ -27,7 +27,14 @@ def check_if_document(text: str) -> Dict:
         'krankenkasse', 'euro', '€', 'betrag', 'frist', 'innerhalb', 'tagen',
         'unterschrift', 'stempel', 'iban', 'konto', 'überweisung', '§',
         'paragraf', 'bgb', 'sgb', 'aktenzeichen', 'geschäftszeichen',
-        'mit freundlichen grüßen', 'rechtsfolgenbelehrung', 'mitwirkungspflichten'
+        'mit freundlichen grüßen', 'rechtsfolgenbelehrung', 'mitwirkungspflichten',
+        # Додаткові маркери
+        'arbeitsagentur', 'vermittlungs', 'leistung', 'sanktion', 'kürzung',
+        'inkasso', 'eos', 'credit', 'forderungs', 'gläubiger', 'schuldner',
+        'vermieter', 'mieter', 'miete', 'kaution', 'nebenkosten', 'hausverwaltung',
+        'rechtsanwalt', 'anwalt', 'kanzlei', 'mandant',
+        'aok', 'tk', 'barmer', 'dakin', 'krankenkasse', 'versicherungsschein',
+        'allianz', 'axa', 'hdi', 'versicherungsschutz', 'police'
     ]
 
     # Не-юридичні документи (сервісні книжки, інструкції, тощо)
