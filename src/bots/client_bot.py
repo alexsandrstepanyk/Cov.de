@@ -583,6 +583,22 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
                 ocr_result = recognize_image(file_path, lang='deu+eng')
                 text = ocr_result.get('text', '')
                 logger.info(f"OCR (advanced_ocr): витягнуто {len(text)} символів")
+                
+                # 💡 Інтерактивні поради щодо якості фото
+                quality_info = ocr_result.get('quality', {})
+                recommendations = ocr_result.get('recommendations', [])
+                
+                if recommendations:
+                    tips_msg = "📸 **Поради щодо якості фото:**\n\n"
+                    for rec in recommendations:
+                        if rec.strip():  # Пропускаємо пусті рядки
+                            tips_msg += f"{rec}\n"
+                    
+                    # Відправляємо поради окремим повідомленням
+                    await update.message.reply_text(
+                        tips_msg,
+                        parse_mode='Markdown'
+                    )
             except Exception as e:
                 logger.warning(f"advanced_ocr не доступний: {e}")
                 text = extract_text_from_photo(file_path, lang='deu')
@@ -1344,7 +1360,7 @@ async def view_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             'tenancy': '🏠 Оренда житла',
             'employment': '💼 Праця / Jobcenter',
             'administrative': '📋 Адміністративний лист',
-            'personal': '👨‍👩‍👦 Особисте листування',
+            'personal': '👨‍👩‍👦 Особисте ��истування',
             'general': '📄 Загальний лист'
         },
         'ru': {

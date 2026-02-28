@@ -238,45 +238,87 @@ class AdvancedOCR:
                 'aspect_ratio': aspect_ratio,
                 'quality': quality,
                 'issues': issues,
-                'recommendations': self._get_recommendations(quality, issues)
+                'recommendations': self._get_recommendations(quality, issues, brightness, contrast)
             }
             
         except Exception as e:
             logger.error(f"Помилка оцінки якості: {e}")
             return {'quality': 'unknown', 'issues': [], 'recommendations': []}
-    
-    def _get_recommendations(self, quality: str, issues: List[str]) -> List[str]:
+
+    def _get_recommendations(self, quality: str, issues: List[str], brightness: float = 128, contrast: float = 50) -> List[str]:
         """
-        Отримання порад для покращення якості фото.
-        
+        Отримання інтерактивних порад для покращення якості фото з емодзі.
+
         Args:
-            quality: Загальна оцінка якості
+            quality: Загальна оцінка якості ('poor', 'fair', 'good')
             issues: Список проблем
-            
+            brightness: Яскравість зображення (0-255)
+            contrast: Контрастність зображення
+
         Returns:
-            Список порад
+            Список інтерактивних порад з емодзі
         """
         recommendations = []
-        
-        if quality in ['poor', 'fair']:
-            recommendations.append('📸 Зробіть фото з кращим освітленням')
-            recommendations.append('📐 Тримайте камеру рівно паралельно документу')
-        
+
+        # Загальна оцінка
+        if quality == 'poor':
+            recommendations.append('😕 Якість фото **низька** для надійного розпізнавання')
+            recommendations.append('')
+        elif quality == 'fair':
+            recommendations.append('⚠️ Якість фото **задовільна**, але можна краще')
+            recommendations.append('')
+
+        # 💡 Освітлення та яскравість
+        if brightness < 50:
+            recommendations.append('💡 **Тут темно!** Увімкніть світло або використайте спалах')
+            recommendations.append('   → Темні фото важко розпізнати (яскравість: {:.0f}%)'.format(brightness/2.55))
+            recommendations.append('')
+        elif brightness > 200:
+            recommendations.append('☀️ **Занадто яскраво!** Уникайте прямого сонячного світла')
+            recommendations.append('   → Відблиски заважають розпізнаванню (яскравість: {:.0f}%)'.format(brightness/2.55))
+            recommendations.append('')
+
+        # 🌗 Контраст
+        if contrast < 30:
+            recommendations.append('🌗 **Низький контраст!** Документ зливається з фоном')
+            recommendations.append('   → Покладіть документ на темний стіл')
+            recommendations.append('   → Контрастність: {:.0f}% (потрібно >30%)'.format(contrast))
+            recommendations.append('')
+
+        # 🔍 Розмиття
         if 'зображення занадто розмите' in issues:
-            recommendations.append('🔍 Сфокусуйте камеру перед зйомкою')
-            recommendations.append('✋ Використовуйте штатив або упріть руки')
-        
-        if 'низький контраст' in issues:
-            recommendations.append('💡 Додайте більше світла')
-            recommendations.append('🌗 Уникайте тіней на документі')
-        
+            recommendations.append('🔍 **Фото розмите!** Потрібно сфокусувати')
+            recommendations.append('   → Натисніть на екран телефону для фокусу')
+            recommendations.append('   → Зачекайте поки камера сфокусується')
+            recommendations.append('   → Використовуйте обидві руки для стабільності')
+            recommendations.append('')
+
+        # 📐 Нахил
+        if 'зображення повернуте' in issues:
+            recommendations.append('📐 **Документ повернутий!** Вирівняйте горизонтально')
+            recommendations.append('   → Тримайте телефон паралельно документу')
+            recommendations.append('   → Усі кути документа мають бути видні')
+            recommendations.append('')
+
+        # ✋ Стабільність
+        if 'рухи під час зйомки' in issues:
+            recommendations.append('✋ **Камера тремтіла!** Зафіксуйте телефон')
+            recommendations.append('   → Упріть руки об стіл')
+            recommendations.append('   → Затримайте подих на момент зйомки')
+            recommendations.append('')
+
+        # 🚫 Відблиски
         if 'проблеми з освітленням' in issues:
-            recommendations.append('💡 Використовуйте рівномірне освітлення')
-            recommendations.append('🚫 Уникайте відблисків')
-        
-        if not recommendations:
-            recommendations.append('✅ Якість фото добра для розпізнавання')
-        
+            recommendations.append('🚫 **Відблики!** Змініть кут освітлення')
+            recommendations.append('   → Уникайте ламп над документом')
+            recommendations.append('   → Використовуйте розсіяне світло')
+            recommendations.append('')
+
+        # ✅ Якщо все добре
+        if not recommendations or quality == 'good':
+            recommendations.append('✅ **Якість фото добра!** Можна розпізнавати')
+            recommendations.append('   → Дякуємо за якісне фото!')
+
         return recommendations
     
     def recognize_with_tesseract(self, image, lang: str = 'deu+eng') -> str:
