@@ -1,19 +1,11 @@
-2026-02-25 23:26:13,590 - __main__ - INFO - Запуск Client Bot...
-2026-02-25 23:26:13,591 - __main__ - INFO - Додано колонку photo_path
-2026-02-25 23:26:13,591 - __main__ - INFO - База даних ініціалізована
-2026-02-25 23:26:13,752 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getMe "HTTP/1.1 200 OK"
-2026-02-25 23:26:13,790 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/deleteWebhook "HTTP/1.1 200 OK"
-2026-02-25 23:26:13,793 - telegram.ext.Application - INFO - Application started
-2026-02-25 23:26:24,086 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
-2026-02-25 23:26:34,225 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
-2026-02-25 23:26:44,362 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
-2026-02-25 23:26:54,500 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
-2026-02-25 23:27:04,638 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
-2026-02-25 23:27:14,775 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
-2026-02-25 23:27:24,854 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
-2026-02-25 23:27:34,949 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
-2026-02-25 23:27:45,086 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
-2026-02-25 23:27:55,327 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
-2026-02-25 23:28:05,365 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
-2026-02-25 23:28:15,499 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
-2026-02-25 23:28:25,738 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0/getUpdates "HTTP/1.1 200 OK"
+Traceback (most recent call last):
+  File "/Users/alex/Desktop/project/Gov.de/src/bots/client_bot.py", line 34, in <module>
+    logger.info("✅ Advanced Translator підключено")
+NameError: name 'logger' is not defined
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/alex/Desktop/project/Gov.de/src/bots/client_bot.py", line 36, in <module>
+    logger.warning(f"⚠️ Advanced Translator недоступний: {e}")
+NameError: name 'logger' is not defined

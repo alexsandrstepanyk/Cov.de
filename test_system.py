@@ -12,16 +12,16 @@ logger = logging.getLogger(__name__)
 def test_imports():
     """Перевірка імпорту модулів."""
     print("🔍 Перевірка імпорту модулів...")
-    
+
     try:
         from src.ingestion import preprocess_text, load_letter
         print("✅ ingestion.py")
     except Exception as e:
         print(f"❌ ingestion.py: {e}")
         return False
-    
+
     try:
-        from src.nlp_analysis import analyze_text, classify_letter_type
+        from src.nlp_analysis import analyze_text_advanced, classify_letter_type_advanced
         print("✅ nlp_analysis.py")
     except Exception as e:
         print(f"❌ nlp_analysis.py: {e}")
@@ -46,10 +46,10 @@ def test_imports():
 def test_nlp():
     """Перевірка NLP аналізу."""
     print("\n🔍 Перевірка NLP аналізу...")
-    
+
     try:
-        from src.nlp_analysis import analyze_text, classify_letter_type
-        
+        from src.nlp_analysis import analyze_text_advanced, classify_letter_type_advanced
+
         # Тестовий текст (борговий лист)
         test_text = """
         Sehr geehrte Damen und Herren,
@@ -58,21 +58,21 @@ def test_nlp():
         Bei Nichtzahlung werden wir gerichtliche Schritte einleiten.
         Mit freundlichen Grüßen
         """
-        
-        analysis = analyze_text(test_text)
+
+        analysis = analyze_text_advanced(test_text)
         print(f"  Сутності: {analysis['entities'][:3]}...")
         print(f"  Ключові слова: {analysis['keywords'][:5]}...")
-        
-        letter_type = classify_letter_type(test_text)
+
+        letter_type, details = classify_letter_type_advanced(test_text)
         print(f"  Тип листа: {letter_type}")
-        
+
         if letter_type == 'debt_collection':
             print("✅ NLP аналіз працює коректно")
             return True
         else:
             print(f"⚠️ Очікувався 'debt_collection', отримано '{letter_type}'")
             return True  # Не критично
-            
+
     except Exception as e:
         print(f"❌ NLP аналіз: {e}")
         return False

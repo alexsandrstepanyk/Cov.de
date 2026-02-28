@@ -20,7 +20,7 @@ from googletrans import Translator
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from ingestion import preprocess_text, load_letter
-from nlp_analysis import analyze_text, classify_letter_type
+from nlp_analysis import analyze_text_advanced, classify_letter_type_advanced
 from legal_db import get_relevant_laws
 from response_generator import generate_response
 
@@ -178,17 +178,17 @@ async def process_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             return
         
         logger.info(f"Core Bot: Текст отримано ({len(text)} символів)")
-        
+
         # Попередня обробка
         text = preprocess_text(text)
-        
+
         # NLP аналіз
         await update.message.reply_text("🔍 Аналіз тексту...")
-        analysis = analyze_text(text)
+        analysis = analyze_text_advanced(text)
         logger.info(f"Core Bot: Аналіз завершено: {analysis}")
-        
+
         # Класифікація типу листа
-        letter_type = classify_letter_type(text)
+        letter_type, _ = classify_letter_type_advanced(text)
         logger.info(f"Core Bot: Тип листа: {letter_type}")
         
         # Отримання законів
@@ -219,13 +219,14 @@ async def process_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             'general': '📄 Загальний лист'
         }
         
+        laws_text = ''.join('• ' + law + '\n' for law in laws['laws'])
         result = (
             f"✅ **Аналіз завершено!**\n\n"
             f"📌 **Тип листа:** {type_names.get(letter_type, letter_type)}\n\n"
             f"🔍 **Ключові слова:**\n"
             f"{', '.join(analysis['keywords'][:5]) if analysis['keywords'] else 'Не визначено'}\n\n"
             f"📚 **Релевантні закони:**\n"
-            f"{''.join('• ' + law + '\n' for law in laws['laws'])}\n\n"
+            f"{laws_text}\n\n"
             f"⚠️ **Наслідки:**\n{laws['consequences']}\n\n"
             f"━━━━━━━━━━━━━━━━━━━━\n\n"
             f"📝 **Пропонована відповідь:**\n\n{response}"

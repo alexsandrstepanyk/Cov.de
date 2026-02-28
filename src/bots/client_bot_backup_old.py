@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Client Bot v4.0 for Gov.de - Повна Інтеграція
-Реєстрація користувачів, завантаження листів, меню з підтримкою багатосторінкових документів.
+Client Bot for Gov.de
+Реєстрація користувачів, завантаження листів, меню.
 """
 
 import os
@@ -31,57 +31,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Юридичний словник для пост-обробки перекладу
-LEGAL_TRANSLATION_FIXES = {
-    # Параграфи та закони
-    'вартістю 59 доларів сша': '§ 59 (параграф 59)',
-    'вартістю 309 доларів сша': '§ 309 (параграф 309)',
-    'доларів сша': 'параграф',
-    '§': '§',
-    'SGB II': 'SGB II (Соціальний кодекс II)',
-    'SGB III': 'SGB III (Соціальний кодекс III)',
-    'SGB': 'SGB (Соціальний кодекс)',
-    'BGB': 'BGB (Цивільний кодекс)',
-    
-    # Організації
-    'центр зайнятості': 'Jobcenter (центр зайнятості)',
-    'jobcenter': 'Jobcenter',
-    'арbeitsagentur': 'Arbeitsagentur (агентство з праці)',
-    'finanzamt': 'Finanzamt (податкова)',
-    'inkasso': 'Inkasso (колекторська служба)',
-    'vermieter': 'орендодавець',
-    
-    # Документи
-    'cv': 'резюме (CV)',
-    ' Lebenslauf': ' резюме (Lebenslauf)',
-    'meldebescheinigung': 'свідоцтво про реєстрацію (Meldebescheinigung)',
-    'personalausweis': 'посвідчення особи (Personalausweis)',
-    'reisepass': 'закордонний паспорт (Reisepass)',
-    
-    # Юридичні терміни
-    'юридичні наслідки': 'правові наслідки (Rechtsfolgenbelehrung)',
-    'зобов\'язання щодо співпраці': 'обов\'язки зі співпраці (Mitwirkungspflichten)',
-    'пільги для забезпечення ваших засобів до існування': 'допомога для забезпечення життєвих потреб (Leistungen zur Sicherung des Lebensunterhalts)',
-    'медична довідка про непрацездатність': 'лікарняний лист (ärztliche Bescheinigung)',
-    'без поважної причини': 'без важливої причини (ohne wichtigen Grund)',
-}
-
-def post_process_translation(text: str) -> str:
-    """Пост-обробка перекладу з виправленням юридичних термінів."""
-    if not text:
-        return text
-    
-    result = text
-    # Сортуємо за довжиною - спочатку найдовші заміни
-    for wrong, correct in sorted(LEGAL_TRANSLATION_FIXES.items(), key=lambda x: -len(x[0])):
-        result = result.replace(wrong, correct)
-    
-    return result
-
 # Імпорт покращених модулів (після logger)
 ADVANCED_TRANSLATOR = False
 FUNCTIONS_AVAILABLE = False
-ADVANCED_OCR = False
 
 try:
     import sys
@@ -105,15 +57,6 @@ try:
     logger.info("✅ Client Bot Functions підключено")
 except Exception as e:
     logger.warning(f"⚠️ Client Bot Functions недоступні: {e}")
-
-try:
-    import sys
-    sys.path.insert(0, str(Path(__file__).parent.parent))
-    from advanced_ocr import recognize_image
-    ADVANCED_OCR = True
-    logger.info("✅ Advanced OCR підключено")
-except Exception as e:
-    logger.warning(f"⚠️ Advanced OCR недоступний: {e}")
 
 # Ініціалізація перекладача
 if not ADVANCED_TRANSLATOR:
@@ -273,7 +216,7 @@ def init_db():
     """Ініціалізація бази даних."""
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
-
+    
     # Таблиця користувачів
     c.execute('''
         CREATE TABLE IF NOT EXISTS users (
@@ -286,7 +229,7 @@ def init_db():
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     ''')
-
+    
     # Таблиця листів
     c.execute('''
         CREATE TABLE IF NOT EXISTS letters (
@@ -301,14 +244,14 @@ def init_db():
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     ''')
-
+    
     # Додаємо photo_path якщо колонки немає
     try:
         c.execute('ALTER TABLE letters ADD COLUMN photo_path TEXT')
         logger.info("Додано колонку photo_path")
     except sqlite3.OperationalError:
         pass  # Колонка вже існує
-
+    
     conn.commit()
     conn.close()
     logger.info("База даних ініціалізована")
@@ -323,7 +266,7 @@ def get_user(chat_id: int) -> dict:
     c.execute("SELECT * FROM users WHERE chat_id=?", (chat_id,))
     row = c.fetchone()
     conn.close()
-
+    
     if row:
         return {
             'id': row[0],
@@ -338,7 +281,7 @@ def get_user(chat_id: int) -> dict:
 def extract_text_from_photo(photo_path: str, lang: str = 'de') -> str:
     """Витягти текст з фото за допомогою OCR."""
     text = ""
-
+    
     # Спроба 1: pytesseract (якщо встановлено)
     try:
         import pytesseract
@@ -350,7 +293,7 @@ def extract_text_from_photo(photo_path: str, lang: str = 'de') -> str:
             return text
     except Exception as e:
         logger.warning(f"tesseract не доступний: {e}")
-
+    
     # Спроба 2: EasyOCR (не потребує системних залежностей)
     try:
         import easyocr
@@ -362,7 +305,7 @@ def extract_text_from_photo(photo_path: str, lang: str = 'de') -> str:
             return text
     except Exception as e:
         logger.warning(f"easyocr не доступний: {e}")
-
+    
     # Спроба 3: PIL + простий аналіз
     try:
         from PIL import Image
@@ -376,14 +319,14 @@ def extract_text_from_photo(photo_path: str, lang: str = 'de') -> str:
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Головне меню."""
     chat_id = update.effective_chat.id
-
+    
     # Перевірка реєстрації
     user = get_user(chat_id)
-
+    
     # Отримуємо мову користувача або за замовчуванням українська
     lang = user['language'] if user else 'uk'
     t = INTERFACE_TRANSLATIONS.get(lang, INTERFACE_TRANSLATIONS['uk'])
-
+    
     if user:
         # Зареєстрований користувач
         keyboard = [
@@ -393,7 +336,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             [t['menu']['settings'], t['menu']['help']]
         ]
         reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-
+        
         lang_names = {'uk': 'Українська', 'ru': 'Русский', 'de': 'Deutsch', 'en': 'English'}
         await update.message.reply_text(
             f"{t['welcome']}\n\n"
@@ -417,7 +360,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             "Підтримувані мови: 🇺🇦🇷🇺🇩🇪🇬🇧",
             reply_markup=reply_markup
         )
-
+    
     return ConversationHandler.END
 
 async def register_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -431,7 +374,7 @@ async def register_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 async def register_username(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Збереження username."""
     context.user_data['username'] = update.message.text.strip()
-
+    
     keyboard = [['🇺🇦 Українська'], ['🇩🇪 Deutsch']]
     reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True)
     await update.message.reply_text(
@@ -444,7 +387,7 @@ async def register_username(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 async def register_language(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Вибір мови."""
     context.user_data['language'] = 'uk' if 'Українська' in update.message.text else 'de'
-
+    
     keyboard = [['🇩🇪 Німеччина']]  # Можна додати більше країн
     reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True)
     await update.message.reply_text(
@@ -457,7 +400,7 @@ async def register_language(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 async def register_country(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Вибір країни."""
     context.user_data['country'] = 'de'  # Поки тільки Німеччина
-
+    
     keyboard = [['🏠 Резидент'], ['🇩🇪 Громадянин']]
     reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True)
     await update.message.reply_text(
@@ -470,7 +413,7 @@ async def register_country(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 async def register_status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Завершення реєстрації."""
     context.user_data['status'] = 'resident' if 'Резидент' in update.message.text else 'citizen'
-
+    
     chat_id = update.effective_chat.id
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
@@ -532,7 +475,7 @@ async def upload_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     # Очищаємо тимчасове сховище
     context.user_data['letter_photos'] = []
     context.user_data['letter_text'] = ''
-
+    
     await update.message.reply_text(
         t['upload']['title'] + "\n\n"
         "📌 **УВАГА: Багатосторінкові документи**\n\n"
@@ -550,68 +493,36 @@ async def upload_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     return WAITING_FOR_LETTER
 
 async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Обробка завантаженого листа з підтримкою багатосторінкових документів."""
+    """Обробка завантаженого листа."""
     chat_id = update.effective_chat.id
     user = get_user(chat_id)
-
+    
     # Отримуємо мову користувача
     lang = user['language'] if user else 'uk'
     t = INTERFACE_TRANSLATIONS.get(lang, INTERFACE_TRANSLATIONS['uk'])
-
-    if not user:
-        await update.message.reply_text(t['not_registered'])
-        return ConversationHandler.END
-
+    
     text = ""
-    file_path = None
 
     # Отримання тексту з різних джерел
     if update.message.photo:
         # Обробка фото
         await update.message.reply_text(t['upload']['processing_photo'])
-
+        
         photo = update.message.photo[-1]  # Найкраща якість
         file = await photo.get_file()
-
+        
         # Завантаження фото
         file_path = f'uploads/{chat_id}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.jpg'
         await file.download_to_drive(file_path)
-
-        # OCR з використанням advanced_ocr якщо доступний
-        if ADVANCED_OCR:
-            try:
-                ocr_result = recognize_image(file_path, lang='deu+eng')
-                text = ocr_result.get('text', '')
-                logger.info(f"OCR (advanced_ocr): витягнуто {len(text)} символів")
-            except Exception as e:
-                logger.warning(f"advanced_ocr не доступний: {e}")
-                text = extract_text_from_photo(file_path, lang='deu')
-        else:
-            text = extract_text_from_photo(file_path, lang='deu')
+        
+        # OCR
+        text = extract_text_from_photo(file_path, lang='deu')
 
         if not text.strip():
-            await update.message.reply_text(t['upload']['error_not_recognized'])
+            await update.message.reply_text(
+                t['upload']['error_not_recognized']
+            )
             return ConversationHandler.END
-
-        # Зберігаємо фото для багатосторінкової обробки
-        if 'letter_photos' not in context.user_data:
-            context.user_data['letter_photos'] = []
-            context.user_data['letter_text'] = ''
-
-        context.user_data['letter_photos'].append(file_path)
-        page_num = len(context.user_data['letter_photos'])
-        context.user_data['letter_text'] += f"\n\n--- СТОРІНКА {page_num} ---\n\n{text}"
-
-        # Запитуємо чи є ще сторінки
-        keyboard = get_multi_page_keyboard()
-        await update.message.reply_text(
-            f"✅ **Сторінка {page_num} оброблена**\n\n"
-            f"Розпізнано {len(text)} символів.\n\n"
-            f"Чи є ще сторінки?",
-            reply_markup=keyboard,
-            parse_mode='Markdown'
-        )
-        return WAITING_FOR_MORE_PAGES
 
     elif update.message.document:
         # Обробка документа (PDF)
@@ -643,11 +554,6 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         return ConversationHandler.END
 
     logger.info(f"Отримано текст: {len(text)} символів")
-
-    # Використовуємо накопичений текст якщо це багатосторінковий документ
-    if context.user_data.get('letter_text'):
-        text = context.user_data['letter_text']
-        logger.info(f"Багатосторінковий текст: {len(text)} символів")
 
     # Переклад тексту на рідну мову користувача
     translated_text = None
@@ -684,15 +590,15 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         # РОЗШИРЕНИЙ АНАЛІЗ
         analysis = analyze_text_advanced(text)
         letter_type, classification_details = classify_letter_type_advanced(text)
-
+        
         # РОЗУМНИЙ АНАЛІЗ ЗАКОНІВ
         smart_analysis = analyze_letter_smart(text, user['language'])
         law_info = smart_analysis['law_info']
         is_personal = smart_analysis.get('is_personal', False)
-
+        
         # Отримуємо закони на основі типу листа
         laws = get_laws_for_letter(letter_type, text)
-
+        
         logger.info(f"Тип листа: {letter_type}, Організація: {law_info.get('organization', 'N/A')}, Особистий: {is_personal}")
         logger.info(f"Параграфи: {law_info.get('paragraphs', [])}")
 
@@ -703,7 +609,7 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         # Використовуємо розумну відповідь з smart_law_reference
         # Відповідь ТІЛЬКИ мовою користувача
         lang = user['language']
-
+        
         # Заголовки для відповідей
         response_titles = {
             'uk': {'title': 'ВІДПОВІДЬ', 'lang': 'UK'},
@@ -711,7 +617,7 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
             'de': {'title': 'ANTWORT', 'lang': 'DE'},
             'en': {'title': 'RESPONSE', 'lang': 'EN'}
         }
-
+        
         # Отримуємо відповідь з правильними ключами
         if lang == 'uk':
             user_response = smart_analysis.get('response_uk', smart_analysis['response_de'])
@@ -723,27 +629,25 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
             user_response = smart_analysis.get('response_en', smart_analysis.get('response_de', ''))
         else:
             user_response = smart_analysis.get('response_uk', smart_analysis['response_de'])
-
+        
         title = response_titles.get(lang, response_titles['uk'])
         response = f"**{title['title']}:**\n\n**{title['lang']}:**\n{user_response}"
-
+        
         # Додаємо поради з розумного аналізу
         tips_titles = {'uk': 'ПОРАДИ', 'ru': 'СОВЕТЫ', 'de': 'TIPPS', 'en': 'TIPS'}
         tips_title = tips_titles.get(lang, 'ПОРАДИ')
         smart_tips = f"\n\n💡 **{tips_title}:**\n" + "\n".join(smart_analysis['tips'])
-
+        
         # Збереження в БД
         conn = sqlite3.connect('users.db')
         c = conn.cursor()
-        photos_list = context.user_data.get('letter_photos', [])
-        first_photo = photos_list[0] if photos_list else None
         c.execute("""
             INSERT INTO letters (chat_id, text, letter_type, analysis, response, photo_path)
             VALUES (?, ?, ?, ?, ?, ?)
-        """, (chat_id, text[:500], letter_type, str(analysis), response, first_photo))
+        """, (chat_id, text[:500], letter_type, str(analysis), response, file_path if update.message.photo else None))
         conn.commit()
         conn.close()
-
+        
         # Формування результату
         type_names = {
             'debt_collection': '💰 Боргові зобов\'язання',
@@ -785,7 +689,7 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
             'en': 'Analysis complete!'
         }
         analysis_title = analysis_titles.get(lang, 'Аналіз завершено!')
-
+        
         if is_personal:
             # Особистий лист - простий формат
             result = (
@@ -828,31 +732,27 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 
         # Екрануємо Markdown символи в результаті
         safe_result = result.replace('*', '\\*').replace('_', '\\_').replace('`', '\\`').replace('[', '\\[').replace(']', '\\]')
-
+        
         # Відправка результату аналізу частинами
         for i in range(0, len(safe_result), 4000):
             await update.message.reply_text(
                 safe_result[i:i+4000],
                 parse_mode='Markdown'
             )
-
+        
         logger.info(f"Аналіз завершено для chat_id={chat_id}, тип={letter_type}")
-
+        
     except Exception as e:
         logger.error(f"Помилка аналізу: {e}", exc_info=True)
         await update.message.reply_text(
             f"❌ Помилка аналізу: {str(e)}\n\n"
             "Спробуйте ще раз або зверніться до підтримки."
         )
-
-    # Очищаємо тимчасове сховище
-    context.user_data['letter_photos'] = []
-    context.user_data['letter_text'] = ''
-
+    
     # Повернення до меню з урахуванням мови користувача
     lang = user['language'] if user else 'uk'
     t = INTERFACE_TRANSLATIONS.get(lang, INTERFACE_TRANSLATIONS['uk'])
-
+    
     keyboard = [
         [t['menu']['upload']],
         [t['menu']['history']],
@@ -867,374 +767,13 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     )
 
     return ConversationHandler.END
-
-async def analyze_and_respond(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str) -> int:
-    """Аналіз тексту та відповідь користувачу."""
-    chat_id = update.effective_chat.id
-    user = get_user(chat_id)
-    
-    if not user:
-        return ConversationHandler.END
-    
-    lang = user['language']
-    t = INTERFACE_TRANSLATIONS.get(lang, INTERFACE_TRANSLATIONS['uk'])
-    
-    logger.info(f"Аналіз тексту: {len(text)} символів для chat_id={chat_id}")
-    
-    # Переклад тексту на рідну мову користувача
-    translated_text = None
-    if user['language'] in ['uk', 'ru'] and text.strip():
-        try:
-            await update.message.reply_text(t['upload']['processing_translation'])
-            dest_lang = user['language']
-            
-            # Використовуємо advanced_translator якщо доступний
-            if ADVANCED_TRANSLATOR:
-                from advanced_translator import translate_text_async
-                clean_text = text[:3000].replace('[', '').replace(']', '')
-                result = await translate_text_async(clean_text, 'de', dest_lang)
-                # translate_text_async повертає Dict, отримуємо текст
-                translated_text = result.get('text', '') if isinstance(result, dict) else str(result)
-                # Пост-обробка з юридичним словником
-                translated_text = post_process_translation(translated_text)
-                logger.info(f"Переклад через advanced_translator: {len(translated_text)} символів, сервіс: {result.get('service', 'unknown')}")
-            else:
-                # Fallback на googletrans
-                clean_text = text[:3000].replace('[', '').replace(']', '')
-                translation = await translator.translate(clean_text, src='de', dest=dest_lang)
-                translated_text = translation.text
-                logger.info(f"Переклад через googletrans: {len(translated_text)} символів")
-                
-        except Exception as e:
-            logger.warning(f"Переклад не вдався: {e}")
-            # Спроба з коротшим текстом
-            try:
-                short_text = text[:500].replace('[', '').replace(']', '')
-                if ADVANCED_TRANSLATOR:
-                    from advanced_translator import translate_text_async
-                    result = await translate_text_async(short_text, 'de', dest_lang)
-                    translated_text = result.get('text', '') if isinstance(result, dict) else str(result)
-                else:
-                    translation = await translator.translate(short_text, src='de', dest=dest_lang)
-                    translated_text = translation.text
-                # Пост-обробка
-                translated_text = post_process_translation(translated_text)
-                translated_text += "\n\n[Перекладено скорочену версію]"
-                logger.info(f"Переклад скороченої версії виконано")
-            except Exception as e2:
-                logger.error(f"Переклад остаточно не вдався: {e2}")
-                translated_text = "[Переклад тимчасово недоступний - спробуйте ще раз]"
-    
-    # Відправка тексту на обробку
-    await update.message.reply_text(t['upload']['processing_analysis'])
-    
-    try:
-        import sys
-        sys.path.insert(0, str(Path(__file__).parent.parent))
-        from ingestion import preprocess_text
-        from nlp_analysis import analyze_text_advanced, classify_letter_type_advanced, get_laws_for_letter
-        from smart_law_reference import analyze_letter_smart
-        from fraud_detection import (
-            extract_phone_numbers, extract_emails, extract_websites,
-            analyze_letter_for_fraud, generate_fraud_warning
-        )
-        from client_bot_functions import check_if_document
-        
-        # Попередня обробка
-        text = preprocess_text(text)
-        
-        # ПЕРЕВІРКА ТИПУ ДОКУМЕНТУ
-        doc_check = check_if_document(text)
-        logger.info(f"Тип документу: {doc_check['document_type']}, official={doc_check['official_score']}, non_legal={doc_check['non_legal_score']}")
-        
-        # Якщо це не юридичний документ
-        if not doc_check['is_legal_letter']:
-            doc_type_uk = {
-                'service_document': '🔧 Сервісний документ (не юридичний)',
-                'receipt': '🧾 Чек/Квитанція (не юридичний)',
-                'personal': '👨‍👩‍👦 Особистий документ',
-                'image': '🖼️ Зображення',
-                'unknown': '❓ Невідомий тип'
-            }
-            doc_name = doc_type_uk.get(doc_check['document_type'], 'Невідомий тип')
-            
-            warning_msg = (
-                f"⚠️ **УВАГА: Це не юридичний лист!**\n\n"
-                f"📄 **Тип документу:** {doc_name}\n\n"
-                f"Цей бот призначений для аналізу **юридичних листів** від:\n"
-                f"• Jobcenter\n"
-                f"• Орендодавця\n"
-                f"• Кредиторів (Inkasso)\n"
-                f"• Державних установ\n\n"
-                f"📌 **Знайдено маркери:**\n"
-                f"• Юридичні: {doc_check['official_score']}\n"
-                f"• Сервісні: {doc_check['non_legal_score']}\n\n"
-                f"Якщо ви вважаєте це помилкою, надішліть текст ще раз."
-            )
-            
-            # Відправка попередження
-            for i in range(0, len(warning_msg), 4000):
-                await update.message.reply_text(
-                    warning_msg[i:i+4000],
-                    parse_mode='Markdown'
-                )
-            
-            # Повернення до меню
-            keyboard = [
-                [t['menu']['upload']],
-                [t['menu']['history']],
-                [t['menu']['lawyer']],
-                [t['menu']['settings'], t['menu']['help']]
-            ]
-            reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-            await update.message.reply_text(
-                f"{t['welcome']}\n\n"
-                "Що ще бажаєте зробити?",
-                reply_markup=reply_markup
-            )
-            
-            return ConversationHandler.END
-        
-        # РОЗШИРЕНИЙ АНАЛІЗ (тільки для юридичних документів)
-        analysis = analyze_text_advanced(text)
-        letter_type, classification_details = classify_letter_type_advanced(text)
-        
-        # РОЗУМНИЙ АНАЛІЗ ЗАКОНІВ
-        smart_analysis = analyze_letter_smart(text, user['language'])
-        law_info = smart_analysis['law_info']
-        is_personal = smart_analysis.get('is_personal', False)
-        
-        # Anti-Fraud аналіз
-        fraud_analysis = analyze_letter_for_fraud(text, {})
-        fraud_warning = generate_fraud_warning(fraud_analysis)
-        
-        # Відповідь мовою користувача
-        lang = user['language']
-        
-        response_titles = {
-            'uk': {'title': 'ВІДПОВІДЬ', 'lang': 'UK'},
-            'ru': {'title': 'ОТВЕТ', 'lang': 'RU'},
-            'de': {'title': 'ANTWORT', 'lang': 'DE'},
-            'en': {'title': 'RESPONSE', 'lang': 'EN'}
-        }
-        
-        if lang == 'uk':
-            user_response = smart_analysis.get('response_uk', smart_analysis['response_de'])
-        elif lang == 'ru':
-            user_response = smart_analysis.get('response_ru', smart_analysis.get('response_uk', smart_analysis['response_de']))
-        elif lang == 'de':
-            user_response = smart_analysis.get('response_de', '')
-        elif lang == 'en':
-            user_response = smart_analysis.get('response_en', smart_analysis.get('response_de', ''))
-        else:
-            user_response = smart_analysis.get('response_uk', smart_analysis['response_de'])
-        
-        title = response_titles.get(lang, response_titles['uk'])
-        response = f"**{title['title']}:**\n\n**{title['lang']}:**\n{user_response}"
-        
-        tips_titles = {'uk': 'ПОРАДИ', 'ru': 'СОВЕТЫ', 'de': 'TIPPS', 'en': 'TIPS'}
-        tips_title = tips_titles.get(lang, 'ПОРАДИ')
-        smart_tips = f"\n\n💡 **{tips_title}:**\n" + "\n".join(smart_analysis['tips'])
-        
-        # Збереження в БД
-        conn = sqlite3.connect('users.db')
-        c = conn.cursor()
-        photos_list = context.user_data.get('letter_photos', [])
-        first_photo = photos_list[0] if photos_list else None
-        c.execute("""
-            INSERT INTO letters (chat_id, text, letter_type, analysis, response, photo_path)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (chat_id, text[:500], letter_type, str(analysis), response, first_photo))
-        conn.commit()
-        conn.close()
-        
-        # Типи листів
-        type_names = {
-            'debt_collection': '💰 Боргові зобов\'язання',
-            'tenancy': '🏠 Оренда житла',
-            'employment': '💼 Праця / Jobcenter',
-            'administrative': '📋 Адміністративний лист',
-            'personal': '👨‍👩‍👦 Особисте листування',
-            'insurance': '🏥 Страхова каса',
-            'utility': '💡 Комунальні послуги',
-            'general': '📄 Загальний лист'
-        }
-        
-        scores = classification_details.get('scores', {})
-        max_score = max(scores.values()) if scores else 0
-        confidence = "✅ Впевнено" if max_score > 5 else "⚠️ Потребує перевірки" if max_score > 0 else "❓ Невизначено"
-        
-        phones = extract_phone_numbers(text)
-        emails = extract_emails(text)
-        websites = extract_websites(text)
-        
-        contacts_info = ""
-        if phones:
-            contacts_info += f"📞 **Телефони:** {', '.join(phones)}\n"
-        if emails:
-            contacts_info += f"📧 **Email:** {', '.join(emails)}\n"
-        if websites:
-            contacts_info += f"🌐 **Сайти:** {', '.join(websites)}\n"
-        
-        if contacts_info:
-            contacts_info = f"🔍 **Контактні дані:**\n{contacts_info}\n"
-        
-        analysis_titles = {
-            'uk': 'Аналіз завершено!',
-            'ru': 'Анализ завершен!',
-            'de': 'Analyse abgeschlossen!',
-            'en': 'Analysis complete!'
-        }
-        analysis_title = analysis_titles.get(lang, 'Аналіз завершено!')
-        
-        if is_personal:
-            result = (
-                f"✅ **{analysis_title}**\n\n"
-                f"📌 **Тип листа:** 👨‍👩‍👦 Особисте листування\n"
-                f"🏢 **Організація:** {law_info.get('organization', 'Не визначено')}\n\n"
-                f"📝 **{title['title']}:**\n\n{response}{smart_tips}"
-            )
-        else:
-            result = (
-                f"✅ **{analysis_title}**\n\n"
-                f"📌 **Тип листа:** {type_names.get(letter_type, letter_type)}\n"
-                f"🏢 **Організація:** {law_info.get('organization', 'Не визначено')}\n"
-                f"📋 **Ситуація:** {law_info.get('situation', 'Не визначено')}\n"
-                f"🔍 **Впевненість:** {confidence}\n\n"
-                f"📚 **ПАРАГРАФИ ДЛЯ ПОСИЛАННЯ:**\n"
-                f"{chr(10).join('• ' + para for para in law_info.get('paragraphs', []))}\n\n"
-                f"{contacts_info}"
-                f"🔍 **Ключові слова:**\n"
-                f"{', '.join(analysis['keywords'][:8]) if analysis['keywords'] else 'Не визначено'}\n\n"
-                f"⚠️ **Наслідки:**\n{law_info.get('consequences', 'Не визначено')}\n\n"
-                f"━━━━━━━━━━━━━━━━━━━━\n\n"
-                f"{fraud_warning}\n\n"
-                f"━━━━━━━━━━━━━━━━━━━━\n\n"
-                f"📝 **{title['title']}:**\n\n{response}{smart_tips}"
-            )
-        
-        # Екрануємо Markdown символи
-        safe_result = result.replace('*', '\\*').replace('_', '\\_').replace('`', '\\`').replace('[', '\\[').replace(']', '\\]')
-
-        # Відправка перекладу (якщо є)
-        if translated_text and user['language'] in ['uk', 'ru']:
-            safe_translated = translated_text.replace('*', '\\*').replace('_', '\\_').replace('`', '\\`').replace('[', '\\[').replace(']', '\\]')
-            lang_name = 'українська' if user['language'] == 'uk' else 'русский'
-            translation_msg = f"🌐 **Переклад листа ({lang_name}):**\n\n{safe_translated}"
-            try:
-                for i in range(0, len(translation_msg), 4000):
-                    await update.message.reply_text(
-                        translation_msg[i:i+4000],
-                        parse_mode='Markdown'
-                    )
-                logger.info(f"Переклад відправлено користувачу")
-            except Exception as e:
-                logger.error(f"Помилка відправки перекладу: {e}")
-                # Відправка без Markdown
-                await update.message.reply_text(f"🌐 Переклад листа:\n\n{translated_text[:2000]}")
-
-        # Відправка результату аналізу частинами
-        logger.info(f"Відправка результату аналізу ({len(safe_result)} символів)")
-        try:
-            for i in range(0, len(safe_result), 4000):
-                await update.message.reply_text(
-                    safe_result[i:i+4000],
-                    parse_mode='Markdown'
-                )
-            logger.info(f"Результат відправлено користувачу")
-        except Exception as e:
-            logger.error(f"Помилка відправки результату: {e}")
-            # Спроба відправити без Markdown
-            await update.message.reply_text(f"Аналіз завершено:\n\n{result[:2000]}")
-        
-        logger.info(f"Аналіз завершено для chat_id={chat_id}, тип={letter_type}")
-        
-    except Exception as e:
-        logger.error(f"Помилка аналізу: {e}", exc_info=True)
-        await update.message.reply_text(
-            f"❌ Помилка аналізу: {str(e)}\n\n"
-            "Спробуйте ще раз або зверніться до підтримки."
-        )
-    
-    # Повернення до меню
-    keyboard = [
-        [t['menu']['upload']],
-        [t['menu']['history']],
-        [t['menu']['lawyer']],
-        [t['menu']['settings'], t['menu']['help']]
-    ]
-    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-    await update.message.reply_text(
-        f"{t['welcome']}\n\n"
-        "Що ще бажаєте зробити?",
-        reply_markup=reply_markup
-    )
-    
-    return ConversationHandler.END
-
-async def handle_more_pages(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Обробка вибору користувача щодо ще сторінок."""
-    chat_id = update.effective_chat.id
-    user = get_user(chat_id)
-    lang = user['language'] if user else 'uk'
-    t = INTERFACE_TRANSLATIONS.get(lang, INTERFACE_TRANSLATIONS['uk'])
-
-    if not user:
-        await update.message.reply_text(t['not_registered'])
-        return ConversationHandler.END
-
-    text = update.message.text.strip()
-
-    # Перевіряємо чи це кнопка "✅ Все, аналізуй"
-    if "✅ Все, аналізуй" in text or text == "✅ Все, аналізуй":
-        logger.info(f"Користувач натиснув '✅ Все, аналізуй' для chat_id={chat_id}")
-        
-        # Використовуємо накопичений текст
-        full_text = context.user_data.get('letter_text', '')
-        
-        if not full_text.strip():
-            await update.message.reply_text("❌ Помилка: немає накопиченого тексту.")
-            return ConversationHandler.END
-        
-        logger.info(f"Об'єднаний текст: {len(full_text)} символів")
-        
-        # Очищаємо тимчасове сховище
-        context.user_data['letter_photos'] = []
-        context.user_data['letter_text'] = ''
-        
-        # Викликаємо аналіз тексту напряму
-        return await analyze_and_respond(update, context, full_text)
-
-    elif "📄 Надіслати ще сторінку" in text or text == "📄 Надіслати ще сторінку":
-        # Очікування наступної сторінки
-        await update.message.reply_text(
-            "📄 **Надішліть наступну сторінку**\n\n"
-            "Надішліть фото наступної сторінки документа.",
-            parse_mode='Markdown'
-        )
-        return WAITING_FOR_LETTER
-    
-    else:
-        # Невідомий вибір - повертаємо меню
-        keyboard = [
-            [t['menu']['upload']],
-            [t['menu']['history']],
-            [t['menu']['lawyer']],
-            [t['menu']['settings'], t['menu']['help']]
-        ]
-        reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-        await update.message.reply_text(
-            "❌ Невідомий вибір. Оберіть дію:",
-            reply_markup=reply_markup
-        )
-        return ConversationHandler.END
 
 async def show_history(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Показати історію листів."""
     chat_id = update.effective_chat.id
     user = get_user(chat_id)
     lang = user['language'] if user else 'uk'
-
+    
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
     c.execute("""
@@ -1246,11 +785,11 @@ async def show_history(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     """, (chat_id,))
     letters = c.fetchall()
     conn.close()
-
+    
     if not letters:
         await update.message.reply_text("📋 Історія порожня.\n\nВи ще не завантажували листи.")
         return ConversationHandler.END
-
+    
     # Створення кнопок для кожного листа
     type_names = {
         'debt_collection': '💰 Боргові',
@@ -1260,7 +799,7 @@ async def show_history(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
         'personal': '👨‍👩‍👦 Особистий',
         'general': '📄 Загальний'
     }
-
+    
     # Переклад назв типів
     type_names_translated = {
         'uk': type_names,
@@ -1289,17 +828,17 @@ async def show_history(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
             'general': '📄 General'
         }
     }
-
+    
     names = type_names_translated.get(lang, type_names)
-
+    
     # Формування повідомлення з кнопками
     await update.message.reply_text("📋 **Ваша історія листів:**\n\nОберіть лист для перегляду:")
-
+    
     # Створення кнопок для кожного листа
     for i, (id, letter_type, timestamp, text) in enumerate(letters, 1):
         type_name = names.get(letter_type, '📄 Лист')
         preview = text[:50].replace('\n', ' ') if text else 'Фото листа'
-
+        
         keyboard = [[InlineKeyboardButton(f"{type_name} #{i} — {preview}...", callback_data=f'letter_{id}')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.message.reply_text(
@@ -1308,19 +847,19 @@ async def show_history(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
             parse_mode='Markdown'
         )
         await asyncio.sleep(0.5)  # Невелика затримка між повідомленнями
-
+    
     return ConversationHandler.END
 
 async def view_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Перегляд конкретного листа з повною інформацією."""
     query = update.callback_query
     await query.answer()
-
+    
     letter_id = query.data.replace('letter_', '')
     chat_id = query.message.chat_id
     user = get_user(chat_id)
     lang = user['language'] if user else 'uk'
-
+    
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
     c.execute("""
@@ -1330,13 +869,13 @@ async def view_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     """, (letter_id, chat_id))
     letter = c.fetchone()
     conn.close()
-
+    
     if not letter:
         await query.edit_message_text("❌ Лист не знайдено.")
         return
-
+    
     text, letter_type, analysis, response, photo_path, timestamp = letter
-
+    
     # Переклад назв типів
     type_names = {
         'uk': {
@@ -1372,10 +911,10 @@ async def view_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             'general': '📄 General Letter'
         }
     }
-
+    
     names = type_names.get(lang, type_names['uk'])
     type_name = names.get(letter_type, letter_type)
-
+    
     # Спочатку показуємо фото якщо є
     if photo_path and Path(photo_path).exists():
         try:
@@ -1388,7 +927,7 @@ async def view_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
                 )
         except Exception as e:
             logger.error(f"Помилка відправки фото: {e}")
-
+    
     # Формуємо повну інформацію про лист
     full_info = f"""📋 **ІНФОРМАЦІЯ ПРО ЛИСТ #{letter_id}**
 
@@ -1413,11 +952,11 @@ _{text[:500 if len(text) > 500 else len(text)]}{'...' if len(text) > 500 else ''
 ━━━━━━━━━━━━━━━━━━━━
 
 🔙 Натисніть кнопку нижче щоб повернутися до історії."""
-
+    
     # Кнопка повернення
     keyboard = [[InlineKeyboardButton("🔙 Назад до історії", callback_data='back_to_history')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
-
+    
     # Відправка повної інформації
     await context.bot.send_message(
         chat_id=chat_id,
@@ -1425,7 +964,7 @@ _{text[:500 if len(text) > 500 else len(text)]}{'...' if len(text) > 500 else ''
         reply_markup=reply_markup,
         parse_mode='Markdown'
     )
-
+    
     # Видаляємо повідомлення з кнопкою вибору
     try:
         await query.delete_message()
@@ -1462,7 +1001,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     user = get_user(chat_id)
     lang = user['language'] if user else 'uk'
     t = INTERFACE_TRANSLATIONS.get(lang, INTERFACE_TRANSLATIONS['uk'])
-
+    
     await update.message.reply_text(
         f"❓ **{t['menu']['help']}**\n\n"
         "Цей бот допомагає аналізувати юридичні листи.\n\n"
@@ -1485,17 +1024,17 @@ async def settings_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     user = get_user(chat_id)
     lang = user['language'] if user else 'uk'
     t = INTERFACE_TRANSLATIONS.get(lang, INTERFACE_TRANSLATIONS['uk'])
-
+    
     if not user:
         await update.message.reply_text(t['not_registered'])
         return ConversationHandler.END
-
+    
     keyboard = [
         [t['settings']['language']],
         [t['settings']['back']]
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-
+    
     await update.message.reply_text(
         f"{t['settings']['title']}\n\n"
         f"🌐 Поточна мова: {lang.upper()}",
@@ -1509,11 +1048,11 @@ async def settings_language(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     user = get_user(chat_id)
     lang = user['language'] if user else 'uk'
     t = INTERFACE_TRANSLATIONS.get(lang, INTERFACE_TRANSLATIONS['uk'])
-
+    
     keyboard = [[lang] for lang in AVAILABLE_LANGUAGES.keys()]
     keyboard.append([t['settings']['back']])
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-
+    
     await update.message.reply_text(
         f"🌐 **{t['settings']['language']}**\n\n"
         "Оберіть мову інтерфейсу:",
@@ -1527,33 +1066,33 @@ async def settings_language_selected(update: Update, context: ContextTypes.DEFAU
     chat_id = update.effective_chat.id
     user = get_user(chat_id)
     selected_text = update.message.text.strip()
-
+    
     logger.info(f"Вибрано мову: {selected_text}")
-
+    
     # Знаходимо мову за текстом кнопки
     selected_lang = None
     for btn_text, lang_code in AVAILABLE_LANGUAGES.items():
         if btn_text in selected_text or lang_code in selected_text.lower():
             selected_lang = lang_code
             break
-
+    
     # Якщо не знайдено мову, повертаємось в меню
     if not selected_lang:
         logger.info(f"Мову не знайдено, повернення в меню")
         return await settings_menu(update, context)
-
+    
     # Оновлюємо мову в БД
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
     c.execute("UPDATE users SET language=? WHERE chat_id=?", (selected_lang, chat_id))
     conn.commit()
     conn.close()
-
+    
     logger.info(f"Мову змінено на: {selected_lang}")
-
+    
     # Отримуємо переклад для нової мови
     t = INTERFACE_TRANSLATIONS.get(selected_lang, INTERFACE_TRANSLATIONS['uk'])
-
+    
     # Повертаємо меню з новою мовою
     keyboard = [
         [t['menu']['upload']],
@@ -1562,13 +1101,13 @@ async def settings_language_selected(update: Update, context: ContextTypes.DEFAU
         [t['menu']['settings'], t['menu']['help']]
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-
+    
     lang_names = {'uk': 'Українська', 'ru': 'Русский', 'de': 'Deutsch', 'en': 'English'}
     await update.message.reply_text(
         t['settings']['language_selected'].format(lang_names.get(selected_lang, selected_lang)),
         reply_markup=reply_markup
     )
-
+    
     return ConversationHandler.END
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -1580,7 +1119,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     """Обробка натискань кнопок."""
     query = update.callback_query
     await query.answer()
-
+    
     if query.data == "lawyer_request":
         await query.edit_message_text(
             "✅ Вашу заявку прийнято!\n\n"
@@ -1597,14 +1136,14 @@ async def letter_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
 def main():
     """Запуск бота."""
-    logger.info("Запуск Client Bot v4.0...")
-
+    logger.info("Запуск Client Bot...")
+    
     # Ініціалізація БД
     init_db()
-
-    # Ство��ення додатку
+    
+    # Створення додатку
     application = Application.builder().token(BOT_TOKEN).build()
-
+    
     # Conversation handler
     conv_handler = ConversationHandler(
         entry_points=[
@@ -1628,14 +1167,11 @@ def main():
                 MessageHandler(filters.Document.ALL, handle_letter),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, handle_letter),
             ],
-            WAITING_FOR_MORE_PAGES: [
-                MessageHandler(filters.TEXT & ~filters.COMMAND, handle_more_pages),
-            ],
             WAITING_FOR_SETTINGS_LANGUAGE: [MessageHandler(filters.TEXT & ~filters.COMMAND, settings_language_selected)],
         },
         fallbacks=[CommandHandler("cancel", cancel)],
     )
-
+    
     application.add_handler(conv_handler)
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CallbackQueryHandler(button_callback))
@@ -1648,9 +1184,8 @@ def main():
     application.add_handler(MessageHandler(filters.Regex("^(🔙 Назад|🔙 Zurück|🔙 Back)$"), settings_menu))
     # Обробка вибору мови - будь-який текст з назвою мови
     application.add_handler(MessageHandler(filters.Regex("^(🇺🇦|🇷🇺|🇩🇪|🇬🇧|Українська|Русский|Deutsch|English|UK|RU|DE|EN)"), settings_language_selected))
-
+    
     # Запуск
-    logger.info("✅ Client Bot v4.0 готовий до запуску!")
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == '__main__':

@@ -1,0 +1,647 @@
+#!/usr/bin/env python3
+"""
+Advanced Translation Module for Gov.de
+Покращений переклад з підтримкою кількох сервісів, кешуванням та словником юридичних термінів.
+"""
+
+import logging
+import json
+import hashlib
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
+from datetime import datetime, timedelta
+import asyncio
+
+logger = logging.getLogger(__name__)
+
+# Шлях до кешу
+CACHE_PATH = Path(__file__).parent.parent / "data" / "translation_cache.json"
+
+# Юридичний словник термінів (німецька -> українська -> російська)
+LEGAL_DICTIONARY = {
+    # Загальні терміни
+    'Sehr geehrte Damen und Herren': {
+        'uk': 'Шановний(а) одержувач(у)',
+        'ru': 'Уважаемый получатель',
+        'de': 'Sehr geehrte Damen und Herren'
+    },
+    'Mit freundlichen Grüßen': {
+        'uk': 'З повагою',
+        'ru': 'С уважением',
+        'de': 'Mit freundlichen Grüßen'
+    },
+    'Mahnung': {
+        'uk': 'Нагадування про сплату',
+        'ru': 'Напоминание об оплате',
+        'de': 'Mahnung'
+    },
+    'Rechnung': {
+        'uk': 'Рахунок',
+        'ru': 'Счет',
+        'de': 'Rechnung'
+    },
+    'Zahlung': {
+        'uk': 'Оплата',
+        'ru': 'Оплата',
+        'de': 'Zahlung'
+    },
+    'Forderung': {
+        'uk': 'Вимога сплати',
+        'ru': 'Требование оплаты',
+        'de': 'Forderung'
+    },
+    'Bescheid': {
+        'uk': 'Рішення (адміністративне)',
+        'ru': 'Решение (административное)',
+        'de': 'Bescheid'
+    },
+    'Widerspruch': {
+        'uk': 'Заперечення / Оскарження',
+        'ru': 'Возражение / Обжалование',
+        'de': 'Widerspruch'
+    },
+    'Kündigung': {
+        'uk': 'Розірвання договору',
+        'ru': 'Расторжение договора',
+        'de': 'Kündigung'
+    },
+    'Miete': {
+        'uk': 'Орендна плата',
+        'ru': 'Арендная плата',
+        'de': 'Miete'
+    },
+    'Nebenkosten': {
+        'uk': 'Додаткові витрати',
+        'ru': 'Дополнительные расходы',
+        'de': 'Nebenkosten'
+    },
+    'Kaution': {
+        'uk': 'Застава',
+        'ru': 'Залог',
+        'de': 'Kaution'
+    },
+    'Jobcenter': {
+        'uk': 'Центр зайнятості (Jobcenter)',
+        'ru': 'Центр занятости (Jobcenter)',
+        'de': 'Jobcenter'
+    },
+    'Einladung': {
+        'uk': 'Запрошення',
+        'ru': 'Приглашение',
+        'de': 'Einladung'
+    },
+    'Termin': {
+        'uk': 'Термін / Зустріч',
+        'ru': 'Срок / Встреча',
+        'de': 'Termin'
+    },
+    'Gespräch': {
+        'uk': 'Розмова / Співбесіда',
+        'ru': 'Разговор / Собеседование',
+        'de': 'Gespräch'
+    },
+    'Sanktion': {
+        'uk': 'Санкція',
+        'ru': 'Санкция',
+        'de': 'Sanktion'
+    },
+    'Leistung': {
+        'uk': 'Виплата / Допомога',
+        'ru': 'Выплата / Помощь',
+        'de': 'Leistung'
+    },
+    'Antrag': {
+        'uk': 'Заява',
+        'ru': 'Заявление',
+        'de': 'Antrag'
+    },
+    'Genehmigung': {
+        'uk': 'Дозвіл',
+        'ru': 'Разрешение',
+        'de': 'Genehmigung'
+    },
+    'Finanzamt': {
+        'uk': 'Податкова інспекція',
+        'ru': 'Налоговая инспекция',
+        'de': 'Finanzamt'
+    },
+    'Steuerbescheid': {
+        'uk': 'Податкове рішення',
+        'ru': 'Налоговое решение',
+        'de': 'Steuerbescheid'
+    },
+    'Nachzahlung': {
+        'uk': 'Доплата',
+        'ru': 'Доплата',
+        'de': 'Nachzahlung'
+    },
+    'Gericht': {
+        'uk': 'Суд',
+        'ru': 'Суд',
+        'de': 'Gericht'
+    },
+    'Urteil': {
+        'uk': 'Судове рішення',
+        'ru': 'Судебное решение',
+        'de': 'Urteil'
+    },
+    'Gerichtsvollzieher': {
+        'uk': 'Судовий виконавець',
+        'ru': 'Судебный исполнитель',
+        'de': 'Gerichtsvollzieher'
+    },
+    'Vollstreckung': {
+        'uk': 'Примусове виконання',
+        'ru': 'Принудительное исполнение',
+        'de': 'Vollstreckung'
+    },
+    'Pfändung': {
+        'uk': 'Арешт майна',
+        'ru': 'Арест имущества',
+        'de': 'Pfändung'
+    },
+    'Versicherung': {
+        'uk': 'Страхування',
+        'ru': 'Страхование',
+        'de': 'Versicherung'
+    },
+    'Krankenkasse': {
+        'uk': 'Лікарняна каса',
+        'ru': 'Больничная касса',
+        'de': 'Krankenkasse'
+    },
+    'Beitrag': {
+        'uk': 'Внесок',
+        'ru': 'Взнос',
+        'de': 'Beitrag'
+    },
+    'Vertrag': {
+        'uk': 'Договір',
+        'ru': 'Договор',
+        'de': 'Vertrag'
+    },
+    'Frist': {
+        'uk': 'Строк / Термін',
+        'ru': 'Срок',
+        'de': 'Frist'
+    },
+    'innerhalb': {
+        'uk': 'протягом',
+        'ru': 'в течение',
+        'de': 'innerhalb'
+    },
+    'Euro': {
+        'uk': 'євро',
+        'ru': 'евро',
+        'de': 'Euro'
+    },
+    'überweisen': {
+        'uk': 'переказати',
+        'ru': 'перевести',
+        'de': 'überweisen'
+    },
+    'Konto': {
+        'uk': 'Рахунок',
+        'ru': 'Счет',
+        'de': 'Konto'
+    },
+    'IBAN': {
+        'uk': 'IBAN (рахунок)',
+        'ru': 'IBAN (счет)',
+        'de': 'IBAN'
+    },
+    'BGB': {
+        'uk': 'Цивільний кодекс Німеччини (BGB)',
+        'ru': 'Гражданский кодекс Германии (BGB)',
+        'de': 'BGB'
+    },
+    'SGB': {
+        'uk': 'Соціальний кодекс (SGB)',
+        'ru': 'Социальный кодекс (SGB)',
+        'de': 'SGB'
+    },
+    '§': {
+        'uk': 'параграф',
+        'ru': 'параграф',
+        'de': '§'
+    }
+}
+
+# Фрази для замін після перекладу
+POST_TRANSLATION_FIXES = {
+    'uk': {
+        'дорогие дамы и господа': 'Шановний(а) одержувач(у)',
+        'уважаемые дамы и господа': 'Шановний(а) одержувач(у)',
+        'искренне ваш': 'З повагою',
+        'с наилучшими пожеланиями': 'З повагою',
+        'напоминание': 'Нагадування про сплату',
+        'требование': 'Вимога сплати',
+        'увольнение': 'Розірвання договору',
+        'аренда': 'Орендна плата',
+        'налог': 'Податок',
+        'суд': 'Суд',
+        'штраф': 'Штрафні санкції',
+    },
+    'ru': {
+        'шановний': 'Уважаемый',
+        'з повагою': 'С уважением',
+        'нагадування': 'Напоминание',
+        'вимога': 'Требование',
+        'розірвання': 'Расторжение',
+        'оренда': 'Аренда',
+        'податок': 'Налог',
+    }
+}
+
+
+class AdvancedTranslator:
+    """
+    Клас для розширеного перекладу з підтримкою кількох сервісів.
+    """
+    
+    def __init__(self):
+        self.services = {}
+        self.cache = {}
+        self._init_services()
+        self._load_cache()
+    
+    def _init_services(self):
+        """Ініціалізація сервісів перекладу."""
+        # Google Translate
+        try:
+            from googletrans import Translator
+            self.services['googletrans'] = Translator()
+            logger.info("✅ Google Translate ініціалізовано")
+        except Exception as e:
+            logger.warning(f"❌ Google Translate недоступний: {e}")
+        
+        # DeepL (якщо доступний)
+        try:
+            import deepl
+            # Потрібен API ключ
+            deepl_key = None  # os.getenv('DEEPL_API_KEY')
+            if deepl_key:
+                self.services['deepl'] = deepl.Translator(deepl_key)
+                logger.info("✅ DeepL API ініціалізовано")
+            else:
+                logger.info("⚠️ DeepL API ключ не надано")
+        except Exception as e:
+            logger.info(f"ℹ️ DeepL недоступний: {e}")
+        
+        # LibreTranslate (безкоштовний, відкритий API)
+        try:
+            import requests
+            self.services['libretranslate'] = {
+                'url': 'https://libretranslate.com/translate',
+                'session': requests.Session()
+            }
+            logger.info("✅ LibreTranslate ініціалізовано")
+        except Exception as e:
+            logger.info(f"ℹ️ LibreTranslate недоступний: {e}")
+    
+    def _load_cache(self):
+        """Завантаження кешу перекладів."""
+        try:
+            if CACHE_PATH.exists():
+                with open(CACHE_PATH, 'r', encoding='utf-8') as f:
+                    self.cache = json.load(f)
+                logger.info(f"✅ Завантажено кеш перекладів ({len(self.cache)} записів)")
+        except Exception as e:
+            logger.warning(f"⚠️ Не вдалося завантажити кеш: {e}")
+            self.cache = {}
+    
+    def _save_cache(self):
+        """Збереження кешу перекладів."""
+        try:
+            CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
+            with open(CACHE_PATH, 'w', encoding='utf-8') as f:
+                json.dump(self.cache, f, ensure_ascii=False, indent=2)
+            logger.info(f"✅ Збережено кеш перекладів ({len(self.cache)} записів)")
+        except Exception as e:
+            logger.error(f"❌ Не вдалося зберегти кеш: {e}")
+    
+    def _get_cache_key(self, text: str, src: str, dest: str) -> str:
+        """Отримання ключа для кешу."""
+        key_str = f"{src}:{dest}:{text}"
+        return hashlib.md5(key_str.encode('utf-8')).hexdigest()
+    
+    def _is_cache_valid(self, entry: Dict) -> bool:
+        """Перевірка чи кеш валідний (не старіше 7 днів)."""
+        try:
+            cached_time = datetime.fromisoformat(entry['timestamp'])
+            return datetime.now() - cached_time < timedelta(days=7)
+        except:
+            return False
+    
+    def translate_with_dictionary(self, text: str, src: str, dest: str) -> Tuple[str, bool]:
+        """
+        Переклад з використанням юридичного словника.
+        
+        Args:
+            text: Текст для перекладу
+            src: Мова оригіналу
+            dest: Мова перекладу
+            
+        Returns:
+            (перекладений текст, чи застосовувався словник)
+        """
+        if src != 'de' or dest not in ['uk', 'ru']:
+            return text, False
+        
+        result = text
+        applied = False
+        
+        # Заміна термінів зі словника (спочатку довші фрази)
+        sorted_terms = sorted(LEGAL_DICTIONARY.keys(), key=len, reverse=True)
+        
+        for de_term in sorted_terms:
+            if de_term in result:
+                translations = LEGAL_DICTIONARY[de_term]
+                translation = translations.get(dest, de_term)
+                result = result.replace(de_term, translation)
+                applied = True
+                logger.debug(f"Замінено термін: {de_term} → {translation}")
+        
+        return result, applied
+    
+    def apply_post_translation_fixes(self, text: str, dest: str) -> str:
+        """
+        Застосування виправлень після перекладу.
+        
+        Args:
+            text: Перекладений текст
+            dest: Мова перекладу
+            
+        Returns:
+            Виправлений текст
+        """
+        if dest not in POST_TRANSLATION_FIXES:
+            return text
+        
+        result = text.lower()
+        
+        for wrong, correct in POST_TRANSLATION_FIXES[dest].items():
+            result = result.replace(wrong, correct)
+        
+        # Capitalize first letter
+        if result:
+            result = result[0].upper() + result[1:]
+        
+        return result
+    
+    async def translate_with_google(self, text: str, src: str, dest: str) -> Optional[str]:
+        """Переклад через Google Translate."""
+        if 'googletrans' not in self.services:
+            return None
+        
+        try:
+            translator = self.services['googletrans']
+            result = await translator.translate(text, src=src, dest=dest)
+            return result.text
+        except Exception as e:
+            logger.error(f"Google Translate помилка: {e}")
+            return None
+    
+    async def translate_with_libre(self, text: str, src: str, dest: str) -> Optional[str]:
+        """Переклад через LibreTranslate."""
+        if 'libretranslate' not in self.services:
+            return None
+        
+        try:
+            service = self.services['libretranslate']
+            
+            # Маппінг мов
+            lang_map = {
+                'de': 'de',
+                'en': 'en',
+                'uk': 'uk',
+                'ru': 'ru',
+                'fr': 'fr',
+                'es': 'es'
+            }
+            
+            payload = {
+                'q': text,
+                'source': lang_map.get(src, 'en'),
+                'target': lang_map.get(dest, 'en'),
+                'format': 'text'
+            }
+            
+            response = service['session'].post(
+                service['url'],
+                json=payload,
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                return response.json().get('translatedText', '')
+            else:
+                logger.error(f"LibreTranslate error: {response.status_code}")
+                return None
+                
+        except Exception as e:
+            logger.error(f"LibreTranslate помилка: {e}")
+            return None
+    
+    async def translate(self, text: str, src: str = 'de', dest: str = 'uk',
+                       use_dictionary: bool = True, use_cache: bool = True) -> Dict:
+        """
+        Основний метод перекладу з використанням всіх доступних сервісів.
+        
+        Args:
+            text: Текст для перекладу
+            src: Мова оригіналу
+            dest: Мова перекладу
+            use_dictionary: Чи використовувати юридичний словник
+            use_cache: Чи використовувати кеш
+            
+        Returns:
+            Dict з результатами
+        """
+        result = {
+            'text': '',
+            'service': 'none',
+            'confidence': 0,
+            'from_cache': False,
+            'dictionary_applied': False
+        }
+        
+        # Перевірка кешу
+        if use_cache:
+            cache_key = self._get_cache_key(text, src, dest)
+            if cache_key in self.cache:
+                cache_entry = self.cache[cache_key]
+                if self._is_cache_valid(cache_entry):
+                    result['text'] = cache_entry['translation']
+                    result['service'] = 'cache'
+                    result['from_cache'] = True
+                    result['confidence'] = 1.0
+                    logger.info(f"✅ Переклад з кешу: {len(text)} символів")
+                    return result
+        
+        # Спроба перекладу всіма сервісами
+        translations = {}
+        
+        # Google Translate
+        google_result = await self.translate_with_google(text, src, dest)
+        if google_result:
+            translations['googletrans'] = google_result
+        
+        # LibreTranslate
+        libre_result = await self.translate_with_libre(text, src, dest)
+        if libre_result:
+            translations['libretranslate'] = libre_result
+        
+        # Обираємо кращий результат (найдовший текст)
+        if translations:
+            best_service = max(translations, key=lambda s: len(translations[s]))
+            result['text'] = translations[best_service]
+            result['service'] = best_service
+            result['confidence'] = len(result['text']) / len(text) if text else 0
+            
+            logger.info(f"Найкращий сервіс: {best_service} - {len(result['text'])} символів")
+        
+        # Застосування юридичного словника
+        if use_dictionary and result['text'] and src == 'de' and dest in ['uk', 'ru']:
+            dictionary_text, dictionary_applied = self.translate_with_dictionary(
+                result['text'], src, dest
+            )
+            if dictionary_applied:
+                result['text'] = dictionary_text
+                result['dictionary_applied'] = True
+                logger.info("✅ Застосовано юридичний словник")
+        
+        # Пост-обробка
+        if result['text']:
+            result['text'] = self.apply_post_translation_fixes(result['text'], dest)
+        
+        # Збереження в кеш
+        if use_cache and result['text']:
+            cache_key = self._get_cache_key(text, src, dest)
+            self.cache[cache_key] = {
+                'translation': result['text'],
+                'timestamp': datetime.now().isoformat(),
+                'service': result['service']
+            }
+            self._save_cache()
+        
+        return result
+    
+    def translate_sync(self, text: str, src: str = 'de', dest: str = 'uk',
+                      use_dictionary: bool = True, use_cache: bool = True) -> Dict:
+        """
+        Синхронна версія перекладу.
+        
+        Args:
+            text: Текст для перекладу
+            src: Мова оригіналу
+            dest: Мова перекладу
+            use_dictionary: Чи використовувати юридичний словник
+            use_cache: Чи використовувати кеш
+            
+        Returns:
+            Dict з результатами
+        """
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+        
+        return loop.run_until_complete(
+            self.translate(text, src, dest, use_dictionary, use_cache)
+        )
+
+
+# Глобальний екземпляр для використання
+_translator_instance = None
+
+def get_translator() -> AdvancedTranslator:
+    """Отримати глобальний екземпляр перекладача."""
+    global _translator_instance
+    if _translator_instance is None:
+        _translator_instance = AdvancedTranslator()
+    return _translator_instance
+
+
+def translate_text(text: str, src: str = 'de', dest: str = 'uk',
+                  use_dictionary: bool = True, use_cache: bool = True) -> Dict:
+    """
+    Перекласти текст з використанням покращеного перекладача.
+    
+    Args:
+        text: Текст для перекладу
+        src: Мова оригіналу
+        dest: Мова перекладу
+        use_dictionary: Чи використовувати юридичний словник
+        use_cache: Чи використовувати кеш
+        
+    Returns:
+        Dict з результатами
+    """
+    translator = get_translator()
+    return translator.translate_sync(text, src, dest, use_dictionary, use_cache)
+
+
+async def translate_text_async(text: str, src: str = 'de', dest: str = 'uk',
+                               use_dictionary: bool = True, use_cache: bool = True) -> Dict:
+    """
+    Асинхронна версія перекладу.
+    
+    Args:
+        text: Текст для перекладу
+        src: Мова оригіналу
+        dest: Мова перекладу
+        use_dictionary: Чи використовувати юридичний словник
+        use_cache: Чи використовувати кеш
+        
+    Returns:
+        Dict з результатами
+    """
+    translator = get_translator()
+    return await translator.translate(text, src, dest, use_dictionary, use_cache)
+
+
+if __name__ == '__main__':
+    # Тестування
+    import sys
+    
+    if len(sys.argv) > 1:
+        text = ' '.join(sys.argv[1:])
+        
+        print("\n" + "="*60)
+        print("  ТЕСТУВАННЯ ПЕРЕКЛАДУ")
+        print("="*60)
+        print(f"\nОригінал (DE):\n{text}\n")
+        
+        # Українська
+        result_uk = translate_text(text, dest='uk')
+        print(f"Переклад (UK) - {result_uk['service']}:")
+        print(f"  {result_uk['text']}")
+        print(f"  Кеш: {result_uk['from_cache']}, Словник: {result_uk['dictionary_applied']}")
+        print()
+        
+        # Російська
+        result_ru = translate_text(text, dest='ru')
+        print(f"Переклад (RU) - {result_ru['service']}:")
+        print(f"  {result_ru['text']}")
+        print(f"  Кеш: {result_ru['from_cache']}, Словник: {result_ru['dictionary_applied']}")
+        print()
+    else:
+        # Тестові приклади
+        test_texts = [
+            "Sehr geehrte Damen und Herren, hiermit mahnen wir Sie zur Zahlung der offenen Forderung.",
+            "Mahnung: Zahlung erforderlich innerhalb von 7 Tagen.",
+            "Kündigung der Wohnung wegen Eigenbedarf.",
+            "Einladung zum Gespräch im Jobcenter am Montag um 10 Uhr."
+        ]
+        
+        print("\n" + "="*60)
+        print("  ТЕСТУВАННЯ ПЕРЕКЛАДУ ЮРИДИЧНИХ ТЕРМІНІВ")
+        print("="*60)
+        
+        for text in test_texts:
+            print(f"\n🇩🇪 {text}")
+            result = translate_text(text, dest='uk')
+            print(f"🇺🇦 {result['text']}")
+            print(f"   Сервіс: {result['service']}, Словник: {result['dictionary_applied']}")

@@ -2,6 +2,7 @@
 """
 Advanced NLP Analysis Module for Gov.de
 Використовує контекстний аналіз для точної класифікації листів
+Інтегрований з SQLite базою даних законів.
 """
 
 import spacy
@@ -18,6 +19,23 @@ try:
 except OSError:
     logger.error("Модель de_core_news_sm не знайдено!")
     raise
+
+# Імпорт SQLite бази даних законів
+try:
+    from legal_database import (
+        analyze_letter,
+        search_laws,
+        search_by_keywords,
+        get_laws_by_category,
+        get_consequences,
+        detect_organization,
+        detect_situation
+    )
+    DB_AVAILABLE = True
+    logger.info("SQLite база даних законів підключена")
+except Exception as e:
+    logger.warning(f"SQLite база даних недоступна: {e}")
+    DB_AVAILABLE = False
 
 # Розширені ключові слова з контекстом
 KEYWORDSWithContext = {
@@ -367,19 +385,38 @@ def classify_letter_type_advanced(text: str) -> Tuple[str, Dict]:
 def get_laws_for_letter(letter_type: str, text: str) -> Dict:
     """
     Отримання релевантних законів для типу листа.
-    
+    Використовує SQLite базу даних якщо доступна.
+
     Args:
         letter_type: Тип листа
         text: Текст листа (для додаткового аналізу)
-    
+
     Returns:
         Dict з законами
     """
-    laws = LAWS_BY_TYPE.get(letter_type, LAWS_BY_TYPE['general'])
+    # Спробуємо використати SQLite базу даних
+    if DB_AVAILABLE:
+        try:
+            # Аналізуємо лист через базу даних
+            db_analysis = analyze_letter(text)
+            
+            if db_analysis and db_analysis.get('paragraphs'):
+                return {
+                    'primary': db_analysis['paragraphs'],
+                    'secondary': [],
+                    'organization': db_analysis.get('organization', ''),
+                    'situation': db_analysis.get('situation', ''),
+                    'consequences': db_analysis.get('consequences', '')
+                }
+        except Exception as e:
+            logger.warning(f"Помилка використання SQLite бази: {e}")
     
+    # Fallback на стару логіку
+    laws = LAWS_BY_TYPE.get(letter_type, LAWS_BY_TYPE['general'])
+
     # Додатковий аналіз для уточнення законів
     text_lower = text.lower()
-    
+
     specific_laws = {
         'jobcenter': '§ 59 SGB II',
         'arbeitsagentur': 'SGB III',
@@ -389,13 +426,53 @@ def get_laws_for_letter(letter_type: str, text: str) -> Dict:
         'strom': 'EnWG',
         'versicherung': 'SGB V / VVG',
     }
-    
+
     for key, law in specific_laws.items():
         if key in text_lower:
             laws['specific'] = law
             break
-    
+
     return laws
+
+
+def get_laws_from_database(keywords: List[str]) -> List[Dict]:
+    """
+    Пошук законів у базі даних за ключовими словами.
+    
+    Args:
+        keywords: Список ключових слів
+        
+    Returns:
+        Список знайдених законів
+    """
+    if not DB_AVAILABLE:
+        return []
+    
+    try:
+        return search_by_keywords(keywords)
+    except Exception as e:
+        logger.error(f"Помилка пошуку законів: {e}")
+        return []
+
+
+def analyze_letter_with_db(text: str) -> Dict:
+    """
+    Аналіз листа з використанням SQLite бази даних.
+    
+    Args:
+        text: Текст листа
+        
+    Returns:
+        Dict з результатами аналізу
+    """
+    if not DB_AVAILABLE:
+        return None
+    
+    try:
+        return analyze_letter(text)
+    except Exception as e:
+        logger.error(f"Помилка аналізу через базу даних: {e}")
+        return None
 
 def analyze_text_advanced(text: str) -> Dict:
     """
