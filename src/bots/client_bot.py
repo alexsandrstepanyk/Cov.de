@@ -94,7 +94,9 @@ except Exception as e:
 
 # Імпорт статистики
 try:
-    from statistics import (
+    import sys
+    sys.path.insert(0, str(Path(__file__).parent.parent))
+    from bot_statistics import (
         log_event, get_daily_stats, get_weekly_stats, get_user_stats,
         create_reminder, get_due_reminders, mark_reminder_sent, get_user_reminders,
         rate_response, get_response_stats,
@@ -1351,7 +1353,7 @@ async def show_history(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     return ConversationHandler.END
 
 async def view_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Перегляд конкретного листа з повною інформацією."""
+    """Перегляд к��нкретного листа з повною інформацією."""
     query = update.callback_query
     await query.answer()
 
