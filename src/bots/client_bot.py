@@ -1353,7 +1353,7 @@ async def show_history(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     return ConversationHandler.END
 
 async def view_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Перегляд к��нкретного листа з повною інформацією."""
+    """Перегляд к��������нкретного листа з повною інформацією."""
     query = update.callback_query
     await query.answer()
 
@@ -1511,6 +1511,12 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
         "1. Зареєструйтесь (/start)\n"
         "2. Надішліть фото або текст листа\n"
         "3. Отримайте аналіз та шаблон відповіді\n\n"
+        "⚡ **Швидкі команди:**\n"
+        "/jobcenter - довідка Jobcenter\n"
+        "/inkasso - довідка борги\n"
+        "/miete - довідка оренда\n"
+        "/reminders - мої нагадування\n"
+        "/stats - моя статистика\n\n"
         "📷 **Поради для фото:**\n"
         "• Робіть фото при хорошому освітленні\n"
         "• Тримайте камеру рівно\n"
@@ -1635,6 +1641,142 @@ async def letter_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         await view_letter(update, context)
     elif query.data == 'back_to_history':
         await back_to_history(update, context)
+    elif query.data.startswith('rating_'):
+        # Обробка оцінки відповіді
+        rating = 1 if 'like' in query.data else 0
+        letter_id = query.data.split('_')[2]
+        chat_id = query.message.chat_id
+        
+        if STATS_AVAILABLE:
+            rate_response(chat_id, letter_id, 5 if rating else 2)
+        
+        await query.answer(f"{'✅ Дякуємо!' if rating else '❌ Дякуємо, покращимо!'}")
+
+# ============================================================================
+# ШВИДКІ КОМАНДИ
+# ============================================================================
+
+async def cmd_jobcenter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Швидка довідка Jobcenter."""
+    await update.message.reply_text(
+        "💼 **Jobcenter - Швидка довідка**\n\n"
+        "📞 **Гарячі лінії:**\n"
+        "• Telefonseelsorge: 0800 111 0 111\n"
+        "• Jobcenter Hotline: 0800 4 5555\n\n"
+        "⚖️ **Ваші права:**\n"
+        "• § 59 SGB II - Запрошення\n"
+        "• § 31 SGB II - Санкції\n"
+        "• § 309 SGB III - Офіційні документи\n\n"
+        "📋 **Документи:**\n"
+        "• Personalausweis (посвідчення)\n"
+        "• Meldebescheinigung (реєстрація)\n"
+        "• Lebenslauf (резюме)\n\n"
+        "⚠️ **Важливо:**\n"
+        "• З'являйтесь на всі запрошення\n"
+        "• Хворобу підтверджуйте лікарем\n"
+        "• Зберігайте всі листи",
+        parse_mode='Markdown'
+    )
+
+async def cmd_inkasso(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Швидка довідка Inkasso."""
+    await update.message.reply_text(
+        "💰 **Inkasso - Швидка довідка**\n\n"
+        "⚖️ **Ваші права:**\n"
+        "• BGB § 286 - Прострочення\n"
+        "• BGB § 288 - Проценти (5% річних)\n"
+        "• BGB § 194 - Строк давності (3 роки)\n\n"
+        "🛡️ **Захист:**\n"
+        "• Вимагайте докази боргу\n"
+        "• Перевіряйте організацію\n"
+        "• Не платіть відразу\n\n"
+        "📞 **Допомога:**\n"
+        "• Verbraucherzentrale: 0800 99 88 77\n"
+        "• Rechtsantragsstelle: безкоштовно\n\n"
+        "⚠️ **Шахраї:**\n"
+        "• Вимагають Western Union\n"
+        "• Погрожують в'язницею\n"
+        "• Тиснуть терміново",
+        parse_mode='Markdown'
+    )
+
+async def cmd_miete(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Швидка довідка оренда."""
+    await update.message.reply_text(
+        "🏠 **Оренда - Швидка довідка**\n\n"
+        "⚖️ **Ваші права:**\n"
+        "• BGB § 535 - Орендодавець зобов'язаний\n"
+        "• BGB § 558 - Підвищення (макс 20% за 3 роки)\n"
+        "• BGB § 543 - Виселення (тільки 2+ місяці несплати)\n\n"
+        "🛡️ **Захист:**\n"
+        "• Mieterbund (спілка орендарів)\n"
+        "• Beratungshilfe (допомога адвоката)\n\n"
+        "📞 **Допомога:**\n"
+        "• Mieterbund: 030 1234 5678\n\n"
+        "⚠️ **Важливо:**\n"
+        "• Зберігайте квитанції\n"
+        "• Перевіряйте підвищення\n"
+        "• Не підписуйте без перевірки",
+        parse_mode='Markdown'
+    )
+
+async def cmd_reminders(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Мої нагадування."""
+    chat_id = update.effective_chat.id
+    
+    if not STATS_AVAILABLE:
+        await update.message.reply_text("⚠️ Функція нагадувань тимчасово недоступна.")
+        return
+    
+    reminders = get_user_reminders(chat_id)
+    
+    if not reminders:
+        await update.message.reply_text(
+            "📅 **Нагадування**\n\n"
+            "У вас немає активних нагадувань.\n\n"
+            "Нагадування створюються автоматично з листів з термінами."
+        )
+        return
+    
+    msg = "📅 **Ваші нагадування:**\n\n"
+    for i, rem in enumerate(reminders[:10], 1):
+        status = "✅" if rem['is_sent'] else "⏰"
+        msg += f"{status} **{rem['date']} {rem['time']}**\n"
+        msg += f"   {rem['text']}\n\n"
+    
+    if len(reminders) > 10:
+        msg += f"... і ще {len(reminders) - 10} нагадувань"
+    
+    await update.message.reply_text(msg, parse_mode='Markdown')
+
+async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Моя статистика."""
+    chat_id = update.effective_chat.id
+    
+    if not STATS_AVAILABLE:
+        await update.message.reply_text("⚠️ Статистика тимчасово недоступна.")
+        return
+    
+    user_stats = get_user_stats(chat_id)
+    
+    msg = (
+        f"📊 **Ваша статистика**\n\n"
+        f"📝 Листів оброблено: **{user_stats['total_letters']}**\n"
+        f"⭐ Середня якість фото: **{user_stats['avg_quality']}%**\n"
+        f"🕒 Остання активність: **{user_stats['last_activity'] or 'Ніколи'}**\n\n"
+        f"Дякуємо за використання бота!"
+    )
+    
+    await update.message.reply_text(msg, parse_mode='Markdown')
+
+async def cmd_verification(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Перевірка організації."""
+    await update.message.reply_text(
+        "🔍 **Перевірка організації**\n\n"
+        "Надішліть назву організації для перевірки.\n\n"
+        "Приклад: `Jobcenter Berlin Mitte`",
+        parse_mode='Markdown'
+    )
 
 def main():
     """Запуск бота."""
@@ -1681,6 +1823,16 @@ def main():
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CallbackQueryHandler(button_callback))
     application.add_handler(CallbackQueryHandler(letter_callback))
+    
+    # Швидкі команди
+    if STATS_AVAILABLE:
+        application.add_handler(CommandHandler("jobcenter", cmd_jobcenter))
+        application.add_handler(CommandHandler("inkasso", cmd_inkasso))
+        application.add_handler(CommandHandler("miete", cmd_miete))
+        application.add_handler(CommandHandler("reminders", cmd_reminders))
+        application.add_handler(CommandHandler("stats", cmd_stats))
+        application.add_handler(CommandHandler("verify", cmd_verification))
+    
     application.add_handler(MessageHandler(filters.Regex("^(📋 Історія листів|📋 История писем|📋 Briefverlauf|📋 Letter history)$"), show_history))
     application.add_handler(MessageHandler(filters.Regex("^(⚖️ Замовити перевірку адвоката|⚖️ Заказать проверку адвоката|⚖️ Anwalt prüfen|⚖️ Lawyer review)$"), lawyer_help))
     application.add_handler(MessageHandler(filters.Regex("^(❓ Допомога|❓ Помощь|❓ Hilfe|❓ Help)$"), help_command))
@@ -1691,7 +1843,7 @@ def main():
     application.add_handler(MessageHandler(filters.Regex("^(🇺🇦|🇷🇺|🇩🇪|🇬🇧|Українська|Русский|Deutsch|English|UK|RU|DE|EN)"), settings_language_selected))
 
     # Запуск
-    logger.info("✅ Client Bot v4.0 готовий до запуску!")
+    logger.info("✅ Client Bot v4.1 готовий до запуску!")
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == '__main__':

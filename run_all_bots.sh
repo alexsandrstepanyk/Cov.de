@@ -1,7 +1,7 @@
 #!/bin/bash
-# Запуск всіх ботів Gov.de
+# Запуск всіх ботів Gov.de v4.1
 
-echo "🚀 Запуск Gov.de Telegram ботів..."
+echo "🚀 Запуск Gov.de Telegram ботів v4.1..."
 echo ""
 
 # Функція для перевірки процесу
@@ -14,6 +14,15 @@ check_python() {
 
 # Перевірка Python
 check_python
+
+# Auto-install spaCy model
+echo "📥 Перевірка spaCy моделей..."
+python3 -m spacy validate de_core_news_sm 2>/dev/null
+if [ $? -ne 0 ]; then
+    echo "⬇️  Завантаження de_core_news_sm..."
+    python3 -m spacy download de_core_news_sm
+fi
+echo ""
 
 # Kill будь-яких існуючих ботів
 echo "⏹️  Зупинка попередніх процесів..."
