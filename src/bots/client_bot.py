@@ -83,6 +83,29 @@ ADVANCED_TRANSLATOR = False
 FUNCTIONS_AVAILABLE = False
 ADVANCED_OCR = False
 
+# Імпорт розширеного юридичного словника
+try:
+    from legal_dictionary import LEGAL_TRANSLATION_FIXES_EXTENDED
+    # Об'єднуємо словники
+    LEGAL_TRANSLATION_FIXES.update(LEGAL_TRANSLATION_FIXES_EXTENDED)
+    logger.info(f"✅ Підключено розширений юридичний словник ({len(LEGAL_TRANSLATION_FIXES)} термінів)")
+except Exception as e:
+    logger.warning(f"⚠️ Розширений словник не підключено: {e}")
+
+# Імпорт статистики
+try:
+    from statistics import (
+        log_event, get_daily_stats, get_weekly_stats, get_user_stats,
+        create_reminder, get_due_reminders, mark_reminder_sent, get_user_reminders,
+        rate_response, get_response_stats,
+        check_organization, get_all_verified_organizations
+    )
+    STATS_AVAILABLE = True
+    logger.info("✅ Модуль статистики підключено")
+except Exception as e:
+    STATS_AVAILABLE = False
+    logger.warning(f"⚠️ Модуль статистики недоступний: {e}")
+
 try:
     import sys
     sys.path.insert(0, str(Path(__file__).parent.parent))
