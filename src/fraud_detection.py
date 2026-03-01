@@ -58,10 +58,10 @@ FRAUD_INDICATORS = {
         'sofort überweisen', 'zahlung sofort', 'innerhalb 24 stunden'
     ],
     'threatening_language': [
-        'Gerichtsvollzieher', 'Haftbefehl', 'Polizei', 'Strafanzeige',
-        'Verhaftung', 'Abschiebung', 'deport', 'konto wird gesperrt',
-        'wir kommen zur polizei', 'anordnung der haft', 'polizei kommt',
-        'zur polizei kommen'
+        'Gerichtsvollzieher kommt', 'Haftbefehl wird beantragt',
+        'wir kommen zur polizei', 'polizei kommt zu ihnen',
+        'zur polizei kommen', 'anordnung der haft',
+        'Abschiebung', 'deport', 'konto wird gesperrt'
     ],
     'suspicious_accounts': [
         'Western Union', 'MoneyGram', 'Kryptowährung', 'Bitcoin',

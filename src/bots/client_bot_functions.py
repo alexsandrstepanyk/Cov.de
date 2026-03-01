@@ -5,7 +5,10 @@ Client Bot v4.0 - Повна Інтеграція
 """
 
 import re
+import logging
 from typing import Dict, List
+
+logger = logging.getLogger('client_bot')
 
 
 # ============================================================================
@@ -35,12 +38,17 @@ def check_if_document(text: str) -> Dict:
         'vermieter', 'mieter', 'miete', 'kaution', 'nebenkosten', 'hausverwaltung',
         'rechtsanwalt', 'anwalt', 'kanzlei', 'mandant',
         'aok', 'tk', 'barmer', 'dakin', 'krankenkasse', 'versicherungsschein',
-        'allianz', 'axa', 'hdi', 'versicherungsschutz', 'police',
+        'allianz', 'axa', 'hdi', 'versicherungsschutz',
         # НОВІ: Більше маркерів для кращої класифікації
         'arbeitgeber', 'lohnsteuer', 'sozialversicherung', 'minijob',
         'sparkasse', 'volksbank', 'commerzbank', 'girokonto',
         'dhl', 'dpd', 'hermes', 'gls', 'paket', 'sendung', 'sendungsnummer',
         'telekom', 'vodafone', 'o2', 'vertrag', 'laufzeit',
+        # ПОЛІЦІЯ ТА ПРАВООХОРОННІ ОРГАНИ
+        'polizei', 'staatsanwaltschaft', 'kriminalpolizei', 'bundespolizei',
+        'landeskriminalamt', 'mordkommission', 'verkehrsunfall', 'strafanzeige',
+        'haftbefehl', 'durchsuchungsbeschluss', 'vorladung', 'zeuge', 'beschuldigter',
+        'strafgesetzbuch', 'strafprozessordnung', 'ordnungswidrigkeitengesetz'
     ]
 
     # Не-юридичні документи
@@ -69,9 +77,10 @@ def check_if_document(text: str) -> Dict:
         'gewonnen', 'lotterie', '100.000 euro', 'kostenlos',
         'klicken sie hier', 'link aktualisieren',
         'western union', 'bitcoin', 'geschenkkarte', 'gutscheinkarte', 'paysafecard',
-        'haftbefehl', 'verhaftung', 'polizei kommt', 'zur polizei',
+        'haftbefehl wird beantragt', 'polizei kommt zu ihnen', 'zur polizei kommen',
         'dhl paket', 'paket konnte nicht zugestellt werden',
         'sparkasse fake', 'konto entsperren',
+        'bundespolizei fake', 'finanzamt fake',
     ]
 
     official_score = sum(1 for m in official_markers if m in text_lower)
