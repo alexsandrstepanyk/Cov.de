@@ -678,5 +678,5 @@ async def handle_multi_page_photo(update, context, file_path: str, chat_id: int)
 def get_multi_page_keyboard():
     """Отримати клавіатуру для багатосторінкового режиму."""
     from telegram import ReplyKeyboardMarkup
-    keyboard = [['✅ Все, аналізуй'], ['📄 Надіслати ще сторінку']]
+    keyboard = [['✅ Все, аналізуй'], ['📄 Ще сторінку']]
     return ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True)

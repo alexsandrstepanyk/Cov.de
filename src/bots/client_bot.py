@@ -1245,34 +1245,34 @@ async def handle_more_pages(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     text = update.message.text.strip()
 
     # Перевіряємо чи це кнопка "✅ Все, аналізуй"
-    if "✅ Все, аналізуй" in text or text == "✅ Все, аналізуй":
+    if "Все, аналізуй" in text or "Все" in text:
         logger.info(f"Користувач натиснув '✅ Все, аналізуй' для chat_id={chat_id}")
-        
+
         # Використовуємо накопичений текст
         full_text = context.user_data.get('letter_text', '')
-        
+
         if not full_text.strip():
             await update.message.reply_text("❌ Помилка: немає накопиченого тексту.")
             return ConversationHandler.END
-        
+
         logger.info(f"Об'єднаний текст: {len(full_text)} символів")
-        
+
         # Очищаємо тимчасове сховище
         context.user_data['letter_photos'] = []
         context.user_data['letter_text'] = ''
-        
+
         # Викликаємо аналіз тексту напряму
         return await analyze_and_respond(update, context, full_text)
 
-    elif "📄 Надіслати ще сторінку" in text or text == "📄 Надіслати ще сторінку":
+    elif "Ще сторінку" in text or "Ще" in text or "Надіслати ще" in text:
         # Очікування наступної сторінки
         await update.message.reply_text(
             "📄 **Надішліть наступну сторінку**\n\n"
-            "Надішліть фото наступної сторінки документа.",
+            "Надішліть фото наступної сторінки документа або вставте текст.",
             parse_mode='Markdown'
         )
         return WAITING_FOR_LETTER
-    
+
     else:
         # Невідомий вибір - повертаємо меню
         keyboard = [
