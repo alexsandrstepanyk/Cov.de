@@ -50,45 +50,71 @@ OFFICIAL_ORGANIZATIONS = {
     },
 }
 
-# Ознаки шахрайства
+# Ознаки шахрайства (РОЗШИРЕНО)
 FRAUD_INDICATORS = {
     'urgent_payment': [
         'sofort', 'umgehend', 'innerhalb 24 Stunden', 'dringend',
-        'sofortige Zahlung', 'letzte Mahnung'
+        'sofortige Zahlung', 'letzte Mahnung', 'sofort handeln',
+        'sofort überweisen', 'zahlung sofort', 'innerhalb 24 stunden'
     ],
     'threatening_language': [
         'Gerichtsvollzieher', 'Haftbefehl', 'Polizei', 'Strafanzeige',
-        'Verhaftung', 'Abschiebung', 'deport'
+        'Verhaftung', 'Abschiebung', 'deport', 'konto wird gesperrt',
+        'wir kommen zur polizei', 'anordnung der haft', 'polizei kommt',
+        'zur polizei kommen'
     ],
     'suspicious_accounts': [
         'Western Union', 'MoneyGram', 'Kryptowährung', 'Bitcoin',
-        'Geschenkkarte', 'Gutscheinkarte', 'Paysafecard'
+        'Geschenkkarte', 'Gutscheinkarte', 'Paysafecard', 'iTunes',
+        'Amazon Gutscheinkarte', 'Steam Wallet', 'bitcoin', 'western union'
     ],
     'fake_official': [
         'Bundespolizei', 'Ausländerbehörde', 'Finanzamt',
-        'Kreditanstalt', 'Bundesbank'
+        'Kreditanstalt', 'Bundesbank', 'fake'
     ],
     'grammar_errors': [
-        # Типові помилки в шахрайських листах
-        'sehr geehrte dame und herren',  # Правильно: Damen und Herren
-        'hiermit mahnen wir sie',  # Правильно: Sie (велика) - АЛЕ це може бути офіційний лист
-        'überweißen sie',  # Правильно: überweisen Sie
-        'bei nicht zahlung',  # Неправильно: bei Nichtzahlung
+        'bei nicht zahlung',  # Правильно: bei Nichtzahlung
         'kommen sie zur polizei',  # Дивний вираз
+        'überweißen sie',  # Правильно: überweisen Sie
+        'sie müssen sofort',  # Занадто агресивно
+        'sofort handeln',
     ],
     'suspicious_phones': [
         r'^0900',  # Платні номери
         r'^0180',  # Сервісні номери
         r'^\+44',  # UK номери (не Німеччина)
         r'^\+1',   # US номери
+        r'^\+234', # Нігерія
+        r'^\+254', # Кенія
     ],
     'suspicious_emails': [
         '@gmail.com',
         '@yahoo.com',
         '@hotmail.com',
-        '@web.de',  # Іноді офіційні, але часто шахраї
+        '@web.de',
         '@gmx.de',
+        '@t-online.de',
+        '@aol.com',
     ],
+    # НОВІ: Banking fraud індикатори
+    'banking_fraud': [
+        'pin erforderlich', 'passwort bestätigen', 'konto wird gesperrt',
+        'daten bestätigen', 'tan eingeben', 'online-banking aktualisieren',
+        'sicherheitssperre', 'konto entsperren', 'zugangsdaten aktualisieren',
+        'pin und passwort'
+    ],
+    # НОВІ: Phishing URL індикатори
+    'phishing_urls': [
+        'klicken sie hier', 'link aktualisieren', 'seite öffnen',
+        'hier klicken', 'jetzt öffnen', 'daten eingeben',
+        'paket konnte nicht zugestellt werden'
+    ],
+    # НОВІ: Lottery fraud індикатори
+    'lottery_fraud': [
+        'gewonnen', 'lotterie', 'eurojackpot', 'millionen',
+        '100.000 euro', 'hauptgewinn', 'glücksspiel',
+        'kostenlos gewonnen', 'zufallsgenerator'
+    ]
 }
 
 

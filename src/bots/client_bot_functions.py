@@ -15,10 +15,11 @@ from typing import Dict, List
 def check_if_document(text: str) -> Dict:
     """
     Перевірка чи текст є офіційним юридичним документом.
+    ВЕРСІЯ 2.0: З інтегрованим виявленням шахрайства
     """
     text_lower = text.lower()
 
-    # Офіційні юридичні маркери
+    # Офіційні юридичні маркери (РОЗШИРЕНО)
     official_markers = [
         'sehr geehrte', 'damen und herren', 'hiermit', 'gemäß', 'aufgrund',
         'mahnung', 'forderung', 'zahlung', 'kündigung', 'mieterhöhung',
@@ -34,18 +35,21 @@ def check_if_document(text: str) -> Dict:
         'vermieter', 'mieter', 'miete', 'kaution', 'nebenkosten', 'hausverwaltung',
         'rechtsanwalt', 'anwalt', 'kanzlei', 'mandant',
         'aok', 'tk', 'barmer', 'dakin', 'krankenkasse', 'versicherungsschein',
-        'allianz', 'axa', 'hdi', 'versicherungsschutz', 'police'
+        'allianz', 'axa', 'hdi', 'versicherungsschutz', 'police',
+        # НОВІ: Більше маркерів для кращої класифікації
+        'arbeitgeber', 'lohnsteuer', 'sozialversicherung', 'minijob',
+        'sparkasse', 'volksbank', 'commerzbank', 'girokonto',
+        'dhl', 'dpd', 'hermes', 'gls', 'paket', 'sendung', 'sendungsnummer',
+        'telekom', 'vodafone', 'o2', 'vertrag', 'laufzeit',
     ]
 
-    # Не-юридичні документи (сервісні книжки, інструкції, тощо)
+    # Не-юридичні документи
     non_legal_markers = [
         'service', 'werkstatt', 'ölwechsel', 'inspektion', 'reparatur',
         'kilometerstand', 'tüv', 'hauptuntersuchung', 'fahrzeug', 'auto',
         'motor', 'getriebe', 'bremsen', 'reifen', 'batterie', 'filter',
         'scheckheft', 'serviceheft', 'garantie', 'werkstatthandbuch',
         'bedienungsanleitung', 'gebrauchsanweisung', 'produktbeschreibung',
-        'rechnung', 'quittung', 'bon', 'ticket', 'ticketnummer',
-        'bestellnummer', 'lieferschein', 'frachtbrief',
         'like', 'share', 'subscribe', 'click', 'link in bio', 'lol', 'rofl',
         'sale', 'discount', 'offer', 'buy now', 'limited', 'special',
         'follow', 'follower', 'promo', 'coupon'
@@ -58,45 +62,65 @@ def check_if_document(text: str) -> Dict:
         'toll', 'super', 'liebe', 'grüße', 'kuss'
     ]
 
+    # НОВІ: Маркери шахрайства
+    fraud_markers = [
+        'sofort überweisen', 'sofort handeln', 'sofortige Zahlung',
+        'konto wird gesperrt', 'pin erforderlich', 'passwort bestätigen',
+        'gewonnen', 'lotterie', '100.000 euro', 'kostenlos',
+        'klicken sie hier', 'link aktualisieren',
+        'western union', 'bitcoin', 'geschenkkarte', 'gutscheinkarte', 'paysafecard',
+        'haftbefehl', 'verhaftung', 'polizei kommt', 'zur polizei',
+        'dhl paket', 'paket konnte nicht zugestellt werden',
+        'sparkasse fake', 'konto entsperren',
+    ]
+
     official_score = sum(1 for m in official_markers if m in text_lower)
     non_legal_score = sum(1 for m in non_legal_markers if m in text_lower)
     personal_score = sum(1 for m in personal_markers if m in text_lower)
-
-    # Визначення типу документу
-    is_legal_document = official_score >= 3 and non_legal_score < 2
-    is_service_document = non_legal_score >= 3
-    is_image = len(text) < 50 or (personal_score > official_score)
-    is_banner = non_legal_score > 5 and official_score == 0
-    is_meme = non_legal_score > 2 and official_score == 0
-    is_personal = personal_score > 2 and official_score < 2
-    is_receipt = 'rechnung' in text_lower or 'quittung' in text_lower or 'bon' in text_lower
-
-    # Визначення типу документу
-    document_type = 'unknown'
-    if is_legal_document:
-        document_type = 'legal_letter'
-    elif is_service_document:
-        document_type = 'service_document'
-    elif is_receipt:
-        document_type = 'receipt'
-    elif is_personal:
-        document_type = 'personal'
-    elif is_image:
-        document_type = 'image'
+    fraud_score = sum(1 for m in fraud_markers if m in text_lower)
     
+    # Бонус для довгих документів (>3000 символів)
+    length_bonus = 2 if len(text) > 3000 else 0
+    official_score += length_bonus
+
+    # Перевірка на явне шахрайство
+    is_likely_fraud = fraud_score >= 2 or (fraud_score >= 1 and official_score >= 5)
+
+    # Визначення типу документу (з пріоритетом fraud)
+    if is_likely_fraud:
+        document_type = 'fraud'
+        is_legal_document = False
+    elif official_score >= 3 and non_legal_score < 2:
+        document_type = 'legal_letter'
+        is_legal_document = True
+    elif non_legal_score >= 3:
+        document_type = 'service_document'
+        is_legal_document = False
+    elif personal_score > 2 and official_score < 2:
+        document_type = 'personal'
+        is_legal_document = False
+    elif len(text) < 50 or (personal_score > official_score):
+        document_type = 'image'
+        is_legal_document = False
+    else:
+        document_type = 'unknown'
+        is_legal_document = False
+
     return {
         'is_document': is_legal_document,
         'is_legal_letter': is_legal_document,
-        'is_service_document': is_service_document,
-        'is_receipt': is_receipt,
-        'is_image': is_image,
-        'is_banner': is_banner,
-        'is_meme': is_meme,
-        'is_personal': is_personal,
+        'is_service_document': not is_legal_document and non_legal_score >= 3,
+        'is_receipt': 'rechnung' in text_lower or 'quittung' in text_lower or 'bon' in text_lower,
+        'is_image': len(text) < 50 or (personal_score > official_score),
+        'is_banner': non_legal_score > 5 and official_score == 0,
+        'is_meme': non_legal_score > 2 and official_score == 0,
+        'is_personal': personal_score > 2 and official_score < 2,
+        'is_fraud': is_likely_fraud,
         'document_type': document_type,
         'official_score': official_score,
         'non_legal_score': non_legal_score,
         'personal_score': personal_score,
+        'fraud_score': fraud_score,
         'text_length': len(text)
     }
 
