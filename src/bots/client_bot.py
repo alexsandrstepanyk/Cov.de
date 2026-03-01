@@ -678,6 +678,24 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     elif update.message.text:
         # Текстовий лист
         text = update.message.text
+        
+        # Запитуємо чи це все (multi-page support для тексту)
+        if 'letter_photos' not in context.user_data:
+            context.user_data['letter_photos'] = []
+            context.user_data['letter_text'] = ''
+
+        context.user_data['letter_text'] += text
+        
+        # Запитуємо чи це все
+        keyboard = get_multi_page_keyboard()
+        await update.message.reply_text(
+            f"✅ **Текст отримано**\n\n"
+            f"Розпізнано {len(text)} символів.\n\n"
+            f"Чи є ще сторінки для додавання?",
+            reply_markup=keyboard,
+            parse_mode='Markdown'
+        )
+        return WAITING_FOR_MORE_PAGES
 
     if not text.strip():
         await update.message.reply_text(t['upload']['error_no_text'])
