@@ -1243,10 +1243,14 @@ async def handle_more_pages(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         return ConversationHandler.END
 
     text = update.message.text.strip()
+    
+    # ЛОГУВАННЯ для дебагу
+    logger.info(f"handle_more_pages: отримано текст: '{text}'")
+    logger.info(f"handle_more_pages: chat_id={chat_id}")
 
     # Перевіряємо чи це кнопка "✅ Все, аналізуй"
-    if "Все, аналізуй" in text or "Все" in text:
-        logger.info(f"Користувач натиснув '✅ Все, аналізуй' для chat_id={chat_id}")
+    if "Все" in text or "аналіз" in text or "анализ" in text:
+        logger.info(f"✅ Користувач обрав 'Все, аналізуй'")
 
         # Використовуємо накопичений текст
         full_text = context.user_data.get('letter_text', '')
@@ -1264,7 +1268,8 @@ async def handle_more_pages(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         # Викликаємо аналіз тексту напряму
         return await analyze_and_respond(update, context, full_text)
 
-    elif "Ще сторінку" in text or "Ще" in text or "Надіслати ще" in text:
+    elif "Ще" in text or "ще" in text or "сторінку" in text:
+        logger.info(f"📄 Користувач обрав 'Ще сторінку'")
         # Очікування наступної сторінки
         await update.message.reply_text(
             "📄 **Надішліть наступну сторінку**\n\n"
@@ -1274,7 +1279,8 @@ async def handle_more_pages(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         return WAITING_FOR_LETTER
 
     else:
-        # Невідомий вибір - повертаємо меню
+        # Невідомий вибір - логуємо і повертаємо меню
+        logger.warning(f"❌ Невідомий вибір: '{text}'")
         keyboard = [
             [t['menu']['upload']],
             [t['menu']['history']],
@@ -1283,7 +1289,7 @@ async def handle_more_pages(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         ]
         reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
         await update.message.reply_text(
-            "❌ Невідомий вибір. Оберіть дію:",
+            f"❌ Невідомий вибір: '{text}'. Оберіть дію:",
             reply_markup=reply_markup
         )
         return ConversationHandler.END
