@@ -1,13 +1,23 @@
 #!/usr/bin/env python3
 """
-Letter Generator Module v1.0
+Letter Generator Module v1.1
 Генерація німецьких відповідей у форматі DIN 5008
-з автоматичним витягуванням даних з листа
+з автоматичним витягуванням даних та fallback шаблонами
 """
 
 import re
 from typing import Dict, Optional, List
 from datetime import datetime
+
+# Імпорт fallback шаблонів
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent))
+from fallback_templates import (
+    generate_fallback_response,
+    should_use_fallback,
+    detect_situation_by_keywords
+)
 
 
 class LetterGenerator:
@@ -417,20 +427,69 @@ class LetterGenerator:
 def generate_german_letter(text: str, response_de: str, response_type: str = 'general') -> str:
     """
     Згенерувати німецький лист з автоматичним заповненням.
-    
+
     Args:
         text: Оригінальний текст листа
         response_de: Відповідь німецькою (з improved_response_generator)
         response_type: Тип відповіді
-        
+
     Returns:
         Згенерований лист у форматі DIN 5008
     """
     generator = LetterGenerator()
     data = generator.extract_all_data(text)
     letter = generator.generate_letter(data, response_de, response_type)
-    
+
     return letter
+
+
+def generate_german_letter_with_fallback(text: str, response_type: str = 'general',
+                                         sender_name: str = None) -> str:
+    """
+    Згенерувати німецький лист з fallback підтримкою.
+    
+    Спочатку намагається згенерувати повну відповідь,
+    якщо не виходить - використовує fallback шаблон.
+    
+    Args:
+        text: Оригінальний текст листа
+        response_type: Тип відповіді
+        sender_name: Ім'я відправника
+        
+    Returns:
+        Згенерований лист у форматі DIN 5008
+    """
+    # Перевіряємо чи потрібен fallback
+    if should_use_fallback(text):
+        # Використовуємо fallback шаблон
+        fallback_result = generate_fallback_response(
+            text=text,
+            org_key=response_type,
+            lang='de',
+            sender_name=sender_name or '[Ihr Name]'
+        )
+        return fallback_result['response']
+    
+    # Спроба згенерувати повну відповідь
+    try:
+        from improved_response_generator import generate_response_smart_improved
+        response_de, _ = generate_response_smart_improved(text, 'de')
+        
+        # Перевіряємо чи відповідь достатньої довжини
+        if len(response_de) < 150:
+            raise ValueError("Відповідь занадто коротка")
+        
+        return generate_german_letter(text, response_de, response_type)
+    
+    except Exception:
+        # Fallback при помилці
+        fallback_result = generate_fallback_response(
+            text=text,
+            org_key=response_type,
+            lang='de',
+            sender_name=sender_name or '[Ihr Name]'
+        )
+        return fallback_result['response']
 
 
 if __name__ == '__main__':
