@@ -37,9 +37,9 @@ def extract_letter_data(text: str) -> Dict:
     data['amounts'] = [amt[0].replace(',', '.') for amt in amounts]
     data['first_amount'] = data['amounts'][0] if data['amounts'] else '[СУМА]'
     
-    # Номери клієнта/справи
-    customer_numbers = re.findall(r'(kundennummer|aktenzeichen|geschäftszeichen|forderungsnummer)[:\s]*([A-Z0-9\-/]+)', text_lower)
-    data['customer_number'] = customer_numbers[0][1].upper() if customer_numbers else '[НОМЕР]'
+    # Номери клієнта/справи (більш точний regex)
+    customer_numbers = re.findall(r'(?:kundennummer|aktenzeichen|geschäftszeichen|forderungsnummer)[:\s]*([A-Z0-9]+)', text_lower)
+    data['customer_number'] = customer_numbers[0] if customer_numbers else '[НОМЕР]'
     
     # IBAN
     ibans = re.findall(r'(DE\d{2}\s*\d{4}\s*\d{4}\s*\d{4}\s*\d{2})', text)
@@ -49,8 +49,24 @@ def extract_letter_data(text: str) -> Dict:
     name_match = re.search(r'(?:herrn|frau|sehr geehrte[r]?)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)', text, re.IGNORECASE)
     data['recipient_name'] = name_match.group(1) if name_match else '[ІМ\'Я]'
     
-    sender_match = re.search(r'(?:mit freundlichen grüßen|im auftrag)\s*\n*\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)', text, re.IGNORECASE)
-    data['sender_name'] = sender_match.group(1) if sender_match else '[ВІДПРАВНИК]'
+    # Імена (контактна особа)
+    # Шукаємо в кінці листа після "Mit freundlichen Grüßen"
+    end_section = text[-500:] if len(text) > 500 else text
+    
+    # Видаляємо "Im Auftrag" для кращого пошуку
+    end_section_clean = re.sub(r'\bIm Auftrag\b', '', end_section, flags=re.IGNORECASE)
+    
+    sender_match = re.search(r'(?:mit freundlichen grüßen|im auftrag)\s*\n*\s*([A-Z][a-z]+)\s+([A-Z][a-z]+)', end_section_clean, re.IGNORECASE)
+    if sender_match:
+        data['sender_name'] = f"{sender_match.group(1)} {sender_match.group(2)}"
+    else:
+        data['sender_name'] = '[ВІДПРАВНИК]'
+    
+    # Якщо не знайшли, шукаємо просто ім'я в кінці
+    if data['sender_name'] == '[ВІДПРАВНИК]':
+        simple_match = re.search(r'\n([A-Z][a-z]+\s+[A-Z][a-z]+)\s*\n\s*(?:Beraterin|Sachbearbeiterin|Geschäftsführer)', text, re.IGNORECASE)
+        if simple_match:
+            data['sender_name'] = simple_match.group(1)
     
     # Адреси
     data['location'] = 'Berlin' if 'berlin' in text_lower else '[МІСТО]'
@@ -78,7 +94,7 @@ def extract_letter_data(text: str) -> Dict:
 def generate_improved_response(text: str, law_info: Dict, language: str = 'uk') -> str:
     """Генерація покращеної відповіді з автоматичним заповненням даних."""
     
-    # Витягуємо дані
+    # Витягуємо дані з листа
     data = extract_letter_data(text)
     org_key = law_info.get('organization_key', 'general')
     sit_key = law_info.get('situation_key', 'default')
