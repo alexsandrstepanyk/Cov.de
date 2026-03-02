@@ -821,7 +821,7 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
                 user_response = smart_analysis.get('response_uk', smart_analysis['response_de'])
 
         title = response_titles.get(lang, response_titles['uk'])
-        response = f"**{title['title']}:**\n\n**{title['lang']}:**\n{user_response}"
+        response = f"**{title['lang']}:**\n{user_response}"
 
         # Додаємо поради з розумного аналізу
         tips_titles = {'uk': 'ПОРАДИ', 'ru': 'СОВЕТЫ', 'de': 'TIPPS', 'en': 'TIPS'}
@@ -933,7 +933,11 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
             )
 
         # 🇩🇪 ДОДАТКОВО: Показуємо готовий лист німецькою для ВСІХ офіційних листів
-        if not is_personal and LETTER_GENERATOR:
+        # Завжди показуємо німецьку версію якщо це не особистий лист
+        show_german = (not is_personal) and LETTER_GENERATOR
+        logger.info(f"🇩🇪 Показ німецької версії: {show_german} (is_personal={is_personal}, LETTER_GENERATOR={LETTER_GENERATOR})")
+        
+        if show_german:
             # 📝 ГЕНЕРУЄМО ПОВНИЙ ЛИСТ У ФОРМАТІ DIN 5008 З FALLBACK
             # Визначаємо тип відповіді
             response_type = org_key if org_key else 'general'
@@ -1187,7 +1191,7 @@ async def analyze_and_respond(update: Update, context: ContextTypes.DEFAULT_TYPE
                 user_response = smart_analysis.get('response_uk', smart_analysis['response_de'])
 
         title = response_titles.get(lang, response_titles['uk'])
-        response = f"**{title['title']}:**\n\n**{title['lang']}:**\n{user_response}"
+        response = f"**{title['lang']}:**\n{user_response}"
         
         tips_titles = {'uk': 'ПОРАДИ', 'ru': 'СОВЕТЫ', 'de': 'TIPPS', 'en': 'TIPS'}
         tips_title = tips_titles.get(lang, 'ПОРАДИ')
