@@ -157,67 +157,68 @@ class LetterGenerator:
     def extract_contact_person(self, text: str) -> Dict:
         """
         Витягнути контактну особу (Frau/Herr з підпису).
-        
-        Args:
-            text: Текст листа
-            
-        Returns:
-            Dict з даними контактної особи
         """
         # Шукаємо в кінці листа (підпис)
         end_section = text[-800:] if len(text) > 800 else text
         
-        # Жінка
-        frau_patterns = [
-            r'(?:Frau|Ms\.)\s*([A-Z][a-z]+(?:-[A-Z][a-z]+)?)\s+([A-Z][a-z]+)',
-            r'Mit freundlichen Grüßen\s*\n\s*(?:Frau\s+)?([A-Z][a-z]+\s+[A-Z][a-z]+)',
+        # Фільтр службових слів які НЕ є іменами
+        IGNORE_PATTERNS = [
+            r'\bIm Auftrag\b', r'\bi\.A\.\b', r'\bi\.V\.\b', r'\bi\.B\.\b',
+            r'\bBeraterin\b', r'\bSachbearbeiterin\b', r'\bGeschäftsleitung\b',
+            r'\bnamens der Geschäftsleitung\b',
+            r'\bin Vollmacht\b', r'\bin Vertretung\b', r'\bDer Leiter\b',
+            r'\bDie Leiterin\b', r'\bTeamleiter\b', r'\bAbteilungsleiter\b',
         ]
         
-        for pattern in frau_patterns:
-            match = re.search(pattern, end_section, re.IGNORECASE)
-            if match:
-                groups = match.groups()
-                if len(groups) == 2:
-                    return {
-                        'firstname': groups[0] if groups[0] else None,
-                        'lastname': groups[1] if groups[1] else groups[0],
-                        'gender': 'female',
-                        'title': None,
-                    }
-                elif len(groups) == 1:
-                    name_parts = groups[0].split()
-                    return {
-                        'firstname': name_parts[0] if len(name_parts) > 1 else None,
-                        'lastname': name_parts[-1],
-                        'gender': 'female',
-                        'title': None,
-                    }
+        # Видаляємо службові слова (але залишаємо Mit freundlichen Grüßen для орієнтира)
+        for pattern in IGNORE_PATTERNS:
+            end_section = re.sub(pattern, '', end_section, flags=re.IGNORECASE)
         
-        # Чоловік (з титулом)
-        herr_patterns = [
-            r'(?:Herr|Hr\.)\s*(Dr\.|Prof\.|Dipl\.-Ing\.)?\s*([A-Z][a-z]+)',
-            r'Mit freundlichen Grüßen\s*\n\s*(?:Herr(?:n)?\s+)?(?:Dr\.?\s+)?([A-Z][a-z]+\s+[A-Z][a-z]+)',
-        ]
+        # Шукаємо ім'я після "Mit freundlichen Grüßen"
+        match = re.search(r'Mit freundlichen Grüßen\s*\n*\s*([A-Z][a-z]+\s+[A-Z][a-z]+)', end_section, re.IGNORECASE)
+        if match:
+            name_parts = match.group(1).split()
+            if len(name_parts) >= 2:
+                # Визначаємо стать за іменем
+                female_names = ['Maria', 'Petra', 'Anna', 'Sabine', 'Monika', 'Claudia', 'Andrea', 'Ute', 'Gabriele', 'Birgit']
+                firstname = name_parts[0]
+                gender = 'female' if firstname in female_names else 'male'
+                return {
+                    'firstname': firstname,
+                    'lastname': name_parts[-1],
+                    'gender': gender,
+                    'title': None,
+                }
         
-        for pattern in herr_patterns:
-            match = re.search(pattern, end_section, re.IGNORECASE)
-            if match:
-                groups = match.groups()
-                if len(groups) == 2 and groups[0]:  # Є титул
-                    return {
-                        'firstname': None,
-                        'lastname': groups[1],
-                        'gender': 'male',
-                        'title': groups[0],
-                    }
-                elif len(groups) == 1:
-                    name_parts = groups[0].split()
-                    return {
-                        'firstname': name_parts[0] if len(name_parts) > 1 else None,
-                        'lastname': name_parts[-1],
-                        'gender': 'male',
-                        'title': None,
-                    }
+        # Жінка (альтернативний патерн)
+        frau_match = re.search(r'Frau\s+([A-Z][a-z]+)\s+([A-Z][a-z]+)', end_section, re.IGNORECASE)
+        if frau_match:
+            return {
+                'firstname': frau_match.group(1),
+                'lastname': frau_match.group(2),
+                'gender': 'female',
+                'title': None,
+            }
+        
+        # Чоловік з титулом
+        herr_title_match = re.search(r'Herr\s+(Dr\.|Prof\.)\s+([A-Z][a-z]+)', end_section, re.IGNORECASE)
+        if herr_title_match:
+            return {
+                'firstname': None,
+                'lastname': herr_title_match.group(2),
+                'gender': 'male',
+                'title': herr_title_match.group(1),
+            }
+        
+        # Чоловік без титулу
+        herr_match = re.search(r'Herr\s+([A-Z][a-z]+)\s+([A-Z][a-z]+)', end_section, re.IGNORECASE)
+        if herr_match:
+            return {
+                'firstname': herr_match.group(1),
+                'lastname': herr_match.group(2),
+                'gender': 'male',
+                'title': None,
+            }
         
         return {}
     
