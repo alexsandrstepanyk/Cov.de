@@ -131,6 +131,17 @@ try:
 except Exception as e:
     logger.warning(f"⚠️ Client Bot Functions недоступні: {e}")
 
+# Імпорт покращеного генератора відповідей (v4.5)
+try:
+    import sys
+    sys.path.insert(0, str(Path(__file__).parent.parent))
+    from improved_response_generator import generate_response_smart_improved
+    IMPROVED_RESPONSES = True
+    logger.info("✅ Improved Response Generator підключено (v4.5)")
+except Exception as e:
+    IMPROVED_RESPONSES = False
+    logger.warning(f"⚠️ Improved Response Generator недоступний: {e}")
+
 try:
     import sys
     sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -759,8 +770,7 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         fraud_analysis = analyze_letter_for_fraud(text, {})
         fraud_warning = generate_fraud_warning(fraud_analysis)
 
-        # Використовуємо розумну відповідь з smart_law_reference
-        # Відповідь ТІЛЬКИ мовою користувача
+        # Використовуємо ПОКРАЩЕНУ відповідь (v4.5) з автоматичним заповненням даних
         lang = user['language']
 
         # Заголовки для відповідей
@@ -771,17 +781,22 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
             'en': {'title': 'RESPONSE', 'lang': 'EN'}
         }
 
-        # Отримуємо відповідь з правильними ключами
-        if lang == 'uk':
-            user_response = smart_analysis.get('response_uk', smart_analysis['response_de'])
-        elif lang == 'ru':
-            user_response = smart_analysis.get('response_ru', smart_analysis.get('response_uk', smart_analysis['response_de']))
-        elif lang == 'de':
-            user_response = smart_analysis.get('response_de', '')
-        elif lang == 'en':
-            user_response = smart_analysis.get('response_en', smart_analysis.get('response_de', ''))
+        # Отримуємо ПОКРАЩЕНУ відповідь з автоматичним заповненням даних
+        if IMPROVED_RESPONSES:
+            # Нова версія v4.5: автоматичне заповнення [ДАТА], [ЧАС], [СУМА] тощо
+            user_response, _ = generate_response_smart_improved(text, lang)
         else:
-            user_response = smart_analysis.get('response_uk', smart_analysis['response_de'])
+            # Стара версія (fallback)
+            if lang == 'uk':
+                user_response = smart_analysis.get('response_uk', smart_analysis['response_de'])
+            elif lang == 'ru':
+                user_response = smart_analysis.get('response_ru', smart_analysis.get('response_uk', smart_analysis['response_de']))
+            elif lang == 'de':
+                user_response = smart_analysis.get('response_de', '')
+            elif lang == 'en':
+                user_response = smart_analysis.get('response_en', smart_analysis.get('response_de', ''))
+            else:
+                user_response = smart_analysis.get('response_uk', smart_analysis['response_de'])
 
         title = response_titles.get(lang, response_titles['uk'])
         response = f"**{title['title']}:**\n\n**{title['lang']}:**\n{user_response}"
@@ -1066,28 +1081,33 @@ async def analyze_and_respond(update: Update, context: ContextTypes.DEFAULT_TYPE
         # Anti-Fraud аналіз
         fraud_analysis = analyze_letter_for_fraud(text, {})
         fraud_warning = generate_fraud_warning(fraud_analysis)
-        
-        # Відповідь мовою користувача
+
+        # Відповідь мовою користувача (v4.5 - ПОКРАЩЕНА версія)
         lang = user['language']
-        
+
         response_titles = {
             'uk': {'title': 'ВІДПОВІДЬ', 'lang': 'UK'},
             'ru': {'title': 'ОТВЕТ', 'lang': 'RU'},
             'de': {'title': 'ANTWORT', 'lang': 'DE'},
             'en': {'title': 'RESPONSE', 'lang': 'EN'}
         }
-        
-        if lang == 'uk':
-            user_response = smart_analysis.get('response_uk', smart_analysis['response_de'])
-        elif lang == 'ru':
-            user_response = smart_analysis.get('response_ru', smart_analysis.get('response_uk', smart_analysis['response_de']))
-        elif lang == 'de':
-            user_response = smart_analysis.get('response_de', '')
-        elif lang == 'en':
-            user_response = smart_analysis.get('response_en', smart_analysis.get('response_de', ''))
+
+        # ПОКРАЩЕНА версія v4.5 з автоматичним заповненням
+        if IMPROVED_RESPONSES:
+            user_response, _ = generate_response_smart_improved(text, lang)
         else:
-            user_response = smart_analysis.get('response_uk', smart_analysis['response_de'])
-        
+            # Стара версія (fallback)
+            if lang == 'uk':
+                user_response = smart_analysis.get('response_uk', smart_analysis['response_de'])
+            elif lang == 'ru':
+                user_response = smart_analysis.get('response_ru', smart_analysis.get('response_uk', smart_analysis['response_de']))
+            elif lang == 'de':
+                user_response = smart_analysis.get('response_de', '')
+            elif lang == 'en':
+                user_response = smart_analysis.get('response_en', smart_analysis.get('response_de', ''))
+            else:
+                user_response = smart_analysis.get('response_uk', smart_analysis['response_de'])
+
         title = response_titles.get(lang, response_titles['uk'])
         response = f"**{title['title']}:**\n\n**{title['lang']}:**\n{user_response}"
         
@@ -1326,7 +1346,7 @@ async def show_history(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
         'general': '📄 Загальний'
     }
 
-    # Переклад назв типів
+    # Пе��еклад назв типів
     type_names_translated = {
         'uk': type_names,
         'ru': {
