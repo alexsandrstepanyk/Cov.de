@@ -932,35 +932,34 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
                 parse_mode='Markdown'
             )
 
-        # 🇩🇪 ДОДАТКОВО: Якщо користувач в Німеччині → показуємо готовий лист німецькою
-        if user.get('country') == 'de' and not is_personal:
+        # 🇩🇪 ДОДАТКОВО: Показуємо готовий лист німецькою для ВСІХ офіційних листів
+        if not is_personal and LETTER_GENERATOR:
             # 📝 ГЕНЕРУЄМО ПОВНИЙ ЛИСТ У ФОРМАТІ DIN 5008 З FALLBACK
-            if LETTER_GENERATOR:
-                # Визначаємо тип відповіді
-                response_type = org_key if org_key else 'general'
-                
-                # Отримуємо ім'я користувача для підпису
-                sender_name = user.get('username', '[Ihr Name]')
-                
-                # Генеруємо повний лист з автоматичним fallback
-                full_german_letter = generate_german_letter_with_fallback(
-                    text=text,
-                    response_type=response_type,
-                    sender_name=sender_name
-                )
+            # Визначаємо тип відповіді
+            response_type = org_key if org_key else 'general'
 
-                # Додаємо інформацію про класифікацію якщо доступно
-                classification_info = ""
-                if ADVANCED_CLASSIFICATION:
-                    try:
-                        class_result = classify_letter_combined(text)
-                        if class_result['is_confident']:
-                            classification_info = f"\n\n🔍 **Класифікація:**\n{get_classification_description(class_result)}"
-                    except Exception as e:
-                        logger.warning(f"Помилка класифікації: {e}")
+            # Отримуємо ім'я користувача для підпису
+            sender_name = user.get('username', '[Ihr Name]') if user else '[Ihr Name]'
 
-                # Формуємо повідомлення з німецькою версією
-                german_msg = f'''
+            # Генеруємо повний лист з автоматичним fallback
+            full_german_letter = generate_german_letter_with_fallback(
+                text=text,
+                response_type=response_type,
+                sender_name=sender_name
+            )
+
+            # Додаємо інформацію про класифікацію якщо доступно
+            classification_info = ""
+            if ADVANCED_CLASSIFICATION:
+                try:
+                    class_result = classify_letter_combined(text)
+                    if class_result['is_confident']:
+                        classification_info = f"\n\n🔍 **Класифікація:**\n{get_classification_description(class_result)}"
+                except Exception as e:
+                    logger.warning(f"Помилка класифікації: {e}")
+
+            # Формуємо повідомлення з німецькою версією
+            german_msg = f'''
 
 ━━━━━━━━━━━━━━━━━━━━
 
@@ -978,26 +977,6 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 📋 **Формат:** DIN 5008 (німецький стандарт)
 ✉️ **Адреси:** Автоматично заповнені з вашого листа
 🔄 **Fallback:** Автоматично для коротких листів'''
-            else:
-                # Fallback - просто німецька відповідь
-                if IMPROVED_RESPONSES:
-                    german_response, _ = generate_response_smart_improved(text, 'de')
-                else:
-                    german_response = smart_analysis.get('response_de', '')
-                
-                german_msg = f'''
-
-━━━━━━━━━━━━━━━━━━━━
-
-🇩🇪 **ВІДПОВІДЬ НІМЕЦЬКОЮ**
-
-────────────────────
-
-{german_response}
-
-────────────────────
-
-💡 **Порада:** Скопіюйте цей текст та відправте відправнику.'''
             
             # Відправляємо німецьку версію
             try:
