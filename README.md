@@ -491,3 +491,4 @@ python3 -m spacy download de_core_news_sm
 **Версія:** 4.0  
 **Статус:** ✅ ГОТОВО ДО ЗАПУСКУ
 # Cov.de
+# Cov.de
