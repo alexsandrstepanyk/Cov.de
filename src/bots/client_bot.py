@@ -164,6 +164,17 @@ except Exception as e:
     ADVANCED_CLASSIFICATION = False
     logger.warning(f"⚠️ Advanced Classification недоступний: {e}")
 
+# Імпорт LLM оркестратора (v5.0 - мозок бота)
+try:
+    import sys
+    sys.path.insert(0, str(Path(__file__).parent.parent))
+    from llm_orchestrator import process_letter_with_llm
+    LLM_ORCHESTRATOR = True
+    logger.info("✅ LLM Orchestrator підключено (v5.0 - мозок бота)")
+except Exception as e:
+    LLM_ORCHESTRATOR = False
+    logger.warning(f"⚠️ LLM Orchestrator недоступний: {e}")
+
 try:
     import sys
     sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -1083,151 +1094,45 @@ async def analyze_and_respond(update: Update, context: ContextTypes.DEFAULT_TYPE
     
     # Відправка тексту на обробку
     await update.message.reply_text(t['upload']['processing_analysis'])
-    
+
     try:
-        import sys
-        sys.path.insert(0, str(Path(__file__).parent.parent))
-        from ingestion import preprocess_text
-        from nlp_analysis import analyze_text_advanced, classify_letter_type_advanced, get_laws_for_letter
-        from smart_law_reference import analyze_letter_smart
-        from fraud_detection import (
-            extract_phone_numbers, extract_emails, extract_websites,
-            analyze_letter_for_fraud, generate_fraud_warning
-        )
-        from client_bot_functions import check_if_document
-        
-        # Попередня обробка
-        text = preprocess_text(text)
-        
-        # ПЕРЕВІРКА ТИПУ ДОКУМЕНТУ
-        doc_check = check_if_document(text)
-        logger.info(f"Тип документу: {doc_check['document_type']}, official={doc_check['official_score']}, non_legal={doc_check['non_legal_score']}")
-        
-        # Якщо це не юридичний документ
-        if not doc_check['is_legal_letter']:
-            doc_type_uk = {
-                'service_document': '🔧 Сервісний документ (не юридичний)',
-                'receipt': '🧾 Чек/Квитанція (не юридичний)',
-                'personal': '👨‍👩‍👦 Особистий документ',
-                'image': '🖼️ Зображення',
-                'unknown': '❓ Невідомий тип'
-            }
-            doc_name = doc_type_uk.get(doc_check['document_type'], 'Невідомий тип')
+        # 🧠 LLM АНАЛІЗ (v5.0 - мозок бота)
+        if LLM_ORCHESTRATOR:
+            # Використовуємо LLM Orchestrator для повного аналізу
+            llm_result = process_letter_with_llm(text, lang)
             
-            warning_msg = (
-                f"⚠️ **УВАГА: Це не юридичний лист!**\n\n"
-                f"📄 **Тип документу:** {doc_name}\n\n"
-                f"Цей бот призначений для аналізу **юридичних листів** від:\n"
-                f"• Jobcenter\n"
-                f"• Орендодавця\n"
-                f"• Кредиторів (Inkasso)\n"
-                f"• Державних установ\n\n"
-                f"📌 **Знайдено маркери:**\n"
-                f"• Юридичні: {doc_check['official_score']}\n"
-                f"• Сервісні: {doc_check['non_legal_score']}\n\n"
-                f"Якщо ви вважаєте це помилкою, надішліть текст ще раз."
-            )
-            
-            # Відправка попередження
-            for i in range(0, len(warning_msg), 4000):
-                await update.message.reply_text(
-                    warning_msg[i:i+4000],
-                    parse_mode='Markdown'
-                )
-            
-            # Повернення до меню
-            keyboard = [
-                [t['menu']['upload']],
-                [t['menu']['history']],
-                [t['menu']['lawyer']],
-                [t['menu']['settings'], t['menu']['help']]
-            ]
-            reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-            await update.message.reply_text(
-                f"{t['welcome']}\n\n"
-                "Що ще бажаєте зробити?",
-                reply_markup=reply_markup
-            )
-            
-            return ConversationHandler.END
-        
-        # РОЗШИРЕНИЙ АНАЛІЗ (тільки для юридичних документів)
-        analysis = analyze_text_advanced(text)
-        letter_type, classification_details = classify_letter_type_advanced(text)
-        
-        # РОЗУМНИЙ АНАЛІЗ ЗАКОНІВ
-        smart_analysis = analyze_letter_smart(text, user['language'])
-        law_info = smart_analysis['law_info']
-        is_personal = smart_analysis.get('is_personal', False)
-        
-        # Anti-Fraud аналіз
-        fraud_analysis = analyze_letter_for_fraud(text, {})
-        fraud_warning = generate_fraud_warning(fraud_analysis)
-
-        # Відповідь мовою користувача (v4.5 - ПОКРАЩЕНА версія)
-        lang = user['language']
-
-        response_titles = {
-            'uk': {'title': 'ВІДПОВІДЬ', 'lang': 'UK'},
-            'ru': {'title': 'ОТВЕТ', 'lang': 'RU'},
-            'de': {'title': 'ANTWORT', 'lang': 'DE'},
-            'en': {'title': 'RESPONSE', 'lang': 'EN'}
-        }
-
-        # ПОКРАЩЕНА версія v4.5 з автоматичним заповненням
-        if IMPROVED_RESPONSES:
-            user_response, _ = generate_response_smart_improved(text, lang)
-        else:
-            # Стара версія (fallback)
-            if lang == 'uk':
-                user_response = smart_analysis.get('response_uk', smart_analysis['response_de'])
-            elif lang == 'ru':
-                user_response = smart_analysis.get('response_ru', smart_analysis.get('response_uk', smart_analysis['response_de']))
-            elif lang == 'de':
-                user_response = smart_analysis.get('response_de', '')
-            elif lang == 'en':
-                user_response = smart_analysis.get('response_en', smart_analysis.get('response_de', ''))
+            if llm_result.get('success'):
+                logger.info(f"✅ LLM аналіз успішний: {llm_result.get('analysis', {}).get('organization', 'N/A')}")
+                
+                # Отримуємо відповіді
+                user_response = llm_result.get('response_user', '')
+                german_response = llm_result.get('response_de', '')
+                
+                # Зберігаємо для подальшого використання
+                analysis = llm_result.get('analysis', {})
+                letter_type = analysis.get('letter_type', 'general')
+                is_personal = False
+                law_info = {
+                    'organization': analysis.get('organization', ''),
+                    'paragraphs': analysis.get('paragraphs', []),
+                    'consequences': '',
+                }
+                
+                # Формуємо відповідь для відправки
+                response = f"**{lang.upper()}:**\n{user_response}"
+                smart_tips = ""
             else:
-                user_response = smart_analysis.get('response_uk', smart_analysis['response_de'])
-
-        title = response_titles.get(lang, response_titles['uk'])
-        response = f"**{title['lang']}:**\n{user_response}"
+                logger.warning(f"⚠️ LLM аналіз не вдався: {llm_result.get('error', 'Unknown error')}")
+                # Fallback на стару систему
+                raise Exception("LLM не спрацював, використовуємо fallback")
+        else:
+            # Стара система (fallback)
+            raise Exception("LLM Orchestrator недоступний")
         
-        tips_titles = {'uk': 'ПОРАДИ', 'ru': 'СОВЕТЫ', 'de': 'TIPPS', 'en': 'TIPS'}
-        tips_title = tips_titles.get(lang, 'ПОРАДИ')
-        smart_tips = f"\n\n💡 **{tips_title}:**\n" + "\n".join(smart_analysis['tips'])
-        
-        # Збереження в БД
-        conn = sqlite3.connect('users.db')
-        c = conn.cursor()
-        photos_list = context.user_data.get('letter_photos', [])
-        first_photo = photos_list[0] if photos_list else None
-        c.execute("""
-            INSERT INTO letters (chat_id, text, letter_type, analysis, response, photo_path)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (chat_id, text[:500], letter_type, str(analysis), response, first_photo))
-        conn.commit()
-        conn.close()
-        
-        # Типи листів
-        type_names = {
-            'debt_collection': '💰 Боргові зобов\'язання',
-            'tenancy': '🏠 Оренда житла',
-            'employment': '💼 Праця / Jobcenter',
-            'administrative': '📋 Адміністративний лист',
-            'personal': '👨‍👩‍👦 Особисте листування',
-            'insurance': '🏥 Страхова каса',
-            'utility': '💡 Комунальні послуги',
-            'general': '📄 Загальний лист'
-        }
-        
-        scores = classification_details.get('scores', {})
-        max_score = max(scores.values()) if scores else 0
-        confidence = "✅ Впевнено" if max_score > 5 else "⚠️ Потребує перевірки" if max_score > 0 else "❓ Невизначено"
-        
-        phones = extract_phone_numbers(text)
-        emails = extract_emails(text)
-        websites = extract_websites(text)
+        # Отримуємо контактні дані з LLM аналізу
+        phones = analysis.get('phones', [])
+        emails = analysis.get('emails', [])
+        websites = analysis.get('websites', [])
         
         contacts_info = ""
         if phones:
@@ -1236,43 +1141,23 @@ async def analyze_and_respond(update: Update, context: ContextTypes.DEFAULT_TYPE
             contacts_info += f"📧 **Email:** {', '.join(emails)}\n"
         if websites:
             contacts_info += f"🌐 **Сайти:** {', '.join(websites)}\n"
-        
+
         if contacts_info:
             contacts_info = f"🔍 **Контактні дані:**\n{contacts_info}\n"
+
+        # Формуємо результат для LLM
+        analysis_title = "Аналіз завершено! 🧠"
         
-        analysis_titles = {
-            'uk': 'Аналіз завершено!',
-            'ru': 'Анализ завершен!',
-            'de': 'Analyse abgeschlossen!',
-            'en': 'Analysis complete!'
-        }
-        analysis_title = analysis_titles.get(lang, 'Аналіз завершено!')
-        
-        if is_personal:
-            result = (
-                f"✅ **{analysis_title}**\n\n"
-                f"📌 **Тип листа:** 👨‍👩‍👦 Особисте листування\n"
-                f"🏢 **Організація:** {law_info.get('organization', 'Не визначено')}\n\n"
-                f"📝 **{title['title']}:**\n\n{response}{smart_tips}"
-            )
-        else:
-            result = (
-                f"✅ **{analysis_title}**\n\n"
-                f"📌 **Тип листа:** {type_names.get(letter_type, letter_type)}\n"
-                f"🏢 **Організація:** {law_info.get('organization', 'Не визначено')}\n"
-                f"📋 **Ситуація:** {law_info.get('situation', 'Не визначено')}\n"
-                f"🔍 **Впевненість:** {confidence}\n\n"
-                f"📚 **ПАРАГРАФИ ДЛЯ ПОСИЛАННЯ:**\n"
-                f"{chr(10).join('• ' + para for para in law_info.get('paragraphs', []))}\n\n"
-                f"{contacts_info}"
-                f"🔍 **Ключові слова:**\n"
-                f"{', '.join(analysis['keywords'][:8]) if analysis['keywords'] else 'Не визначено'}\n\n"
-                f"⚠️ **Наслідки:**\n{law_info.get('consequences', 'Не визначено')}\n\n"
-                f"━━━━━━━━━━━━━━━━━━━━\n\n"
-                f"{fraud_warning}\n\n"
-                f"━━━━━━━━━━━━━━━━━━━━\n\n"
-                f"📝 **{title['title']}:**\n\n{response}{smart_tips}"
-            )
+        # Для LLM використовуємо спрощений формат
+        result = (
+            f"✅ **{analysis_title}**\n\n"
+            f"🏢 **Організація:** {law_info.get('organization', 'Не визначено')}\n"
+            f"📋 **Тип:** {letter_type}\n"
+            f"📚 **Параграфи:** {', '.join(law_info.get('paragraphs', []))}\n\n"
+            f"{contacts_info}"
+            f"━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"📝 **ВІДПОВІДЬ:**\n\n{response}{smart_tips}\n\n"
+        )
         
         # Екрануємо Markdown символи
         safe_result = result.replace('*', '\\*').replace('_', '\\_').replace('`', '\\`').replace('[', '\\[').replace(']', '\\]')
@@ -1291,10 +1176,9 @@ async def analyze_and_respond(update: Update, context: ContextTypes.DEFAULT_TYPE
                 logger.info(f"Переклад відправлено користувачу")
             except Exception as e:
                 logger.error(f"Помилка відправки перекладу: {e}")
-                # Відправка без Markdown
                 await update.message.reply_text(f"🌐 Переклад листа:\n\n{translated_text[:2000]}")
 
-        # Відправка результату аналізу частинами
+        # Відправка результату аналізу
         logger.info(f"Відправка результату аналізу ({len(safe_result)} символів)")
         try:
             for i in range(0, len(safe_result), 4000):
@@ -1305,10 +1189,38 @@ async def analyze_and_respond(update: Update, context: ContextTypes.DEFAULT_TYPE
             logger.info(f"Результат відправлено користувачу")
         except Exception as e:
             logger.error(f"Помилка відправки результату: {e}")
-            # Спроба відправити без Markdown
             await update.message.reply_text(f"Аналіз завершено:\n\n{result[:2000]}")
-        
-        logger.info(f"Аналіз завершено для chat_id={chat_id}, тип={letter_type}")
+
+        # 🇩🇪 ВІДПРАВКА НІМЕЦЬКОЇ ВІДПОВІДІ (DIN 5008)
+        if german_response and LLM_ORCHESTRATOR:
+            logger.info(f"Відправка німецької відповіді ({len(german_response)} символів)")
+            
+            german_msg = f'''
+━━━━━━━━━━━━━━━━━━━━
+
+🇩🇪 **ГОТОВИЙ ЛИСТ НІМЕЦЬКОЮ (DIN 5008)**
+
+Цей лист можна скопіювати та відправити відправнику:
+
+────────────────────
+
+{german_response}
+
+────────────────────
+
+💡 **Порада:** Скопіюйте текст та відправте на email або поштою.'''
+            
+            try:
+                for i in range(0, len(german_msg), 4000):
+                    await update.message.reply_text(
+                        german_msg[i:i+4000],
+                        parse_mode='Markdown'
+                    )
+                logger.info(f"Німецька відповідь відправлена")
+            except Exception as e:
+                logger.error(f"Помилка відправки німецької відповіді: {e}")
+
+        logger.info(f"Аналіз завершено для chat_id={chat_id}")
         
     except Exception as e:
         logger.error(f"Помилка аналізу: {e}", exc_info=True)
@@ -1317,7 +1229,7 @@ async def analyze_and_respond(update: Update, context: ContextTypes.DEFAULT_TYPE
             "Спробуйте ще раз або зверніться до підтримки."
         )
     
-    # Повернення до меню
+    # Повер��ення до меню
     keyboard = [
         [t['menu']['upload']],
         [t['menu']['history']],
@@ -1474,7 +1386,7 @@ async def show_history(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
             reply_markup=reply_markup,
             parse_mode='Markdown'
         )
-        await asyncio.sleep(0.5)  # Невелика затримка між повідомленнями
+        await asyncio.sleep(0.5)  # Невелика зат��имка між повідомленнями
 
     return ConversationHandler.END
 
