@@ -910,6 +910,41 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
                 parse_mode='Markdown'
             )
 
+        # 🇩🇪 ДОДАТКОВО: Якщо користувач в Німеччині → показуємо готовий лист німецькою
+        if user.get('country') == 'de' and not is_personal:
+            # Отримуємо німецьку версію відповіді
+            if IMPROVED_RESPONSES:
+                german_response, _ = generate_response_smart_improved(text, 'de')
+            else:
+                german_response = smart_analysis.get('response_de', '')
+            
+            # Формуємо повідомлення з німецькою відповіддю
+            german_msg = f'''
+
+━━━━━━━━━━━━━━━━━━━━
+
+🇩🇪 **ГОТОВИЙ ЛИСТ НІМЕЦЬКОЮ**
+
+Цей лист можна скопіювати та відправити відправнику оригінального листа:
+
+────────────────────
+
+{german_response}
+
+────────────────────
+
+💡 **Порада:** Скопіюйте цей текст та відправте на email або поштою.'''
+            
+            # Відправляємо німецьку версію
+            try:
+                for i in range(0, len(german_msg), 4000):
+                    await update.message.reply_text(
+                        german_msg[i:i+4000],
+                        parse_mode='Markdown'
+                    )
+            except Exception as e:
+                logger.error(f"Помилка відправки німецької версії: {e}")
+
         logger.info(f"Аналіз завершено для chat_id={chat_id}, тип={letter_type}")
 
     except Exception as e:
