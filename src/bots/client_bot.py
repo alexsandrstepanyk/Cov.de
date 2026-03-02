@@ -142,6 +142,17 @@ except Exception as e:
     IMPROVED_RESPONSES = False
     logger.warning(f"⚠️ Improved Response Generator недоступний: {e}")
 
+# Імпорт генератора німецьких листів (DIN 5008)
+try:
+    import sys
+    sys.path.insert(0, str(Path(__file__).parent.parent))
+    from letter_generator import generate_german_letter
+    LETTER_GENERATOR = True
+    logger.info("✅ Letter Generator підключено (DIN 5008)")
+except Exception as e:
+    LETTER_GENERATOR = False
+    logger.warning(f"⚠️ Letter Generator недоступний: {e}")
+
 try:
     import sys
     sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -918,14 +929,39 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
             else:
                 german_response = smart_analysis.get('response_de', '')
             
-            # Формуємо повідомлення з німецькою відповіддю
-            german_msg = f'''
+            # 📝 ГЕНЕРУЄМО ПОВНИЙ ЛИСТ У ФОРМАТІ DIN 5008
+            if LETTER_GENERATOR:
+                # Визначаємо тип відповіді
+                response_type = org_key if org_key else 'general'
+                
+                # Генеруємо повний лист з адресами та звертанням
+                full_german_letter = generate_german_letter(text, german_response, response_type)
+                
+                # Формуємо повідомлення з німецькою версією
+                german_msg = f'''
 
 ━━━━━━━━━━━━━━━━━━━━
 
-🇩🇪 **ГОТОВИЙ ЛИСТ НІМЕЦЬКОЮ**
+🇩🇪 **ГОТОВИЙ ЛИСТ НІМЕЦЬКОЮ (DIN 5008)**
 
 Цей лист можна скопіювати та відправити відправнику оригінального листа:
+
+────────────────────
+
+{full_german_letter}
+
+────────────────────
+
+💡 **Порада:** Скопіюйте цей текст та відправте на email або поштою.
+📋 **Формат:** DIN 5008 (німецький стандарт)
+✉️ **Адреси:** Автоматично заповнені з вашого листа'''
+            else:
+                # Fallback - просто німецька відповідь
+                german_msg = f'''
+
+━━━━━━━━━━━━━━━━━━━━
+
+🇩🇪 **ВІДПОВІДЬ НІМЕЦЬКОЮ**
 
 ────────────────────
 
@@ -933,7 +969,7 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 
 ────────────────────
 
-💡 **Порада:** Скопіюйте цей текст та відправте на email або поштою.'''
+💡 **Порада:** Скопіюйте цей текст та відправте відправнику.'''
             
             # Відправляємо німецьку версію
             try:
@@ -1327,7 +1363,7 @@ async def handle_more_pages(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         logger.info(f"📄 Користувач обрав 'Ще сторінку'")
         # Очікування наступної сторінки
         await update.message.reply_text(
-            "📄 **Надішліть наступну сторінку**\n\n"
+            "��� **Надішліть наступну сторінку**\n\n"
             "Надішліть фото наступної сторінки документа або вставте текст.",
             parse_mode='Markdown'
         )
