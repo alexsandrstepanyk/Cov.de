@@ -175,6 +175,17 @@ except Exception as e:
     LLM_ORCHESTRATOR = False
     logger.warning(f"⚠️ LLM Orchestrator недоступний: {e}")
 
+# Імпорт PDF генератора (v8.4)
+try:
+    import sys
+    sys.path.insert(0, str(Path(__file__).parent.parent))
+    from pdf_generator import generate_letter_pdf
+    PDF_GENERATOR = True
+    logger.info("✅ PDF Generator підключено (v8.4)")
+except Exception as e:
+    PDF_GENERATOR = False
+    logger.warning(f"⚠️ PDF Generator недоступний: {e}")
+
 try:
     import sys
     sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -1191,10 +1202,11 @@ async def analyze_and_respond(update: Update, context: ContextTypes.DEFAULT_TYPE
             logger.error(f"Помилка відправки результату: {e}")
             await update.message.reply_text(f"Аналіз завершено:\n\n{result[:2000]}")
 
-        # 🇩🇪 ВІДПРАВКА НІМЕЦЬКОЇ ВІДПОВІДІ (DIN 5008)
+        # 🇩🇪 ВІДПРАВКА НІМЕЦЬКОЇ ВІДПОВІДІ (DIN 5008) + PDF
         if german_response and LLM_ORCHESTRATOR:
             logger.info(f"Відправка німецької відповіді ({len(german_response)} символів)")
-            
+
+            # Текстове повідомлення
             german_msg = f'''
 ━━━━━━━━━━━━━━━━━━━━
 
@@ -1209,16 +1221,54 @@ async def analyze_and_respond(update: Update, context: ContextTypes.DEFAULT_TYPE
 ────────────────────
 
 💡 **Порада:** Скопіюйте текст та відправте на email або поштою.'''
-            
+
             try:
                 for i in range(0, len(german_msg), 4000):
                     await update.message.reply_text(
                         german_msg[i:i+4000],
                         parse_mode='Markdown'
                     )
-                logger.info(f"Німецька відповідь відправлена")
+                logger.info(f"Німецька відповідь (текст) відправлена")
             except Exception as e:
-                logger.error(f"Помилка відправки німецької відповіді: {e}")
+                logger.error(f"Помилка відправки тексту: {e}")
+
+            # Генерація та відправка PDF
+            if PDF_GENERATOR and smart_analysis:
+                try:
+                    logger.info(f"📄 Генерація PDF...")
+                    
+                    # Отримуємо law_info з smart_analysis
+                    law_info = smart_analysis.get('law_info', {})
+                    
+                    # Генерація PDF
+                    pdf_path = generate_letter_pdf(
+                        analysis=law_info,
+                        response_text=german_response,
+                        filename=f'letter_{chat_id}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
+                    )
+                    
+                    logger.info(f"✅ PDF згенеровано: {pdf_path}")
+                    
+                    # Відправка PDF
+                    with open(pdf_path, 'rb') as f:
+                        await update.message.reply_document(
+                            document=f,
+                            caption='📄 **Готовий PDF-лист**\n\nМожна роздрукувати та відправити поштою.',
+                            parse_mode='Markdown'
+                        )
+                    
+                    logger.info(f"✅ PDF відправлено")
+                    
+                except Exception as e:
+                    logger.error(f"❌ Помилка генерації/відправки PDF: {e}")
+                    # Спроба відправити помилку користувачу
+                    try:
+                        await update.message.reply_text(
+                            '⚠️ **Помилка генерації PDF**\n\nСпробуйте ще раз або скопіюйте текст вище.',
+                            parse_mode='Markdown'
+                        )
+                    except:
+                        pass
 
         logger.info(f"Аналіз завершено для chat_id={chat_id}")
         
