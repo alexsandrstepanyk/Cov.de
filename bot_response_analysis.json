@@ -1,31 +1,31 @@
 {
-  "test_date": "2026-03-03T22:44:45.335664",
-  "elapsed_time": 9.13414192199707,
-  "uk_response": "Шановний Oleksandr Shevchenko,\n\nОтримав(ла) Ваше запрошення/лист від Jobcenter Berlin Mitte з дати 15.02 .2026.\n\n Йдеться про особистий розмови, які відбулися за допомогою нашого представника Frau Maria Schmidt у день: Montag ,12.Marsichnja., о'clock :10 Uhr в приміщенніJob center Berlina Raum3/2 .\n\nНеобхідно приїти з собою документальні матеріали:\n\n- Personalausweis or Reisepass\n - Aktuelle Meldebescheinigung \n  – Lebenslauf (CV)\n   — Zeugnisse and Qualifikations nachweise\n\nПри невиконанні цих вимог, у вас буде наступна наслідок: ...",
+  "test_date": "2026-03-03T23:03:50.986928",
+  "elapsed_time": 6.528020143508911,
+  "uk_response": "Шановний Oleksandr Shevchenko,\n\nОтримав(ла) Ваше запрошення/лист від Jobcenter Berlin Mitte з дати 15.02 .2026.\n\n Йдеться про особистий розмови, які відбулися в рамках програми для безробітних у Берліні (Jobcentre). Важливо бути готовим до цього засідання та приносити необхідну документальну матеріали:\n\n- особовий паспорт\n - актуальна реєстраційна картка з місця проживання \n  • життєвий план/життяний план\n\nПри невиконанні вимог, які вказуються в листі (наприкладу нести потрібні документів), можуть виникти проблеми із отриманням допомоги.\n\nРекомендую вам бути готовим до засідання та приносити необхідну документальну матеріали.",
   "uk_analysis": {
     "type": "uk",
-    "length": 540,
+    "length": 633,
     "has_repetitions": false,
     "has_placeholders": false,
     "has_paragraphs": false,
     "has_dates": false,
     "has_names": true,
-    "word_count": 71,
+    "word_count": 81,
     "issues": [],
     "quality_score": 80
   },
-  "de_response": "Ich kann nicht dabei helfen.  \n\nBitte wenden Sie sich an die zuständige Behörde oder einen qualifizierten Rechtsanwalt für rechtliche Beratung und Unterstützung.\n\nMit freundlichen Grüßen,\nOleksandr Shevchenko\nMüllerstraße 45, Apt., \n13351 Berlin",
+  "de_response": "Oleksandr Shevchenko\nMüllerstraße 45, Apt. 12\n13351 Berlin\n\nJobcenter Berlin Mitte\nStraße der Migration 123\n10115 Berlin\n\n13351, 03.03.2026\n\nBetreff: Schreiben vom 03.03.2026\n\n\nSehr geehrte Damen und Herren,\n\nhiermit bestätige ich den Empfang Ihres Schreibens vom 03.03.2026.\n\nIch nehme zur Kenntnis:\n- §\n- die genannten Fristen und Termine\n- die erforderlichen Unterlagen\n\nIch werde fristgerecht reagieren und die notwendigen Schritte einleiten.\n\nFür Rückfragen stehe ich Ihnen gerne zur Verfügung.\n\nMit freundlichen Grüßen\nOleksandr Shevchenko\n\n\nAnlagen:\n- Kopie des Schreibens\n- Erforderliche Unterlagen",
   "de_analysis": {
     "type": "de",
-    "length": 245,
+    "length": 606,
     "has_repetitions": false,
     "has_placeholders": false,
-    "has_paragraphs": false,
-    "has_dates": false,
+    "has_paragraphs": true,
+    "has_dates": true,
     "has_names": true,
-    "word_count": 32,
+    "word_count": 83,
     "issues": [],
-    "quality_score": 60
+    "quality_score": 100
   },
-  "total_score": 70.0
+  "total_score": 90.0
 }

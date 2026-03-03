@@ -222,7 +222,7 @@ def remove_repetitions(text: str) -> str:
 
 def generate_response_llm(text: str, analysis: Dict, lang: str = 'uk') -> str:
     """
-    Генерація відповіді з LLM (v7.0 - ВИПРАВЛЕНО).
+    Генерація відповіді з LLM (v8.0 - FALLBACK + СЛОВНИК).
     
     Args:
         text: Оригінальний текст листа
@@ -237,46 +237,64 @@ def generate_response_llm(text: str, analysis: Dict, lang: str = 'uk') -> str:
     
     logger.info(f"📝 Генерація відповіді (lang={lang})")
     
-    # Вибір промпту
+    # v8.0: Для німецької використовуємо FALLBACK ШАБЛОНИ
+    if lang == 'de':
+        try:
+            from german_templates import get_template_for_type
+            letter_type = analysis.get('letter_type', 'Schreiben')
+            response = get_template_for_type(letter_type, analysis)
+            logger.info(f"✅ Німецька відповідь (шаблон): {len(response)} символів")
+            return response
+        except Exception as e:
+            logger.error(f"Помилка fallback шаблону: {e}")
+            # Якщо шаблон не спрацював - використовуємо LLM
+            pass
+    
+    # Для української - LLM + СЛОВНИК
     if lang == 'uk':
-        prompt = PROMPT_RESPONSE_UK
-    elif lang == 'de':
-        prompt = PROMPT_RESPONSE_DE
-    else:
-        prompt = PROMPT_RESPONSE_UK
+        try:
+            from ukrainian_dictionary import fix_ukrainian_text
+            
+            # Вибір промпту
+            prompt = PROMPT_RESPONSE_UK
+            
+            # Обмеження тексту
+            text_cut = text[:2000] if len(text) > 2000 else text
+            analysis_cut = json.dumps(analysis, ensure_ascii=False)[:500]
+            
+            # Формування повного промпту
+            full_prompt = prompt.format(text=text_cut, analysis=analysis_cut)
+            
+            # Виклик LLM з виправленими налаштуваннями
+            response = ollama.chat(
+                model='llama3.2:3b',
+                messages=[{'role': 'user', 'content': full_prompt}],
+                options={
+                    'temperature': 0.1,
+                    'num_predict': 1500,
+                    'top_p': 0.8,
+                    'repeat_penalty': 2.5,
+                    'num_ctx': 3072,
+                }
+            )
+            
+            content = response['message']['content']
+            
+            # ВИПРАВЛЕННЯ СУРЖИКУ
+            content = fix_ukrainian_text(content)
+            
+            # Видалення повторень
+            content = remove_repetitions(content)
+            
+            logger.info(f"✅ Українська відповідь (LLM + словник): {len(content)} символів")
+            return content
+            
+        except Exception as e:
+            logger.error(f"Помилка генерації uk: {e}")
+            return f"Помилка: {str(e)}"
     
-    # Обмеження тексту
-    text_cut = text[:2000] if len(text) > 2000 else text
-    analysis_cut = json.dumps(analysis, ensure_ascii=False)[:500]
-    
-    # Формування повного промпту
-    full_prompt = prompt.format(text=text_cut, analysis=analysis_cut)
-    
-    try:
-        # Виклик LLM з виправленими налаштуваннями
-        response = ollama.chat(
-            model='llama3.2:3b',
-            messages=[{'role': 'user', 'content': full_prompt}],
-            options={
-                'temperature': 0.1,  # Дуже низька для стабільності
-                'num_predict': 1500,  # Більше символів
-                'top_p': 0.8,
-                'repeat_penalty': 2.5,  # Дуже сильне запобігання повторенням
-                'num_ctx': 3072,  # Більший контекст
-            }
-        )
-        
-        content = response['message']['content']
-        
-        # Видалення повторень
-        content = remove_repetitions(content)
-        
-        logger.info(f"✅ Відповідь {lang}: {len(content)} символів")
-        return content
-        
-    except Exception as e:
-        logger.error(f"Помилка генерації {lang}: {e}")
-        return f"Помилка: {str(e)}"
+    # Для інших мов
+    return "Помилка: Непідтримувана мова"
 
 
 if __name__ == '__main__':
