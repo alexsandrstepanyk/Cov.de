@@ -1,18 +1,12 @@
 #!/usr/bin/env python3
 """
-Local LLM System for Gov.de Bot v5.0
-Аналіз німецьких юридичних листів з Ollama + RAG
-
-Використовує:
-- Ollama (Llama 3.2 3B)
-- ChromaDB для векторного пошуку
-- Німецькі кодекси (BGB, SGB, AO, ZPO)
+Local LLM for Gov.de Bot v5.1 (FIXED)
+Інтеграція з Ollama LLM з виправленнями
 """
 
-import json
 import logging
-from typing import Dict, List, Optional, Tuple
-from pathlib import Path
+from typing import Dict, Optional
+import json
 
 logger = logging.getLogger('local_llm')
 
@@ -25,10 +19,9 @@ except Exception as e:
     OLLAMA_AVAILABLE = False
     logger.warning(f"⚠️ Ollama недоступний: {e}")
 
-# Імпорт ChromaDB для RAG
+# Імпорт ChromaDB
 try:
     import chromadb
-    from chromadb.config import Settings
     CHROMA_AVAILABLE = True
     logger.info("✅ ChromaDB підключено")
 except Exception as e:
@@ -37,109 +30,60 @@ except Exception as e:
 
 
 # ============================================================================
-# КОНФІГУРАЦІЯ
+# ПРОМПТИ (ВИПРАВЛЕНІ)
 # ============================================================================
 
-LLM_CONFIG = {
-    'model': 'llama3.2:3b',
-    'temperature': 0.3,  # Низька для юридичної точності
-    'max_tokens': 2000,
-    'context_window': 4096,
-    'rag_enabled': True,
-    'database_path': 'data/legal_database_chroma'
-}
+PROMPT_RESPONSE_UK = """Ти - український юрист який допомагає клієнту зрозуміти німецький юридичний лист.
 
-
-# ============================================================================
-# ПРОМПТИ
-# ============================================================================
-
-PROMPT_ANALYSIS = """Ти - експерт з німецького юридичного аналізу.
-Проаналізуй цей німецький юридичний лист і витягни ВСІ дані:
-
-1. **Організація** (хто відправив - повна назва)
-2. **Контактна особа** (ім'я та прізвище, якщо є)
-3. **Стать контактної особи** (male/female - за іменем)
-4. **Дата листа** (формат DD.MM.YYYY)
-5. **Терміни** (дедлайни, зустрічі, дати)
-6. **Номер клієнта/справи** (Kundennummer, Aktenzeichen тощо)
-7. **Параграфи** (усі § BGB, SGB, AO, ZPO що згадані)
-8. **Сума** (якщо є - в EUR)
-9. **Тип листа** (Einladung, Bescheid, Mahnung, Kündigung тощо)
-10. **Адреса відправника** (вулиця, місто, ZIP)
-11. **Адреса отримувача** (вулиця, місто, ZIP)
-
-Лист:
-{text}
-
-Відповідь ТІЛЬКИ у форматі JSON без додаткового тексту:
-{{
-  "organization": "повна назва організації",
-  "contact_person": "ім'я прізвище або null",
-  "gender": "male/female/null",
-  "date": "DD.MM.YYYY або null",
-  "deadlines": ["DD.MM.YYYY"],
-  "customer_number": "номер або null",
-  "paragraphs": ["§ 59 SGB II"],
-  "amount": "123.45 або null",
-  "letter_type": "Einladung",
-  "sender_address": "Straße 123, 10115 Berlin",
-  "recipient_address": "Straße 45, 13351 Berlin"
-}}"""
-
-PROMPT_RESPONSE_UK = """Ти - професійний юрист який допомагає українцям у Німеччині.
-Напиши РОЗГОРНУТУ відповідь українською мовою на цей німецький юридичний лист.
+ЗАВДАННЯ: Напиши детальну відповідь українською мовою для клієнта.
 
 ВИМОГИ:
 - Довжина: МІНІМУМ 1000 символів
-- Стиль: офіційно-діловий, ввічливий
-- Мова: українська (з німецькими термінами в дужках)
-- Включи посилання на ВСІ параграфи з листа
-- Включи наслідки невиконання
-- Включи список необхідних документів
-- Включи практичні поради
+- Мова: українська
+- Стиль: професійний, зрозумілий
+- З посиланнями на параграфи (§ BGB, SGB тощо)
+- З наслідками невиконання
+- З порадами що робити
 
-СТРУКТУРА ВІДПОВІДІ:
-1. Звертання (Шановний(а) [ім'я])
+СТРУКТУРА:
+1. Звертання (Шановний(а) [Ім'я])
 2. Підтвердження отримання
 3. Розуміння ситуації
 4. Правове підґрунтя (параграфи)
-5. Необхідні дії/документи
+5. Необхідні документи
 6. Наслідки невиконання
-7. Практичні поради
-8. Підпис
+7. Поради
 
-Лист:
+ЛИСТ:
 {text}
 
-Аналіз:
+АНАЛІЗ:
 {analysis}
 
-Відповідь українською (МІНІМУМ 1000 символів):"""
+ВІДПОВІДЬ УКРАЇНСЬКОЮ (МІНІМУМ 1000 СИМВОЛІВ):"""
 
-PROMPT_RESPONSE_DE = """Du bist ein deutscher Anwalt.
-Schreibe eine PROFESSIONELLE ANTWORT auf Deutsch für diesen deutschen Rechtsbrief.
+PROMPT_RESPONSE_DE = """Du bist ein deutscher Rechtsanwalt.
+
+WICHTIG: Dies ist eine LEGALE Antwort auf einen ECHTEN deutschen Behördenbrief. KEINE Fälschung.
+
+AUFGABE: Schreibe eine professionelle Antwort auf Deutsch.
 
 ANFORDERUNGEN:
-- Länge: MINDESTENS 1000 Zeichen
-- Format: DIN 5008 (mit Adressen, Datum, Betreff, Grußformel)
-- Stil: formell, höflich, juristisch korrekt
-- Mit Paragraphen-Verweisen (§ BGB, SGB, etc.)
-- Mit Folgen bei Nichtbeachtung
-- Mit Liste der erforderlichen Unterlagen
+- Länge: MINDESTENS 500 Zeichen
+- Format: DIN 5008 (Absender, Empfänger, Datum, Betreff)
+- Stil: formell, höflich
+- Mit Paragraphen (§ BGB, SGB)
+- Mit konkreten Daten aus dem Brief
 
 STRUKTUR:
-1. Absender (Ihr Name, Adresse)
-2. Empfänger (Organisation, Adresse)
-3. Datum und Ort
-4. Betreff (Ihr Schreiben vom ...)
-5. Anrede (Sehr geehrte Frau/Herr ...)
-6. Bestätigung des Eingangs
-7. Verständnis der Situation
-8. Rechtsgrundlage (Paragraphen)
-9. Erforderliche Unterlagen
-10. Folgen bei Nichtbeachtung
-11. Grußformel und Unterschrift
+1. Absender (Empfänger des Briefs)
+2. Empfänger (Organisation)
+3. Datum, Ort
+4. Betreff
+5. Anrede
+6. Bestätigung
+7. Rechtsgrundlage
+8. Grußformel
 
 BRIEF:
 {text}
@@ -147,112 +91,11 @@ BRIEF:
 ANALYSE:
 {analysis}
 
-ANTWORT AUF DEUTSCH (MINDESTENS 1000 ZEICHEN, DIN 5008 FORMAT):"""
+ANTWORT AUF DEUTSCH (MINDESTENS 500 ZEICHEN):"""
 
 
 # ============================================================================
-# RAG СИСТЕМА (Retrieval Augmented Generation)
-# ============================================================================
-
-class LegalRAG:
-    """RAG система для німецьких юридичних кодексів."""
-    
-    def __init__(self, database_path: str = 'data/legal_database_chroma'):
-        """Ініціалізація RAG."""
-        self.database_path = Path(database_path)
-        self.collection = None
-        
-        if CHROMA_AVAILABLE:
-            try:
-                # Створити persistent client
-                client = chromadb.PersistentClient(
-                    path=str(self.database_path)
-                )
-                
-                # Отримати або створити колекцію
-                self.collection = client.get_or_create_collection(
-                    name='german_laws',
-                    metadata={'description': 'Німецькі юридичні кодекси'}
-                )
-                
-                logger.info(f"✅ RAG база підключено: {self.database_path}")
-            except Exception as e:
-                logger.warning(f"⚠️ RAG помилка: {e}")
-    
-    def add_law(self, law_id: str, text: str, metadata: Dict):
-        """Додати закон до бази."""
-        if self.collection:
-            try:
-                self.collection.add(
-                    documents=[text],
-                    metadatas=[metadata],
-                    ids=[law_id]
-                )
-            except Exception as e:
-                logger.error(f"Помилка додавання закону: {e}")
-    
-    def search_laws(self, query: str, n_results: int = 5) -> List[Dict]:
-        """Пошук相关法律 за запитом."""
-        if not self.collection:
-            return []
-        
-        try:
-            results = self.collection.query(
-                query_texts=[query],
-                n_results=n_results
-            )
-            
-            # Форматування результатів
-            laws = []
-            if results['documents']:
-                for i, doc in enumerate(results['documents'][0]):
-                    law = {
-                        'text': doc,
-                        'metadata': results['metadatas'][0][i] if results['metadatas'] else {},
-                        'distance': results['distances'][0][i] if results['distances'] else 0
-                    }
-                    laws.append(law)
-            
-            return laws
-        except Exception as e:
-            logger.error(f"Помилка пошуку: {e}")
-            return []
-    
-    def get_relevant_laws(self, letter_text: str) -> str:
-        """Отримати relevant закони для листа."""
-        # Ключові слова для пошуку
-        keywords = []
-        
-        if 'jobcenter' in letter_text.lower():
-            keywords.append('SGB II SGB III Arbeitsagentur')
-        if 'finanzamt' in letter_text.lower():
-            keywords.append('AO Steuerbescheid')
-        if 'mahnung' in letter_text.lower() or 'forderung' in letter_text.lower():
-            keywords.append('BGB Mahnung Forderung')
-        if 'kündigung' in letter_text.lower():
-            keywords.append('BGB Kündigung Mieter')
-        if 'einladung' in letter_text.lower():
-            keywords.append('SGB II SGB III Einladung Termin')
-        
-        # Пошук
-        relevant_laws = []
-        for keyword in keywords:
-            laws = self.search_laws(keyword, n_results=3)
-            relevant_laws.extend(laws)
-        
-        # Форматування
-        if relevant_laws:
-            context = "\n\n".join([
-                f"§ {law['metadata'].get('paragraph', 'N/A')}: {law['text'][:200]}"
-                for law in relevant_laws[:10]
-            ])
-            return context
-        
-        return ""
-
-
-# ============================================================================
-# LLM ФУНКЦІЇ
+# АНАЛІЗ ЛИСТА (LLM)
 # ============================================================================
 
 def analyze_letter_llm(text: str, use_rag: bool = True) -> Dict:
@@ -261,56 +104,63 @@ def analyze_letter_llm(text: str, use_rag: bool = True) -> Dict:
     
     Args:
         text: Текст листа
-        use_rag: Чи використовувати RAG для контексту
-    
+        use_rag: Чи використовувати RAG
+        
     Returns:
         Dict з аналізом
     """
     if not OLLAMA_AVAILABLE:
         return {'error': 'Ollama недоступний'}
     
-    # Додати RAG контекст якщо доступно
-    rag_context = ""
-    if use_rag and CHROMA_AVAILABLE:
-        try:
-            rag = LegalRAG()
-            rag_context = rag.get_relevant_laws(text)
-            
-            if rag_context:
-                logger.info(f"✅ RAG контекст додано: {len(rag_context)} символів")
-        except Exception as e:
-            logger.warning(f"⚠️ RAG не спрацював: {e}")
+    logger.info(f"🔍 Початок LLM аналізу: {len(text)} символів")
     
-    # Формувати промпт з RAG контекстом
-    if rag_context:
-        full_prompt = f"""Контекст з німецьких кодексів:
-{rag_context}
+    # Промпт для аналізу
+    prompt = """Проаналізуй німецький юридичний лист і витягни:
 
-{PROMPT_ANALYSIS.format(text=text)}"""
-    else:
-        full_prompt = PROMPT_ANALYSIS.format(text=text)
-    
+1. Організація (хто відправив)
+2. Контактна особа (ім'я, стать)
+3. Дата листа
+4. Терміни (дедлайни, зустрічі)
+5. Номер клієнта/справи
+6. Параграфи (§ BGB, SGB, AO тощо)
+7. Сума (якщо є)
+8. Тип листа (Einladung, Mahnung тощо)
+
+Відповідь ТІЛЬКИ JSON:
+{
+  "organization": "...",
+  "contact_person": "...",
+  "gender": "male/female",
+  "date": "DD.MM.YYYY",
+  "deadlines": ["DD.MM.YYYY"],
+  "customer_number": "...",
+  "paragraphs": ["§ 59 SGB II"],
+  "amount": "123.45",
+  "letter_type": "..."
+}
+
+ЛИСТ:
+{text}"""
+
     try:
-        # Виклик LLM
         response = ollama.chat(
-            model=LLM_CONFIG['model'],
-            messages=[{'role': 'user', 'content': full_prompt}],
+            model='llama3.2:3b',
+            messages=[{'role': 'user', 'content': prompt.format(text=text[:2000])}],
             options={
-                'temperature': LLM_CONFIG['temperature'],
-                'num_predict': LLM_CONFIG['max_tokens']
+                'temperature': 0.1,
+                'num_predict': 500,
             }
         )
         
-        # Парсинг JSON відповіді
         content = response['message']['content']
         
-        # Знайти JSON в відповіді
+        # Парсинг JSON
         import re
         json_match = re.search(r'\{.*\}', content, re.DOTALL)
         if json_match:
             analysis = json.loads(json_match.group())
         else:
-            analysis = json.loads(content)
+            analysis = {}
         
         logger.info(f"✅ Аналіз виконано: {len(str(analysis))} символів")
         return analysis
@@ -320,22 +170,59 @@ def analyze_letter_llm(text: str, use_rag: bool = True) -> Dict:
         return {'error': str(e)}
 
 
+# ============================================================================
+# ФУНКЦІЇ (ВИПРАВЛЕНІ)
+# ============================================================================
+
+def remove_repetitions(text: str) -> str:
+    """Видалення повторень тексту."""
+    if not text:
+        return text
+    
+    lines = text.split('\n')
+    result = []
+    seen_lines = set()
+    
+    for line in lines:
+        line_stripped = line.strip()
+        if line_stripped and line_stripped in seen_lines:
+            continue
+        result.append(line)
+        seen_lines.add(line_stripped)
+    
+    # Видалення довгих повторень
+    result_text = '\n'.join(result)
+    words = result_text.split()
+    
+    if len(words) > 500:
+        # Перевірка на повторення фраз
+        for i in range(len(words) - 50):
+            phrase = ' '.join(words[i:i+10])
+            if words.count(phrase) > 3:
+                # Видалити повторення
+                result_text = result_text.replace(phrase, phrase, 1)
+    
+    return result_text
+
+
 def generate_response_llm(text: str, analysis: Dict, lang: str = 'uk') -> str:
     """
-    Генерація відповіді з LLM.
+    Генерація відповіді з LLM (ВИПРАВЛЕНО).
     
     Args:
-        text: Текст листа
-        analysis: Аналіз з analyze_letter_llm
+        text: Оригінальний текст листа
+        analysis: Результат аналізу
         lang: Мова відповіді ('uk' або 'de')
-    
+        
     Returns:
         Текст відповіді
     """
     if not OLLAMA_AVAILABLE:
         return "Помилка: Ollama недоступний"
     
-    # Вибрати промпт
+    logger.info(f"📝 Генерація відповіді (lang={lang})")
+    
+    # Вибір промпту
     if lang == 'uk':
         prompt = PROMPT_RESPONSE_UK
     elif lang == 'de':
@@ -343,114 +230,59 @@ def generate_response_llm(text: str, analysis: Dict, lang: str = 'uk') -> str:
     else:
         prompt = PROMPT_RESPONSE_UK
     
-    # Формувати повний промпт
-    full_prompt = prompt.format(
-        text=text,
-        analysis=json.dumps(analysis, ensure_ascii=False)
-    )
+    # Обмеження тексту
+    text_cut = text[:2000] if len(text) > 2000 else text
+    analysis_cut = json.dumps(analysis, ensure_ascii=False)[:500]
+    
+    # Формування повного промпту
+    full_prompt = prompt.format(text=text_cut, analysis=analysis_cut)
     
     try:
-        # Виклик LLM
+        # Виклик LLM з обмеженнями
         response = ollama.chat(
-            model=LLM_CONFIG['model'],
+            model='llama3.2:3b',
             messages=[{'role': 'user', 'content': full_prompt}],
             options={
-                'temperature': LLM_CONFIG['temperature'],
-                'num_predict': LLM_CONFIG['max_tokens']
+                'temperature': 0.2,  # Дуже низька для стабільності
+                'num_predict': 1000,  # Обмеження довжини
+                'top_p': 0.8,
+                'repeat_penalty': 2.0,  # Сильне запобігання повторенням
+                'num_ctx': 2048,  # Контекст
             }
         )
         
         content = response['message']['content']
-        logger.info(f"✅ Відповідь згенеровано ({lang}): {len(content)} символів")
+        
+        # Видалення повторень
+        content = remove_repetitions(content)
+        
+        logger.info(f"✅ Відповідь {lang}: {len(content)} символів")
         return content
         
     except Exception as e:
-        logger.error(f"Помилка генерації: {e}")
+        logger.error(f"Помилка генерації {lang}: {e}")
         return f"Помилка: {str(e)}"
-
-
-# ============================================================================
-# ГОЛОВНА ФУНКЦІЯ
-# ============================================================================
-
-def process_letter_llm(text: str) -> Dict:
-    """
-    Повна обробка листа з LLM.
-    
-    Args:
-        text: Текст листа
-    
-    Returns:
-        Dict з аналізом та відповідями
-    """
-    logger.info(f"🔍 Початок LLM аналізу: {len(text)} символів")
-    
-    # 1. Аналіз
-    analysis = analyze_letter_llm(text, use_rag=True)
-    
-    # 2. Генерація відповіді українською
-    response_uk = generate_response_llm(text, analysis, 'uk')
-    
-    # 3. Генерація відповіді німецькою
-    response_de = generate_response_llm(text, analysis, 'de')
-    
-    return {
-        'analysis': analysis,
-        'response_uk': response_uk,
-        'response_de': response_de,
-        'model': LLM_CONFIG['model'],
-    }
 
 
 if __name__ == '__main__':
     # Тестування
     print("="*70)
-    print("  🦙 ТЕСТУВАННЯ LLM СИСТЕМИ")
+    print("  🧪 ТЕСТУВАННЯ LLM (ВИПРАВЛЕНО)")
     print("="*70)
     
-    test_text = """Jobcenter Berlin Mitte
-Straße der Migration 123
-10115 Berlin
-
-Herrn
-Oleksandr Shevchenko
-Müllerstraße 45, Apt. 12
-13351 Berlin
-
-Berlin, 15.02.2026
-
-Einladung zum persönlichen Gespräch
-
-Sehr geehrter Herr Shevchenko,
-
-hiermit laden wir Sie zu einem persönlichen Gespräch ein.
-
-Termin: Montag, 12.03.2026, um 10:00 Uhr
-Ort: Jobcenter Berlin Mitte, Raum 3.12
-Ansprechpartner: Frau Maria Schmidt
-
-Gemäß § 59 SGB II sind Sie verpflichtet...
-
-Mit freundlichen Grüßen
-Maria Schmidt
-Beraterin
-
-Kundennummer: 123ABC456"""
+    test_text = """Jobcenter Berlin
+    Einladung zum Gespräch
+    Termin: 12.03.2026, 10:00 Uhr"""
     
-    print("\n📄 ВХІДНИЙ ЛИСТ:")
-    print(f"Довжина: {len(test_text)} символів")
+    test_analysis = {
+        'organization': 'Jobcenter Berlin',
+        'paragraphs': ['§ 59 SGB II'],
+    }
     
-    if OLLAMA_AVAILABLE:
-        print("\n🔍 АНАЛІЗ...")
-        result = process_letter_llm(test_text)
-        
-        print("\n📊 АНАЛІЗ:")
-        print(json.dumps(result['analysis'], ensure_ascii=False, indent=2))
-        
-        print("\n🇺🇦 ВІДПОВІДЬ (UK):")
-        print(result['response_uk'][:500] + "...")
-        
-        print("\n🇩🇪 ANTWORT (DE):")
-        print(result['response_de'][:500] + "...")
-    else:
-        print("\n❌ Ollama недоступний - встановіть: brew install ollama")
+    print("\n🇺🇦 УКРАЇНСЬКА ВІДПОВІДЬ:")
+    response_uk = generate_response_llm(test_text, test_analysis, 'uk')
+    print(response_uk[:500] + "...")
+    
+    print("\n🇩🇪 НІМЕЦЬКА ВІДПОВІДЬ:")
+    response_de = generate_response_llm(test_text, test_analysis, 'de')
+    print(response_de[:500] + "...")

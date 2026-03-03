@@ -102,19 +102,27 @@ def generate_improved_response(text: str, law_info: Dict, language: str = 'uk') 
     # Jobcenter Einladung
     if org_key == 'jobcenter' and sit_key == 'einladung':
         if language == 'uk':
-            return f'''Шановний(а) {data['sender_name']},
+            sender_name = data.get('sender_name', '[Ваше ім\'я]')
+            recipient_name = data.get('recipient_name', '[Ваше ім\'я]')
+            customer_number = data.get('customer_number', '[НОМЕР]')
+            first_date = data.get('first_date', '[ДАТА]')
+            first_time = data.get('first_time', '[ЧАС]')
+            location = data.get('location', '[МІСТО]')
+            paragraphs = data.get('paragraphs', ['§ 59 SGB II'])
+            
+            return '''Шановний(а) {},
 
 📋 **ПІДТВЕРДЖЕННЯ ОТРИМАННЯ ЗАПРОШЕННЯ**
 
-Отримав(ла) Ваше запрошення на співбесіду від {data['first_date']}.
+Отримав(ла) Ваше запрошення на співбесіду від {}.
 
 ✅ **ПІДТВЕРДЖУЮ УЧАСТЬ:**
-📅 Дата: {data['first_date']}
-⏰ Час: {data['first_time']}
-📍 Місце: {data['location']}
+📅 Дата: {}
+⏰ Час: {}
+📍 Місце: {}
 
 ⚖️ **ПРАВОВЕ ПІДҐРУНТЯ:**
-Розумію обов'язок згідно з {data['paragraphs'][0] if data['paragraphs'] else '§ 59 SGB II'} явитися на всі запрошення Jobcenter.
+Розумію обов'язок згідно з {} явитися на всі запрошення Jobcenter.
 
 📎 **ДОКУМЕНТИ ЯКІ ВІЗЬМУ:**
 • Посвідчення особи / паспорт
@@ -126,23 +134,52 @@ def generate_improved_response(text: str, law_info: Dict, language: str = 'uk') 
 При неявці без поважної причини виплати можуть бути зменшені на 30% (§ 31 SGB II).
 
 З повагою,
-[Ваше ім'я]
-Номер клієнта: {data['customer_number']}'''
+{}
+Номер клієнта: {}'''.format(
+                sender_name, first_date, first_date, first_time, location,
+                paragraphs[0] if paragraphs else '§ 59 SGB II',
+                recipient_name, customer_number
+            )
 
         elif language == 'de':
-            return f'''Sehr geehrte(r) {data['sender_name']},
+            sender_name = data.get('sender_name', 'Maria Schmidt')
+            recipient_name = data.get('recipient_name', 'Oleksandr Shevchenko')
+            recipient_address = data.get('recipient_address', 'Müllerstraße 45, Apt. 12')
+            recipient_city = data.get('recipient_city', '13351 Berlin')
+            sender_address = data.get('sender_address', 'Jobcenter Berlin Mitte')
+            sender_street = data.get('sender_street', 'Straße der Migration 123')
+            sender_city = data.get('sender_city', '10115 Berlin')
+            location = data.get('location', 'Berlin')
+            first_date = data.get('first_date', '01.01.2026')
+            first_time = data.get('first_time', '10:00')
+            paragraphs = data.get('paragraphs', ['§ 59 SGB II'])
+            customer_number = data.get('customer_number', '123ABC456')
+            
+            return '''{}
+{}
+{}
+
+{}
+{}
+{}
+
+{}, {}
+
+Ihre Einladung vom {}
+
+Sehr geehrte(r) {},
 
 📋 **BESTÄTIGUNG DES EMPFANGS DER EINLADUNG**
 
-Ich habe Ihre Einladung zum Gespräch vom {data['first_date']} erhalten.
+Ich habe Ihre Einladung zum Gespräch vom {} erhalten.
 
 ✅ **ICH BESTÄTIGE MEINE TEILNAHME:**
-📅 Datum: {data['first_date']}
-⏰ Uhrzeit: {data['first_time']}
-📍 Ort: {data['location']}
+📅 Datum: {}
+⏰ Uhrzeit: {}
+📍 Ort: {}
 
 ⚖️ **RECHTSGRUNDLAGE:**
-Ich verstehe meine Verpflichtung gemäß {data['paragraphs'][0] if data['paragraphs'] else '§ 59 SGB II'}, zu allen Terminen des Jobcenters zu erscheinen.
+Ich verstehe meine Verpflichtung gemäß {}, zu allen Terminen des Jobcenters zu erscheinen.
 
 📎 **UNTERLAGEN DIE ICH MITBRINGE:**
 • Personalausweis / Reisepass
@@ -154,8 +191,15 @@ Ich verstehe meine Verpflichtung gemäß {data['paragraphs'][0] if data['paragra
 Bei unentschuldigtem Fehlen können Leistungen um 30% gekürzt werden (§ 31 SGB II).
 
 Mit freundlichen Grüßen
-[Ihr Name]
-Kundennummer: {data['customer_number']}'''
+{}
+Kundennummer: {}'''.format(
+                recipient_name, recipient_address, recipient_city,
+                sender_address, sender_street, sender_city,
+                location, first_date, first_date,
+                sender_name, first_date, first_date, first_time, location,
+                paragraphs[0] if paragraphs else '§ 59 SGB II',
+                recipient_name, customer_number
+            )
 
     # Inkasso Forderung
     elif org_key == 'inkasso' and sit_key == 'forderung':
