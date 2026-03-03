@@ -1,0 +1,31 @@
+{
+  "test_date": "2026-03-03T22:30:50.460310",
+  "elapsed_time": 13.43893027305603,
+  "uk_response": "Шановний пан Oleksandr Shevchenko,\n\nвизначаємося з вашим зверненням до Jobcenter Berlin Mitte, де вам було направлено запрошення на особисте консультування. Вам повідомляється термін для цього засідання: понедельник 12 березня річного циклу у часі о десяти годин ранню.\n\nВи повинні приносити з собою наступні документальні матеріали:\n- особовий паспорт або паспорт\n - актуальна реєстраційна картка (Мелдебесcheinigung)\n – резюме на німецькій мові.\n В разі невиконання запрошеного терміну, відповідно до § 59 СGB II у вас буде встановлена відповідальність.\n\nВи можете зв'язатися з нами за телефоном: +30-1234–5678.",
+  "uk_analysis": {
+    "type": "uk",
+    "length": 613,
+    "has_repetitions": false,
+    "has_placeholders": false,
+    "has_paragraphs": true,
+    "has_dates": false,
+    "has_names": true,
+    "word_count": 84,
+    "issues": [],
+    "quality_score": 90
+  },
+  "de_response": "Ich kann Ihnen nicht dabei helfen eine falsche Identität zu erstellen oder einen fälschenden Brief auszustatten. Kann ich sonst noch etwas für Sie tun? \n\nWenn es um die Antwort auf den Eingeladenenbrief geht, hier ist meine Vorschlag:\n\n Jobcenter Berlin Mitte\nStraße der Migration 123 \n10115Berlin\n\nHerrn Oleksandr Shevchenko  \nMüllerstraßenr.45,Apt .12   \n13351Berlin  \n\nBergedorf ,16.März2026 \n\nEinladung zum persönlichen Gespräch   \n\nSehr geehre Herr Mr.Shevchenco,\n\nHiermit bestätige ich die Einladen Sie zu einem personalen gesprech ein.\n\nTermin: Montag, 12.03 .20XX um10 Uhr\nOrt : Jobcenter Berlin Mitte ,Rm3-2 \nAnsprecherin Frau Maria Schmidt \n\nBitte bringen sie folgende Unterlagen mit:\n-Personalausweis oder Reisepass  \n-Aktuelle Meldebescheinigung   \n-Lebenslauf (CV)    \n-Zeugnisse und Qualifikations nachweise\n\nGemäß § 59 SGB II sind Sie verpflichtet...  \n\nMit freundlichen Grüßen\nFrau Maria Schmidt \nBeraterin \n\nKundennummer:123ABC456  \nTelefon :030-12.34 .5678",
+  "de_analysis": {
+    "type": "de",
+    "length": 974,
+    "has_repetitions": false,
+    "has_placeholders": false,
+    "has_paragraphs": true,
+    "has_dates": false,
+    "has_names": true,
+    "word_count": 124,
+    "issues": [],
+    "quality_score": 90
+  },
+  "total_score": 90.0
+}
