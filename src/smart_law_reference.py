@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """
-Smart Law Reference System for Gov.de
+Smart Law Reference System for Gov.de v8.1
 Аналізує текст листа та знаходить конкретні параграфи законів для посилання
+
+v8.1: Додано smart_letter_analysis для точного визначення організації
 """
 
 import re
@@ -9,6 +11,15 @@ import logging
 from typing import Dict, List, Tuple, Optional
 
 logger = logging.getLogger(__name__)
+
+# Імпорт нового аналізатора
+try:
+    from smart_letter_analysis import analyze_letter_smart as smart_analyze_letter
+    SMART_ANALYSIS_AVAILABLE = True
+    logger.info("✅ Smart Letter Analysis підключено")
+except Exception as e:
+    SMART_ANALYSIS_AVAILABLE = False
+    logger.warning(f"⚠️ Smart Letter Analysis недоступний: {e}")
 
 # База законів з конкретними ситуаціями та параграфами
 LAW_DATABASE = {
@@ -689,19 +700,56 @@ def is_personal_letter(text: str) -> bool:
 
 def analyze_letter_smart(text: str, language: str = 'uk') -> Dict:
     """
-    Повний розумний аналіз листа.
+    Повний розумний аналіз листа v8.1.
     
+    Використовує smart_letter_analysis для точного визначення:
+    - Організації (Jobcenter, Finanzamt, Inkasso...)
+    - Типу листа (Einladung, Mahnung, Bescheid...)
+    - Параграфів (§ 59 SGB II, § 286 BGB...)
+    - Дат, сум, номерів
+    - Наслідків невиконання
+
     Args:
         text: Текст листа
         language: Мова користувача
-    
+
     Returns:
         Dict з повною інформацією
     """
+    # Використовуємо новий аналізатор
+    if SMART_ANALYSIS_AVAILABLE:
+        try:
+            smart_result = smart_analyze_letter(text, language)
+            
+            # Формуємо результат у сумісному форматі
+            return {
+                'law_info': {
+                    'organization': smart_result.get('organization', 'Невизначено'),
+                    'organization_key': smart_result.get('organization_key', 'unknown'),
+                    'situation': smart_result.get('letter_type', 'Загальний лист'),
+                    'situation_key': smart_result.get('letter_type_key', 'general'),
+                    'paragraphs': smart_result.get('paragraphs', []),
+                    'consequences': smart_result.get('consequences', 'Наслідки не визначено'),
+                },
+                'recipient_name': smart_result.get('recipient_name', ''),
+                'sender_name': smart_result.get('sender_name', ''),
+                'recipient_address': smart_result.get('recipient_address', ''),
+                'sender_address': smart_result.get('sender_address', ''),
+                'dates': smart_result.get('dates', []),
+                'amounts': smart_result.get('amounts', []),
+                'customer_number': smart_result.get('customer_number', ''),
+                'is_personal': False,
+                'confidence': smart_result.get('confidence', 0.5),
+            }
+        except Exception as e:
+            logger.warning(f"⚠️ Smart Analysis помилка: {e}")
+            # Fallback на старий метод
+    
+    # Старий метод (fallback)
     # Перевіряємо чи лист особистий
     if is_personal_letter(text):
         return analyze_personal_letter(text, language)
-    
+
     # Офіційний лист - глибокий аналіз
     return analyze_official_letter(text, language)
 
