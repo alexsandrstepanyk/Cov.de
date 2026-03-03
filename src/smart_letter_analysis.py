@@ -176,20 +176,30 @@ def detect_letter_type(text_lower: str) -> tuple:
 
 
 def extract_paragraphs(text: str) -> List[str]:
-    """Витягування параграфів з тексту."""
+    """Витягування параграфів з тексту (v8.2 - German Legal Parser)."""
     paragraphs = []
     
-    # Формат: § 59 SGB II
-    pattern1 = re.findall(r'§\s*(\d+[a-z]?)\s*(SGB\s*[IVX]+|BGB|AO|ZPO|VVG)', text, re.IGNORECASE)
-    for match in pattern1:
-        paragraphs.append(f'§ {match[0]} {match[1]}')
+    # Крок 1: Використовуємо German Legal Parser
+    try:
+        from german_legal_parser import extract_legal_paragraphs
+        parser_paragraphs = extract_legal_paragraphs(text)
+        paragraphs.extend(parser_paragraphs)
+    except Exception as e:
+        logger.warning(f"⚠️ German Legal Parser помилка: {e}")
     
-    # Формат: BGB § 286
-    pattern2 = re.findall(r'(SGB\s*[IVX]+|BGB|AO|ZPO|VVG)\s*§\s*(\d+[a-z]?)', text, re.IGNORECASE)
-    for match in pattern2:
-        para = f'§ {match[1]} {match[0]}'
-        if para not in paragraphs:
-            paragraphs.append(para)
+    # Крок 2: Fallback на старий метод
+    if not paragraphs:
+        # Формат: § 59 SGB II
+        pattern1 = re.findall(r'§\s*(\d+[a-z]?)\s*(SGB\s*[IVX]+|BGB|AO|ZPO|VVG)', text, re.IGNORECASE)
+        for match in pattern1:
+            paragraphs.append(f'§ {match[0]} {match[1]}')
+        
+        # Формат: BGB § 286
+        pattern2 = re.findall(r'(SGB\s*[IVX]+|BGB|AO|ZPO|VVG)\s*§\s*(\d+[a-z]?)', text, re.IGNORECASE)
+        for match in pattern2:
+            para = f'§ {match[1]} {match[0]}'
+            if para not in paragraphs:
+                paragraphs.append(para)
     
     return paragraphs if paragraphs else None
 
