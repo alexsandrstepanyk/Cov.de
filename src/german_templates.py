@@ -24,26 +24,38 @@ def generate_german_response_template(analysis: Dict) -> str:
     # Отримуємо дані з аналізу
     recipient_name = analysis.get('recipient_name', 'Oleksandr Shevchenko')
     recipient_address = analysis.get('recipient_address', 'Müllerstraße 45, Apt. 12')
-    recipient_city = analysis.get('recipient_city', '13351 Berlin')
-    
+    recipient_city_full = analysis.get('recipient_city', '13351 Berlin')
+    # Виправлення: беремо останнє слово як місто (Berlin замість 13351)
+    recipient_city = recipient_city_full.split()[-1] if recipient_city_full else 'Berlin'
+
     sender_name = analysis.get('sender_name', 'Jobcenter Berlin Mitte')
     sender_address = analysis.get('sender_address', 'Straße der Migration 123')
     sender_city = analysis.get('sender_city', '10115 Berlin')
+
+    # Виправлення: беремо дату з листа, а не поточну
+    dates = analysis.get('dates', [])
+    letter_date = dates[0] if dates else datetime.now().strftime('%d.%m.%Y')
     
-    letter_date = analysis.get('date', datetime.now().strftime('%d.%m.%Y'))
-    paragraphs = analysis.get('paragraphs', ['§'])
+    # Виправлення: перевіряємо що параграфи не пусті
+    paragraphs = analysis.get('paragraphs', [])
+    if not paragraphs or paragraphs == ['§']:
+        paragraphs = ['die genannten Punkte']
+    
     customer_number = analysis.get('customer_number', '')
     letter_type = analysis.get('letter_type', 'Schreiben')
-    
+
     # Поточна дата
     current_date = datetime.now().strftime('%d.%m.%Y')
-    current_city = recipient_city.split()[0] if recipient_city else 'Berlin'
-    
-    # Визначаємо привітання
-    if 'Frau' in sender_name or 'Schmidt' in sender_name:
-        salutation = 'Sehr geehrte Frau Schmidt'
-    elif 'Herr' in sender_name:
-        salutation = 'Sehr geehrter Herr ' + sender_name.split()[-1]
+    current_city = recipient_city
+
+    # Виправлення: визначаємо привітання по імені відправника
+    if sender_name:
+        last_name = sender_name.split()[-1]
+        # Перевіряємо що це не загальне звертання
+        if last_name.lower() not in ['damen', 'herren', 'mitte']:
+            salutation = f'Sehr geehrte Frau/Herr {last_name}'
+        else:
+            salutation = 'Sehr geehrte Damen und Herren'
     else:
         salutation = 'Sehr geehrte Damen und Herren'
     
