@@ -1,0 +1,13 @@
+{
+  "test_date": "2026-03-03T23:41:02.516803",
+  "version": "v8.2",
+  "total_score": 70.83333333333333,
+  "scores": {
+    "smart_analysis": 100,
+    "german_parser": 100,
+    "german_templates": 100,
+    "ukrainian_dictionary": 25,
+    "response_validator": 0,
+    "50_letters_test": 100
+  }
+}
