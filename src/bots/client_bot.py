@@ -1233,12 +1233,22 @@ async def analyze_and_respond(update: Update, context: ContextTypes.DEFAULT_TYPE
                 logger.error(f"Помилка відправки тексту: {e}")
 
             # Генерація та відправка PDF
-            if PDF_GENERATOR and smart_analysis:
+            if PDF_GENERATOR and analysis:
                 try:
                     logger.info(f"📄 Генерація PDF...")
                     
-                    # Отримуємо law_info з smart_analysis
-                    law_info = smart_analysis.get('law_info', {})
+                    # Використовуємо law_info з analysis
+                    law_info = {
+                        'recipient_name': analysis.get('recipient_name', ''),
+                        'recipient_address': analysis.get('recipient_address', ''),
+                        'recipient_city': analysis.get('recipient_city', ''),
+                        'sender_name': analysis.get('sender_name', ''),
+                        'sender_address': analysis.get('sender_address', ''),
+                        'sender_city': analysis.get('sender_city', ''),
+                        'dates': analysis.get('dates', []),
+                        'customer_number': analysis.get('customer_number', ''),
+                        'letter_type': analysis.get('letter_type', ''),
+                    }
                     
                     # Генерація PDF
                     pdf_path = generate_letter_pdf(
@@ -1334,7 +1344,7 @@ async def handle_more_pages(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
     elif "Ще" in text or "ще" in text or "сторінку" in text:
         logger.info(f"📄 Користувач обрав 'Ще сторінку'")
-        # Очікування наступної сторінки
+        # Очікування наступно�� сторінки
         await update.message.reply_text(
             "��� **Надішліть наступну сторінку**\n\n"
             "Надішліть фото наступної сторінки документа або вставте текст.",
