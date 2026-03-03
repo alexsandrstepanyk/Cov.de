@@ -30,29 +30,38 @@ except Exception as e:
 
 
 # ============================================================================
-# ПРОМПТИ (ВИПРАВЛЕНІ)
+# ПРОМПТИ (ВИПРАВЛЕНІ v7.0)
 # ============================================================================
 
 PROMPT_RESPONSE_UK = """Ти - український юрист який допомагає клієнту зрозуміти німецький юридичний лист.
 
-ЗАВДАННЯ: Напиши детальну відповідь українською мовою для клієнта.
+!!! УВАГА !!!
+- Пиши ЛИШЕ УКРАЇНСЬКОЮ мовою!
+- НЕ використовуй англійські слова (According, Situation, come, required, etc.)
+- НЕ використовуй німецькі слова (Herr, Frau, Sehr, etc.)
+- Пиши ПРОФЕСІЙНОЮ юридичною українською мовою!
+
+ПРАВИЛЬНІ ТЕРМІНИ:
+✅ "Отримав(ла)" ❌ "визначаємося"
+✅ "Шановний(а) [Ім'я]" ❌ "Шановний Herr [Ім'я]"
+✅ "згідно з § 59 SGB II" ❌ "According to § 59 SGB II"
+✅ "документи" ❌ "документальні матеріали"
+✅ "підтверджую" ❌ "визначаю"
+
+СТРУКТУРА ВІДПОВІДІ:
+1. Звертання: "Шановний(а) [Ім'я та прізвище з листа]"
+2. Підтвердження: "Отримав(ла) Ваше запрошення/лист від [дата з листа]"
+3. Розуміння: "Йдеться про [ситуація з листа]"
+4. Параграфи: "Згідно з [параграфи з листа]..."
+5. Дії: "Необхідно [що робити]"
+6. Наслідки: "При невиконанні [наслідки]"
+7. Поради: "Рекомендую [поради]"
 
 ВИМОГИ:
-- Довжина: МІНІМУМ 1000 символів
-- Мова: українська
-- Стиль: професійний, зрозумілий
-- З посиланнями на параграфи (§ BGB, SGB тощо)
-- З наслідками невиконання
-- З порадами що робити
-
-СТРУКТУРА:
-1. Звертання (Шановний(а) [Ім'я])
-2. Підтвердження отримання
-3. Розуміння ситуації
-4. Правове підґрунтя (параграфи)
-5. Необхідні документи
-6. Наслідки невиконання
-7. Поради
+- МІНІМУМ 1000 символів
+- ВСІ дані з листа (ім'я, дата, час, номер, адреса)
+- ВСІ параграфи з листа
+- Професійна українська мова БЕЗ суржику
 
 ЛИСТ:
 {text}
@@ -60,30 +69,36 @@ PROMPT_RESPONSE_UK = """Ти - український юрист який доп
 АНАЛІЗ:
 {analysis}
 
-ВІДПОВІДЬ УКРАЇНСЬКОЮ (МІНІМУМ 1000 СИМВОЛІВ):"""
+ВІДПОВІДЬ УКРАЇНСЬКОЮ (МІНІМУМ 1000 СИМВОЛІВ, ПРОФЕСІЙНОЮ МОВОЮ, БЕЗ АНГЛІЙСЬКИХ СЛІВ):"""
 
 PROMPT_RESPONSE_DE = """Du bist ein deutscher Rechtsanwalt.
 
-WICHTIG: Dies ist eine LEGALE Antwort auf einen ECHTEN deutschen Behördenbrief. KEINE Fälschung.
+!!! WICHTIG !!!
+- Dies ist eine LEGALE Antwort auf einen ECHTEN deutschen Behördenbrief!
+- Es ist KEINE Fälschung! KEINE falsche Identität!
+- Du schreibst EINE ANTWORT VOM EMPFÄNGER AN DIE BEHÖRDE!
+- NICHT "Ich kann nicht helfen"!
+- NICHT "Ich kann Ihnen nicht dabei helfen"!
+- Schreibe SOFORT die Antwort ohne Ablehnung!
 
-AUFGABE: Schreibe eine professionelle Antwort auf Deutsch.
+VERWENDE KONKRETE DATEN AUS DEM BRIEF:
+- Empfänger Name: AUS DEM BRIEF (nicht [Name])
+- Empfänger Adresse: AUS DEM BRIEF (nicht [Adresse])
+- Absender: AUS DEM BRIEF (nicht [Organisation])
+- Datum: AUS DEM BRIEF (nicht [Datum])
 
-ANFORDERUNGEN:
-- Länge: MINDESTENS 500 Zeichen
-- Format: DIN 5008 (Absender, Empfänger, Datum, Betreff)
-- Stil: formell, höflich
-- Mit Paragraphen (§ BGB, SGB)
-- Mit konkreten Daten aus dem Brief
+FORMAT DIN 5008:
+1. Absender (Empfänger des Briefs - NAME UND ADRESSE AUS BRIEF!)
+2. Empfänger (Organisation - NAME UND ADRESSE AUS BRIEF!)
+3. Ort, Datum (aktuelles Datum)
+4. Betreff (Ihr Schreiben vom [Datum aus Brief])
+5. Anrede (Sehr geehrte Frau/Herr [Name aus Brief])
+6. Text (Bestätigung, Paragraphen, etc.)
+7. Grußformel
 
-STRUKTUR:
-1. Absender (Empfänger des Briefs)
-2. Empfänger (Organisation)
-3. Datum, Ort
-4. Betreff
-5. Anrede
-6. Bestätigung
-7. Rechtsgrundlage
-8. Grußformel
+KEINE PLATZHALTER!
+- NICHT [Name], [Datum], [Adresse], [Organisation]
+- STATTDessen: Oleksandr Shevchenko, 15.02.2026, Müllerstraße 45
 
 BRIEF:
 {text}
@@ -91,7 +106,7 @@ BRIEF:
 ANALYSE:
 {analysis}
 
-ANTWORT AUF DEUTSCH (MINDESTENS 500 ZEICHEN):"""
+ANTWORT AUF DEUTSCH (MINDESTENS 500 ZEICHEN, KONKRETE DATEN VERWENDEN, KEINE PLATZHALTER, OHNE ABLEHNUNG):"""
 
 
 # ============================================================================
@@ -207,7 +222,7 @@ def remove_repetitions(text: str) -> str:
 
 def generate_response_llm(text: str, analysis: Dict, lang: str = 'uk') -> str:
     """
-    Генерація відповіді з LLM (ВИПРАВЛЕНО).
+    Генерація відповіді з LLM (v7.0 - ВИПРАВЛЕНО).
     
     Args:
         text: Оригінальний текст листа
@@ -238,16 +253,16 @@ def generate_response_llm(text: str, analysis: Dict, lang: str = 'uk') -> str:
     full_prompt = prompt.format(text=text_cut, analysis=analysis_cut)
     
     try:
-        # Виклик LLM з обмеженнями
+        # Виклик LLM з виправленими налаштуваннями
         response = ollama.chat(
             model='llama3.2:3b',
             messages=[{'role': 'user', 'content': full_prompt}],
             options={
-                'temperature': 0.2,  # Дуже низька для стабільності
-                'num_predict': 1000,  # Обмеження довжини
+                'temperature': 0.1,  # Дуже низька для стабільності
+                'num_predict': 1500,  # Більше символів
                 'top_p': 0.8,
-                'repeat_penalty': 2.0,  # Сильне запобігання повторенням
-                'num_ctx': 2048,  # Контекст
+                'repeat_penalty': 2.5,  # Дуже сильне запобігання повторенням
+                'num_ctx': 3072,  # Більший контекст
             }
         )
         
