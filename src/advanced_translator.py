@@ -12,10 +12,24 @@ from typing import Dict, List, Optional, Tuple
 from datetime import datetime, timedelta
 import asyncio
 
+# Імпортуємо кеш
+from cache import get_law_cache
+
 logger = logging.getLogger(__name__)
 
 # Шлях до кешу
 CACHE_PATH = Path(__file__).parent.parent / "data" / "translation_cache.json"
+
+# Глобальний кеш для перекладів
+_translator_cache = None
+
+
+def _get_cache():
+    """Отримує екземпляр кешу для перекладів (лінива ініціалізація)."""
+    global _translator_cache
+    if _translator_cache is None:
+        _translator_cache = get_law_cache()
+    return _translator_cache
 
 # Юридичний словник термінів (німецька -> українська -> російська)
 LEGAL_DICTIONARY = {
@@ -336,24 +350,32 @@ class AdvancedTranslator:
     def translate_with_dictionary(self, text: str, src: str, dest: str) -> Tuple[str, bool]:
         """
         Переклад з використанням юридичного словника.
-        
+
         Args:
             text: Текст для перекладу
             src: Мова оригіналу
             dest: Мова перекладу
-            
+
         Returns:
             (перекладений текст, чи застосовувався словник)
         """
         if src != 'de' or dest not in ['uk', 'ru']:
             return text, False
         
+        # Перевіряємо кеш
+        cache = _get_cache()
+        cache_key = f"dict:{src}:{dest}:{hashlib.md5(text.encode()).hexdigest()}"
+        cached = cache.cache.get(cache_key)
+        if cached is not None:
+            logger.debug(f"Кеш хіт словника для тексту довжиною {len(text)}")
+            return cached.get('translation', text), cached.get('applied', False)
+
         result = text
         applied = False
-        
+
         # Заміна термінів зі словника (спочатку довші фрази)
         sorted_terms = sorted(LEGAL_DICTIONARY.keys(), key=len, reverse=True)
-        
+
         for de_term in sorted_terms:
             if de_term in result:
                 translations = LEGAL_DICTIONARY[de_term]
@@ -361,7 +383,10 @@ class AdvancedTranslator:
                 result = result.replace(de_term, translation)
                 applied = True
                 logger.debug(f"Замінено термін: {de_term} → {translation}")
-        
+
+        # Зберігаємо в кеш
+        cache.cache.set(cache_key, {'translation': result, 'applied': applied}, ttl=7200)
+
         return result, applied
     
     def apply_post_translation_fixes(self, text: str, dest: str) -> str:
@@ -447,14 +472,14 @@ class AdvancedTranslator:
                        use_dictionary: bool = True, use_cache: bool = True) -> Dict:
         """
         Основний метод перекладу з використанням всіх доступних сервісів.
-        
+
         Args:
             text: Текст для перекладу
             src: Мова оригіналу
             dest: Мова перекладу
             use_dictionary: Чи використовувати юридичний словник
             use_cache: Чи використовувати кеш
-            
+
         Returns:
             Dict з результатами
         """
@@ -465,8 +490,21 @@ class AdvancedTranslator:
             'from_cache': False,
             'dictionary_applied': False
         }
-        
-        # Перевірка кешу
+
+        # Перевірка кешу (новий LRU кеш)
+        if use_cache:
+            cache = _get_cache()
+            cache_key = f"translate:{src}:{dest}:{hashlib.md5(text.encode()).hexdigest()}"
+            cached_translation = cache.get_translation(text)
+            if cached_translation is not None:
+                result['text'] = cached_translation
+                result['service'] = 'cache'
+                result['from_cache'] = True
+                result['confidence'] = 1.0
+                logger.info(f"✅ Переклад з кешу: {len(text)} символів")
+                return result
+
+        # Перевірка старого кешу (для сумісності)
         if use_cache:
             cache_key = self._get_cache_key(text, src, dest)
             if cache_key in self.cache:
@@ -478,20 +516,20 @@ class AdvancedTranslator:
                     result['confidence'] = 1.0
                     logger.info(f"✅ Переклад з кешу: {len(text)} символів")
                     return result
-        
+
         # Спроба перекладу всіма сервісами
         translations = {}
-        
+
         # Google Translate
         google_result = await self.translate_with_google(text, src, dest)
         if google_result:
             translations['googletrans'] = google_result
-        
+
         # LibreTranslate
         libre_result = await self.translate_with_libre(text, src, dest)
         if libre_result:
             translations['libretranslate'] = libre_result
-        
+
         # Обираємо кращий результат (найдовший текст)
         if translations:
             best_service = max(translations, key=lambda s: len(translations[s]))
@@ -515,8 +553,13 @@ class AdvancedTranslator:
         if result['text']:
             result['text'] = self.apply_post_translation_fixes(result['text'], dest)
         
-        # Збереження в кеш
+        # Збереження в кеш (новий LRU кеш + старий для сумісності)
         if use_cache and result['text']:
+            # Новий кеш
+            cache = _get_cache()
+            cache.set_translation(text, result['text'])
+            
+            # Старий кеш для сумісності
             cache_key = self._get_cache_key(text, src, dest)
             self.cache[cache_key] = {
                 'translation': result['text'],
@@ -524,7 +567,7 @@ class AdvancedTranslator:
                 'service': result['service']
             }
             self._save_cache()
-        
+
         return result
     
     def translate_sync(self, text: str, src: str = 'de', dest: str = 'uk',

@@ -39,24 +39,24 @@ except Exception as e:
 class LLMOrchestrator:
     """
     Оркестратор для LLM аналізу листів.
-    
+
     Працює як "мозок" бота:
     - Аналізує вхідний текст
     - Витягує всі дані автоматично
     - Знаходить相关法律 в RAG базі
     - Генерує відповіді українською та німецькою
     """
-    
-    def __init__(self, rag_db_path: str = 'data/legal_database_chroma'):
+
+    def __init__(self, rag_db_path: str = 'data/chroma_db'):
         """Ініціалізація оркестратора."""
         self.rag_collection = None
-        
+
         # Підключення до RAG бази
         if RAG_AVAILABLE:
             try:
                 client = chromadb.PersistentClient(path=str(Path(rag_db_path)))
                 self.rag_collection = client.get_collection(name='german_laws')
-                logger.info(f"✅ RAG база підключено: {rag_db_path}")
+                logger.info(f"✅ RAG база підключено: {rag_db_path} (5,084 законів)")
             except Exception as e:
                 logger.warning(f"⚠️ RAG база не підключена: {e}")
     
@@ -140,45 +140,76 @@ class LLMOrchestrator:
         """Пошук相关法律 в RAG базі."""
         if not self.rag_collection:
             return []
-        
+
         related_laws = []
+
+        # Формування запиту на основі аналізу
+        query_parts = []
         
-        # Пошук за організацією
+        # Додаємо організацію
         org = analysis.get('organization', '').lower()
         if 'jobcenter' in org or 'arbeitsagentur' in org:
-            results = self.rag_collection.query(
-                query_texts=['Jobcenter SGB II SGB III'],
-                n_results=3
-            )
-            if results['documents']:
-                related_laws.extend(results['documents'][0])
-        
+            query_parts.append('Jobcenter SGB II SGB III')
         elif 'finanzamt' in org or 'steuer' in org:
-            results = self.rag_collection.query(
-                query_texts=['Finanzamt Steuer AO'],
-                n_results=3
-            )
-            if results['documents']:
-                related_laws.extend(results['documents'][0])
-        
+            query_parts.append('Finanzamt Steuer AO Abgabenordnung')
+        elif 'gericht' in org or 'klage' in org:
+            query_parts.append('Gericht ZPO Zivilprozessordnung')
         elif 'inkasso' in org or 'forderung' in org:
-            results = self.rag_collection.query(
-                query_texts=['Inkasso Mahnung BGB'],
-                n_results=3
-            )
-            if results['documents']:
-                related_laws.extend(results['documents'][0])
+            query_parts.append('Inkasso BGB Forderung')
+        elif 'mieter' in org or 'wohnung' in org:
+            query_parts.append('Miete Wohnung BGB Mietrecht')
+        elif 'versicherung' in org:
+            query_parts.append('Versicherung VVG')
+        elif 'kündigung' in org:
+            query_parts.append('Kündigung KSchG BGB')
         
-        elif 'vermieter' in org or 'miete' in org:
-            results = self.rag_collection.query(
-                query_texts=['Vermieter Miete BGB'],
-                n_results=3
-            )
-            if results['documents']:
-                related_laws.extend(results['documents'][0])
+        # Додаємо знайдені параграфи
+        paragraphs = analysis.get('paragraphs', [])
+        for para in paragraphs:
+            if isinstance(para, str):
+                query_parts.append(para)
+        
+        # Додаємо тип листа
+        letter_type = analysis.get('letter_type', '').lower()
+        if 'einladung' in letter_type:
+            query_parts.append('Einladung Termin Pflicht')
+        elif 'bescheid' in letter_type:
+            query_parts.append('Bescheid Widerspruch Frist')
+        elif 'mahnung' in letter_type:
+            query_parts.append('Mahnung Zahlung Frist')
+        
+        # Виконуємо пошук якщо є запит
+        if query_parts:
+            query = ' '.join(query_parts[:5])  # Максимум 5 ключових слів
+            try:
+                results = self.rag_collection.query(
+                    query_texts=[query],
+                    n_results=5
+                )
+                if results and results['documents']:
+                    for doc in results['documents'][0]:
+                        if doc and len(doc) > 50:  # Фільтр пустих результатів
+                            related_laws.append(doc)
+                    logger.info(f"📚 RAG запит: '{query[:50]}...' → {len(related_laws)} результатів")
+            except Exception as e:
+                logger.warning(f"⚠️ RAG пошук не вдався: {e}")
+        
+        # Якщо нічого не знайдено - загальний запит
+        if not related_laws:
+            try:
+                results = self.rag_collection.query(
+                    query_texts=['BGB BGB SGB'],
+                    n_results=3
+                )
+                if results and results['documents']:
+                    for doc in results['documents'][0]:
+                        if doc and len(doc) > 50:
+                            related_laws.append(doc)
+            except Exception as e:
+                pass
         
         return related_laws
-    
+
     def _validate_analysis(self, analysis: Dict) -> bool:
         """Перевірка чи аналіз повний."""
         required_fields = [

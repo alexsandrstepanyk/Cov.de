@@ -1,0 +1,53 @@
+# Flake8 configuration for Gov.de project
+
+[flake8]
+# Maximum line length
+max-line-length = 127
+
+# Maximum complexity
+max-complexity = 15
+
+# Ignore specific error codes
+ignore = 
+    # E123: closing bracket does not match indentation
+    E123,
+    # E203: whitespace before ':'
+    E203,
+    # E266: too many leading '#' for block comment
+    E266,
+    # W503: line break before binary operator
+    W503,
+    # W605: invalid escape sequence
+    W605
+
+# Exclude directories
+exclude =
+    .git,
+    __pycache__,
+    build,
+    dist,
+    *.egg-info,
+    venv,
+    env,
+    .venv,
+    data,
+    logs,
+    uploads,
+    test_letters,
+    test_results
+
+# Per-file ignores
+per-file-ignores =
+    # Import formatting in __init__.py
+    */__init__.py: F401
+    # Long lines in test files
+    tests/*: E501
+
+# Show source of errors
+show-source = true
+
+# Statistics
+statistics = true
+
+# Count errors
+count = true

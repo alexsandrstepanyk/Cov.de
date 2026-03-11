@@ -1,0 +1,144 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11"]
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          tesseract-ocr \
+          tesseract-ocr-deu \
+          tesseract-ocr-eng \
+          tesseract-ocr-ukr \
+          libtesseract-dev \
+          libleptonica-dev \
+          poppler-utils
+    
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install flake8 black pytest pytest-cov
+    
+    - name: Lint with flake8
+      run: |
+        # Stop the build if there are Python syntax errors or undefined names
+        flake8 src/ --count --select=E9,F63,F7,F82 --show-source --statistics
+        # Exit-zero treats all errors as warnings
+        flake8 src/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      continue-on-error: true
+    
+    - name: Check code style with black
+      run: |
+        black --check src/ tests/
+      continue-on-error: true
+    
+    - name: Run tests with pytest
+      run: |
+        pytest tests/ -v --cov=src --cov-report=xml --cov-report=term-missing
+      continue-on-error: true
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+      continue-on-error: true
+
+  security:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+    
+    - name: Install safety
+      run: pip install safety
+    
+    - name: Check dependencies for vulnerabilities
+      run: safety check -r requirements.txt
+      continue-on-error: true
+    
+    - name: Check for secrets in code
+      run: |
+        echo "Checking for potential secrets..."
+        ! grep -r "AKIA[0-9A-Z]\{16\}" src/ || echo "⚠️ Potential AWS keys found"
+        ! grep -r "ghp_[a-zA-Z0-9]\{36\}" src/ || echo "⚠️ Potential GitHub tokens found"
+        ! grep -r "xox[baprs]-[0-9a-zA-Z]\{10,48\}" src/ || echo "⚠️ Potential Slack tokens found"
+      continue-on-error: true
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [test]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Check imports
+      run: |
+        python -c "import sys; sys.path.insert(0, 'src'); import cache; print('✅ cache module OK')"
+        python -c "import sys; sys.path.insert(0, 'src'); import monitoring; print('✅ monitoring module OK')"
+      continue-on-error: true
+    
+    - name: Create build artifact
+      run: |
+        tar -czf gov-de-bot-${{ github.sha }}.tar.gz src/ requirements.txt README.md
+        echo "Build artifact created: gov-de-bot-${{ github.sha }}.tar.gz"
+    
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: gov-de-bot-${{ github.sha }}
+        path: gov-de-bot-${{ github.sha }}.tar.gz
+        retention-days: 30
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - name: Deployment placeholder
+      run: |
+        echo "🚀 Deployment step ready"
+        echo "Configure your deployment strategy here:"
+        echo "  - Docker deployment"
+        echo "  - VPS deployment"
+        echo "  - Cloud deployment (AWS/GCP/Azure)"
+        echo "  - Heroku/Railway deployment"

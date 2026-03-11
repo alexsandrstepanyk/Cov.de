@@ -1,4 +1,4 @@
-"""
+   """
 Telegram Bot for Gov.de Legal Analyzer
 Bot client with core logic and country knowledge bases.
 """

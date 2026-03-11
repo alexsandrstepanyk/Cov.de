@@ -51,6 +51,17 @@ Thumbs.db
 # Tokens (ніколи не зберігайте токени в git!)
 *.env
 .env.local
+.env.*.local
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# Secrets
+secrets/
+*.key
+*.pem
+*.crt
 
 # NoHup
 nohup.out

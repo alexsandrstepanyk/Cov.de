@@ -7,13 +7,28 @@ Legal Database Module - SQLite implementation
 import sqlite3
 import json
 import logging
+import time
 from typing import Dict, List, Optional, Tuple
 from pathlib import Path
+
+# Імпортуємо кеш
+from cache import get_law_cache
 
 logger = logging.getLogger(__name__)
 
 # Шлях до бази даних
 DB_PATH = Path(__file__).parent.parent / "data" / "legal_database.db"
+
+# Глобальний кеш для пошуку законів
+_law_search_cache = None
+
+
+def _get_cache():
+    """Отримує екземпляр кешу (лінива ініціалізація)."""
+    global _law_search_cache
+    if _law_search_cache is None:
+        _law_search_cache = get_law_cache()
+    return _law_search_cache
 
 # Початкові дані з legal_db.py
 LEGAL_DATA = {
@@ -470,18 +485,27 @@ def populate_db(cursor):
 def search_laws(query: str, country: str = 'de') -> List[Dict]:
     """
     Пошук законів за текстовим запитом.
-    
+
     Args:
         query: Текст запиту
         country: Код країни
-        
+
     Returns:
         Список знайдених законів
     """
+    # Перевіряємо кеш
+    cache = _get_cache()
+    cached_results = cache.get_search_results(f"{country}:{query}")
+    if cached_results is not None:
+        logger.debug(f"Кеш хіт для запиту: {query}")
+        return cached_results
+    
+    logger.debug(f"Кеш місс для запиту: {query}")
+    
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    
+
     # Пошук по назві та опису
     search_query = f"%{query.lower()}%"
     cursor.execute('''
@@ -491,7 +515,7 @@ def search_laws(query: str, country: str = 'de') -> List[Dict]:
         AND (LOWER(law_name) LIKE ? OR LOWER(description) LIKE ?)
         ORDER BY law_name
     ''', (country, search_query, search_query))
-    
+
     results = []
     for row in cursor.fetchall():
         results.append({
@@ -500,26 +524,40 @@ def search_laws(query: str, country: str = 'de') -> List[Dict]:
             'category': row['category'],
             'keywords': json.loads(row['keywords']) if row['keywords'] else []
         })
-    
+
     conn.close()
+    
+    # Зберігаємо в кеш
+    cache.set_search_results(f"{country}:{query}", results)
+    
     return results
 
 
 def search_by_keywords(keywords: List[str], country: str = 'de') -> List[Dict]:
     """
     Пошук законів за списком ключових слів.
-    
+
     Args:
         keywords: Список ключових слів
         country: Код країни
-        
+
     Returns:
         Список знайдених законів
     """
+    # Перевіряємо кеш
+    cache = _get_cache()
+    cache_key = f"{country}:{','.join(sorted(keywords))}"
+    cached_results = cache.get_search_results(cache_key)
+    if cached_results is not None:
+        logger.debug(f"Кеш хіт для ключових слів: {keywords}")
+        return cached_results
+    
+    logger.debug(f"Кеш місс для ключових слів: {keywords}")
+    
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    
+
     results = []
     for keyword in keywords:
         search_query = f"%{keyword.lower()}%"
@@ -529,7 +567,7 @@ def search_by_keywords(keywords: List[str], country: str = 'de') -> List[Dict]:
             WHERE country_code = ?
             AND (LOWER(law_name) LIKE ? OR LOWER(description) LIKE ? OR keywords LIKE ?)
         ''', (country, search_query, search_query, search_query))
-        
+
         for row in cursor.fetchall():
             law_dict = {
                 'law_name': row['law_name'],
@@ -539,33 +577,47 @@ def search_by_keywords(keywords: List[str], country: str = 'de') -> List[Dict]:
             }
             if law_dict not in results:
                 results.append(law_dict)
-    
+
     conn.close()
+    
+    # Зберігаємо в кеш
+    cache.set_search_results(cache_key, results)
+    
     return results
 
 
 def get_laws_by_category(category: str, country: str = 'de') -> List[Dict]:
     """
     Отримати всі закони для категорії.
-    
+
     Args:
         category: Категорія (debt_collection, tenancy тощо)
         country: Код країни
-        
+
     Returns:
         Список законів
     """
+    # Перевіряємо кеш
+    cache = _get_cache()
+    cache_key = f"category:{country}:{category}"
+    cached_results = cache.get_search_results(cache_key)
+    if cached_results is not None:
+        logger.debug(f"Кеш хіт для категорії: {category}")
+        return cached_results
+    
+    logger.debug(f"Кеш місс для категорії: {category}")
+    
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    
+
     cursor.execute('''
         SELECT law_name, description, keywords
         FROM laws
         WHERE country_code = ? AND category = ?
         ORDER BY law_name
     ''', (country, category))
-    
+
     results = []
     for row in cursor.fetchall():
         results.append({
@@ -573,8 +625,12 @@ def get_laws_by_category(category: str, country: str = 'de') -> List[Dict]:
             'description': row['description'],
             'keywords': json.loads(row['keywords']) if row['keywords'] else []
         })
-    
+
     conn.close()
+    
+    # Зберігаємо в кеш
+    cache.set_search_results(cache_key, results)
+    
     return results
 
 

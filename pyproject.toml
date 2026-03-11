@@ -1,0 +1,51 @@
+# Black configuration for Gov.de project
+
+[tool.black]
+# Target Python version
+target-version = ['py39', 'py310', 'py311']
+
+# Line length
+line-length = 127
+
+# Exclude directories
+exclude = '''
+/(
+    \.git
+  | \.github
+  | \.qwen
+  | \.venv
+  | \.env
+  | venv
+  | env
+  | build
+  | dist
+  | \.egg-info
+  | data
+  | logs
+  | uploads
+  | test_letters
+  | test_results
+  | \.mypy_cache
+)/
+'''
+
+# Include patterns
+force-exclude = '''
+/(
+    \.git
+  | \.github
+  | \.qwen
+)/
+'''
+
+# Use Python 3.9+ style string formatting
+preview = true
+
+# Enable fast mode
+fast = true
+
+# Color output
+color = true
+
+# Verbose output
+verbose = true

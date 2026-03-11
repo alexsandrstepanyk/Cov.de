@@ -78,22 +78,57 @@ Betreff: {letter_type} vom {letter_date}
 hiermit bestätige ich den Empfang Ihres Schreibens vom {letter_date}.
 
 Ich nehme zur Kenntnis:
-- {'; '.join(paragraphs) if paragraphs else 'die genannten Punkte'}
-- die genannten Fristen und Termine
+"""
+
+    # Додаємо параграфи з поясненнями
+    if paragraphs and paragraphs != ['§']:
+        for para in paragraphs:
+            if '§ 59' in para and 'SGB II' in para:
+                template += f"- {para} (Einladung zur Beratung und Erörterung)\n"
+            elif '§ 309' in para and 'SGB III' in para:
+                template += f"- {para} (Mitwirkungspflichten bei Arbeitsvermittlung)\n"
+            elif '§ 60' in para and 'SGB I' in para:
+                template += f"- {para} (Allgemeine Mitwirkungspflichten)\n"
+            elif '§ 66' in para and 'SGB I' in para:
+                template += f"- {para} (Leistungsausschluss bei Mitwirkungsverletzung)\n"
+            elif '§ 31' in para and 'SGB II' in para:
+                template += f"- {para} (Pflichtverletzungen und Sanktionen)\n"
+            elif '§ 15' in para and 'SGB II' in para:
+                template += f"- {para} (Eingliederungsvereinbarung)\n"
+            elif '§ 7' in para and 'SGB II' in para:
+                template += f"- {para} (Voraussetzungen für Leistungen)\n"
+            elif '§ 9' in para and 'SGB II' in para:
+                template += f"- {para} (Bedürftigkeit)\n"
+            elif 'Mahnung' in letter_type or 'Zahlung' in letter_type:
+                template += f"- {para} (Zahlungsaufforderung)\n"
+            elif 'Kündigung' in letter_type:
+                template += f"- {para} (Kündigung)\n"
+            else:
+                template += f"- {para}\n"
+    else:
+        template += "- die genannten Anforderungen und Fristen\n"
+
+    template += """- die genannten Fristen und Termine
 - die erforderlichen Unterlagen
 
 Ich werde fristgerecht reagieren und die notwendigen Schritte einleiten.
 
 Für Rückfragen stehe ich Ihnen gerne zur Verfügung.
 
-Mit freundlichen Grüßen
-{recipient_name}
-{f'Kundennummer: {customer_number}' if customer_number else ''}
+Telefon: +49 [Ihre Telefonnummer]
+E-Mail: [Ihre E-Mail-Adresse]
 
+Mit freundlichen Grüßen
+"""
+    template += f"{recipient_name}\n"
+    if customer_number:
+        template += f"Kundennummer: {customer_number}\n"
+
+    template += """
 Anlagen:
 - Kopie des Schreibens
 - Erforderliche Unterlagen"""
-    
+
     return template
 
 
