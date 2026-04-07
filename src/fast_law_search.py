@@ -32,43 +32,88 @@ class FastLawSearch:
     
     def search(self, query: str, limit: int = 10) -> List[Dict]:
         """
-        Пошук законів за запитом.
-        
+        Розумний пошук законів за запитом.
+
         Args:
             query: Пошуковий запит (наприклад, "§ 59 SGB II")
             limit: Максимальна кількість результатів
-        
+
         Returns:
             Список знайдених параграфів
         """
         if not self.index:
             return []
-        
+
         results = []
         query_lower = query.lower()
         
+        # Витягуємо номер параграфа з запиту (напр. "§ 59 SGB II" → "59")
+        import re
+        para_match = re.search(r'§\s*(\d+[a-z]?)', query, re.IGNORECASE)
+        query_para_num = para_match.group(1) if para_match else None
+        
+        # Витягуємо назву закону (напр. "SGB II" або "SGB_2" з запиту)
+        # Нормалізуємо: SGB II → SGB_2, SGB III → SGB_3, і т.д.
+        query_law = None
+        
+        # Спочатку шукаємо формат SGB_2, BGB, AO, і т.д.
+        law_match = re.search(r'\b(SGB_\d+|BGB|AO_?\d*|ZPO|StGB|HGB|GG|VwVfG|SGB\s*\d+)\b', query, re.IGNORECASE)
+        if law_match:
+            query_law = law_match.group(1).upper().replace(' ', '_')
+            # Нормалізація римських цифр: SGB_II → SGB_2
+            roman_map = {'I': '1', 'II': '2', 'III': '3', 'IV': '4', 'V': '5', 'VI': '6', 'VII': '7', 'VIII': '8', 'IX': '9', 'X': '10'}
+            for roman, arabic in roman_map.items():
+                query_law = query_law.replace(f'SGB_{roman}', f'SGB_{arabic}')
+        else:
+            # Шукаємо формат "SGB II" (з пробілом і римською цифрою)
+            law_match2 = re.search(r'\bSGB\s+(I{1,3}|IV|V|VI|VII|VIII|IX|X)\b', query, re.IGNORECASE)
+            if law_match2:
+                roman = law_match2.group(1).upper()
+                roman_map = {'I': '1', 'II': '2', 'III': '3', 'IV': '4', 'V': '5', 'VI': '6', 'VII': '7', 'VIII': '8', 'IX': '9', 'X': '10'}
+                query_law = f'SGB_{roman_map.get(roman, roman)}'
+
         # Пошук по всіх законах
         for law_name, law_data in self.index.get('laws', {}).items():
-            # Перевірка чи закон відповідає запиту
-            if query_lower in law_name.lower():
-                results.append({
-                    'law': law_name,
-                    'paragraphs': law_data.get('paragraphs', []),
-                    'relevance': 1.0
-                })
+            law_name_lower = law_name.lower()
             
-            # Пошук по параграфах
-            for para in law_data.get('paragraphs', []):
-                if query_lower in para.lower():
+            # 1. Прямий пошук назви закону
+            if query_law:
+                # Точний збіг назви закону
+                if query_law.lower() == law_name_lower:
+                    if query_para_num:
+                        # Шукаємо конкретний параграф в цьому законі
+                        target_para = f'§ {query_para_num}'
+                        if target_para in law_data.get('paragraphs', []):
+                            results.append({
+                                'law': law_name,
+                                'paragraph': target_para,
+                                'relevance': 1.0
+                            })
+                            if len(results) >= limit:
+                                return results
+                    else:
+                        # Просто повертаємо закон
+                        results.append({
+                            'law': law_name,
+                            'paragraphs': law_data.get('paragraphs', []),
+                            'relevance': 1.0
+                        })
+                        if len(results) >= limit:
+                            return results
+            
+            # 2. Пошук по всіх параграфах (якщо запит містить § але не знайшли закон)
+            elif query_para_num and '§' in query and not query_law:
+                target_para = f'§ {query_para_num}'
+                if target_para in law_data.get('paragraphs', []):
                     results.append({
                         'law': law_name,
-                        'paragraph': para,
-                        'relevance': 0.9
+                        'paragraph': target_para,
+                        'relevance': 0.5
                     })
-                    
-                    if len(results) >= limit:
-                        return results
-        
+
+            if len(results) >= limit:
+                return results
+
         return results
     
     def get_law(self, law_name: str) -> Optional[Dict]:

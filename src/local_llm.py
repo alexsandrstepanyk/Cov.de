@@ -5,16 +5,25 @@ Local LLM for Gov.de Bot v5.1 (FIXED)
 """
 
 import logging
+import os
 from typing import Dict, Optional
 import json
+import requests
 
 logger = logging.getLogger('local_llm')
 
-# Імпорт Ollama
+# Отримуємо URL з змінної оточення (fallback для локального запуску)
+OLLAMA_HOST = os.getenv('OLLAMA_BASE_URL', 'http://localhost:11434')
+
+# Перевіряємо доступність Ollama
 try:
-    import ollama
-    OLLAMA_AVAILABLE = True
-    logger.info("✅ Ollama підключено")
+    r = requests.get(f'{OLLAMA_HOST}/api/tags', timeout=5)
+    if r.status_code == 200:
+        OLLAMA_AVAILABLE = True
+        logger.info(f"✅ Ollama підключено ({OLLAMA_HOST})")
+    else:
+        OLLAMA_AVAILABLE = False
+        logger.warning(f"⚠️ Ollama повернув статус {r.status_code}")
 except Exception as e:
     OLLAMA_AVAILABLE = False
     logger.warning(f"⚠️ Ollama недоступний: {e}")
@@ -115,73 +124,134 @@ ANTWORT AUF DEUTSCH (MINDESTENS 500 ZEICHEN, KONKRETE DATEN VERWENDEN, KEINE PLA
 
 def analyze_letter_llm(text: str, use_rag: bool = True) -> Dict:
     """
-    Аналіз листа з LLM.
-    
+    Аналіз листа з LLM + RAG.
+
     Args:
         text: Текст листа
         use_rag: Чи використовувати RAG
-        
+
     Returns:
         Dict з аналізом
     """
     if not OLLAMA_AVAILABLE:
         return {'error': 'Ollama недоступний'}
-    
+
     logger.info(f"🔍 Початок LLM аналізу: {len(text)} символів")
     
-    # Промпт для аналізу
-    prompt = """Проаналізуй німецький юридичний лист і витягни:
+    # RAG пошук相关法律
+    rag_context = ""
+    if use_rag:
+        try:
+            from fast_law_search import search_laws
 
-1. Організація (хто відправив)
-2. Контактна особа (ім'я, стать)
-3. Дата листа
-4. Терміни (дедлайни, зустрічі)
-5. Номер клієнта/справи
-6. Параграфи (§ BGB, SGB, AO тощо)
-7. Сума (якщо є)
-8. Тип листа (Einladung, Mahnung тощо)
+            # Шукаємо закони за ключовими словами
+            keywords = ['Jobcenter', 'Einladung', 'SGB', 'BGB', 'Mahnung']
+            found_laws = []
+            for keyword in keywords:
+                if keyword.lower() in text.lower():
+                    laws = search_laws(keyword, limit=3)
+                    found_laws.extend(laws[:2])
 
-Відповідь ТІЛЬКИ JSON:
-{
-  "organization": "...",
-  "contact_person": "...",
-  "gender": "male/female",
-  "date": "DD.MM.YYYY",
-  "deadlines": ["DD.MM.YYYY"],
-  "customer_number": "...",
-  "paragraphs": ["§ 59 SGB II"],
-  "amount": "123.45",
-  "letter_type": "..."
-}
+            if found_laws:
+                rag_context = "\n\nЗнайдені закони:\n"
+                for law in found_laws[:5]:
+                    rag_context += f"- {law.get('law', '')} {law.get('paragraph', '')}: {law.get('description', '')}\n"
+                logger.info(f"✅ RAG знайдено законів: {len(found_laws)}")
+        except Exception as e:
+            logger.warning(f"⚠️ RAG пошук не вдався: {e}")
 
-ЛИСТ:
+    # Промпт для аналізу (фігурні дужки JSON екрановані подвійними {{}})
+    prompt = """Ти експерт з німецького права. Проаналізуй лист і витягни ВСІ дані у форматі JSON.
+
+ПРАВИЛА:
+1. Поверни ВИКЛЮЧНО JSON, без додаткового тексту
+2. Не використовуй markdown, code blocks чи інший текст
+3. Всі поля мають бути заповнені або порожній рядок ""
+4. Масиви можуть бути порожні []
+
+СТРУКТУРА JSON (обов'язково дотримуйся):
+{{
+  "organization": "точна назва організації з листа",
+  "contact_person": "ім'я контактної особи",
+  "gender": "male або female",
+  "date": "дата листа у форматі DD.MM.YYYY",
+  "deadlines": ["список усіх дат/дедлайнів"],
+  "customer_number": "Kundennummer/Aktenzeichen",
+  "paragraphs": ["ВСІ параграфи § що згадані в листі"],
+  "amount": "сума якщо є",
+  "letter_type": "Einladung/Mahnung/Schreiben/Kündigung тощо"
+}}
+
+ПРИКЛАД правильної відповіді:
+{{"organization":"Jobcenter Berlin Mitte","contact_person":"Frau Schmidt","gender":"female","date":"15.02.2026","deadlines":["25.02.2026 10:00"],"customer_number":"123ABC456","paragraphs":["§ 59 SGB II","§ 31 SGB II"],"amount":"","letter_type":"Einladung"}}
+
+ТЕПЕР ПРОАНАЛІЗУЙ ЦЕЙ ЛИСТ:
 {text}"""
 
     try:
-        response = ollama.chat(
-            model='llama3.2:3b',
-            messages=[{'role': 'user', 'content': prompt.format(text=text[:2000])}],
-            options={
-                'temperature': 0.1,
-                'num_predict': 500,
-            }
+        # Прямий HTTP запит до Ollama API
+        # Отримуємо модель з оточення
+        llm_model = os.getenv('DEFAULT_LLM_MODEL', 'gemma:7b')
+        
+        response = requests.post(
+            f'{OLLAMA_HOST}/api/chat',
+            json={
+                'model': llm_model,
+                'messages': [{'role': 'user', 'content': prompt.format(text=text[:2000])}],
+                'options': {
+                    'temperature': 0.05,
+                    'num_predict': 1000,
+                    'top_p': 0.9,
+                },
+                'stream': False,
+                'format': 'json'  # Вимушує Ollama повертати тільки JSON
+            },
+            timeout=90
         )
         
-        content = response['message']['content']
-        
-        # Парсинг JSON
+        response.raise_for_status()
+        result = response.json()
+        content = result['message']['content']
+
+        # Парсинг JSON з кількома спробами
         import re
+        
+        # Спроба 1: Шукаємо JSON між фігурними дужками
         json_match = re.search(r'\{.*\}', content, re.DOTALL)
         if json_match:
-            analysis = json.loads(json_match.group())
+            try:
+                analysis = json.loads(json_match.group())
+                logger.info(f"✅ JSON розпаршено (спроба 1)")
+            except json.JSONDecodeError:
+                # Спроба 2: Очищаємо від markdown
+                cleaned = json_match.group().replace('```json', '').replace('```', '').strip()
+                analysis = json.loads(cleaned)
+                logger.info(f"✅ JSON розпаршено (спроба 2)")
         else:
+            logger.warning(f"⚠️ JSON не знайдено у відповіді: {content[:200]}")
             analysis = {}
         
-        logger.info(f"✅ Аналіз виконано: {len(str(analysis))} символів")
-        return analysis
+        # Очищення ключів від нових рядків та пробілів
+        cleaned_analysis = {}
+        for key, value in analysis.items():
+            clean_key = key.strip().strip('"').strip()
+            cleaned_analysis[clean_key] = value
+        analysis = cleaned_analysis
         
+        # Перевірка що всі потрібні ключі є
+        required_keys = ['organization', 'contact_person', 'gender', 'date', 'deadlines', 'customer_number', 'paragraphs', 'amount', 'letter_type']
+        for key in required_keys:
+            if key not in analysis:
+                analysis[key] = '' if key != 'deadlines' and key != 'paragraphs' else []
+
+        logger.info(f"✅ Аналіз виконано: organization='{analysis.get('organization', '')}', paragraphs={analysis.get('paragraphs', [])}")
+        return analysis
+
     except Exception as e:
+        import traceback
+        tb = traceback.format_exc()
         logger.error(f"Помилка аналізу: {e}")
+        logger.error(f"Full traceback:\n{tb}")
         return {'error': str(e)}
 
 
@@ -254,32 +324,42 @@ def generate_response_llm(text: str, analysis: Dict, lang: str = 'uk') -> str:
     if lang == 'uk':
         try:
             from ukrainian_dictionary import fix_ukrainian_text
-            
+
             # Вибір промпту
             prompt = PROMPT_RESPONSE_UK
-            
+
             # Обмеження тексту
             text_cut = text[:2000] if len(text) > 2000 else text
             analysis_cut = json.dumps(analysis, ensure_ascii=False)[:500]
-            
+
             # Формування повного промпту
             full_prompt = prompt.format(text=text_cut, analysis=analysis_cut)
+
+            # Отримуємо модель з оточення
+            llm_model = os.getenv('DEFAULT_LLM_MODEL', 'gemma:7b')
             
             # Виклик LLM з виправленими налаштуваннями
-            response = ollama.chat(
-                model='llama3.2:3b',
-                messages=[{'role': 'user', 'content': full_prompt}],
-                options={
-                    'temperature': 0.1,
-                    'num_predict': 1500,
-                    'top_p': 0.8,
-                    'repeat_penalty': 2.5,
-                    'num_ctx': 3072,
-                }
+            response = requests.post(
+                f'{OLLAMA_HOST}/api/chat',
+                json={
+                    'model': llm_model,
+                    'messages': [{'role': 'user', 'content': full_prompt}],
+                    'options': {
+                        'temperature': 0.1,
+                        'num_predict': 1500,
+                        'top_p': 0.8,
+                        'repeat_penalty': 2.5,
+                        'num_ctx': 3072,
+                    },
+                    'stream': False
+                },
+                timeout=120
             )
             
-            content = response['message']['content']
-            
+            response.raise_for_status()
+            result = response.json()
+            content = result['message']['content']
+
             # ВИПРАВЛЕННЯ СУРЖИКУ
             content = fix_ukrainian_text(content)
             

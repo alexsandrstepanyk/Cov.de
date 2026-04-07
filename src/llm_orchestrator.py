@@ -62,34 +62,52 @@ class LLMOrchestrator:
     
     def analyze_letter(self, text: str) -> Dict:
         """
-        Повний аналіз листа з LLM.
-        
+        Повний аналіз листа з LLM + RAG.
+
         Args:
             text: Текст листа німецькою
-            
+
         Returns:
             Dict з повним аналізом
         """
         if not LLM_AVAILABLE:
             return {'error': 'LLM недоступний'}
-        
+
         logger.info(f"🔍 Початок LLM аналізу: {len(text)} символів")
-        
+
         # Крок 1: LLM аналіз (витягування даних)
-        analysis = analyze_letter_llm(text, use_rag=False)
+        analysis = analyze_letter_llm(text, use_rag=True)
         
+        # Перевірка чи аналіз успішний
+        if 'error' in analysis:
+            logger.warning(f"⚠️ Помилка LLM аналізу: {analysis['error']}")
+            # Повертаємо порожній але валідний аналіз
+            analysis = {
+                'organization': '',
+                'contact_person': '',
+                'gender': '',
+                'date': '',
+                'deadlines': [],
+                'customer_number': '',
+                'paragraphs': [],
+                'amount': '',
+                'letter_type': '',
+                'error': analysis['error']
+            }
+            return analysis
+
         # Крок 2: RAG пошук相关法律
         if self.rag_collection and 'paragraphs' in analysis:
             rag_context = self._search_related_laws(analysis)
             analysis['rag_context'] = rag_context
             logger.info(f"✅ RAG знайдено {len(rag_context)}相关法律")
-        
+
         # Крок 3: Додаткова обробка
         analysis['text_length'] = len(text)
         analysis['is_complete'] = self._validate_analysis(analysis)
-        
-        logger.info(f"✅ Аналіз завершено: {analysis.get('organization', 'N/A')}")
-        
+
+        logger.info(f"✅ Аналіз завершено: organization='{analysis.get('organization', 'N/A')}'")
+
         return analysis
     
     def generate_responses(self, text: str, analysis: Dict, lang: str = 'uk') -> Dict:

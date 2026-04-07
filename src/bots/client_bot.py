@@ -129,7 +129,13 @@ try:
     FUNCTIONS_AVAILABLE = True
     logger.info("✅ Client Bot Functions підключено")
 except Exception as e:
+    FUNCTIONS_AVAILABLE = False
     logger.warning(f"⚠️ Client Bot Functions недоступні: {e}")
+    # Дефолтна реалізація для багатосторінкового режиму
+    def get_multi_page_keyboard():
+        """Отримати клавіатуру для багатосторінкового режиму."""
+        keyboard = [['✅ Все, аналізуй'], ['📄 Ще сторінку']]
+        return ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True)
 
 # Імпорт покращеного генератора відповідей (v4.5)
 try:
@@ -141,6 +147,17 @@ try:
 except Exception as e:
     IMPROVED_RESPONSES = False
     logger.warning(f"⚠️ Improved Response Generator недоступний: {e}")
+
+# Імпорт RAG інтеграції
+try:
+    import sys
+    sys.path.insert(0, str(Path(__file__).parent.parent))
+    from bot_rag_integration import rag_search_handler, search_paragraph, quick_law_reference
+    RAG_INTEGRATION = True
+    logger.info("✅ RAG Integration підключено")
+except Exception as e:
+    RAG_INTEGRATION = False
+    logger.warning(f"⚠️ RAG Integration недоступна: {e}")
 
 # Імпорт генератора німецьких листів (DIN 5008)
 try:
@@ -197,8 +214,8 @@ except Exception as e:
 
 # Ініціалізація перекладача
 if not ADVANCED_TRANSLATOR:
-    from googletrans import Translator
-    translator = Translator()
+    from deep_translator import GoogleTranslator
+    translator = GoogleTranslator()
 
 # Токен бота
 BOT_TOKEN = "8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0"
@@ -663,22 +680,23 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
                 ocr_result = recognize_image(file_path, lang='deu+eng')
                 text = ocr_result.get('text', '')
                 logger.info(f"OCR (advanced_ocr): витягнуто {len(text)} символів")
-                
+
                 # 💡 Інтерактивні поради щодо якості фото
                 quality_info = ocr_result.get('quality', {})
                 recommendations = ocr_result.get('recommendations', [])
-                
+
                 if recommendations:
-                    tips_msg = "📸 **Поради щодо якості фото:**\n\n"
+                    tips_msg = "📸 Поради щодо якості фото:\n\n"
                     for rec in recommendations:
                         if rec.strip():  # Пропускаємо пусті рядки
                             tips_msg += f"{rec}\n"
-                    
-                    # Відправляємо поради окремим повідомленням
-                    await update.message.reply_text(
-                        tips_msg,
-                        parse_mode='Markdown'
-                    )
+
+                    # Відправляємо поради окремим повідомленням (без markdown щоб уникнути помилок)
+                    try:
+                        await update.message.reply_text(tips_msg)
+                    except Exception as md_err:
+                        logger.warning(f"Помилка Markdown: {md_err}")
+                        await update.message.reply_text(tips_msg.replace("*", "").replace("_", ""))
             except Exception as e:
                 logger.warning(f"advanced_ocr не доступний: {e}")
                 text = extract_text_from_photo(file_path, lang='deu')
@@ -763,288 +781,8 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         text = context.user_data['letter_text']
         logger.info(f"Багатосторінковий текст: {len(text)} символів")
 
-    # Переклад тексту на рідну мову користувача
-    translated_text = None
-    if user['language'] in ['uk', 'ru'] and text.strip():
-        try:
-            await update.message.reply_text(t['upload']['processing_translation'])
-            dest_lang = user['language']
-            translation = await translator.translate(text, src='de', dest=dest_lang)
-            translated_text = translation.text
-            logger.info(f"Переклад виконано: {len(translated_text)} символів")
-        except Exception as e:
-            logger.warning(f"Переклад не вдався: {e}")
-            translated_text = text  # fallback
-
-    # Відправка тексту на обробку
-    await update.message.reply_text(t['upload']['processing_analysis'])
-
-    # Імпортуємо модулі аналізу
-    try:
-        import sys
-        sys.path.insert(0, str(Path(__file__).parent.parent))
-        from ingestion import preprocess_text
-        from nlp_analysis import analyze_text_advanced, classify_letter_type_advanced, get_laws_for_letter
-        from smart_law_reference import analyze_letter_smart, get_law_reference
-        from response_generator import generate_response
-        from fraud_detection import (
-            extract_phone_numbers, extract_emails, extract_websites,
-            analyze_letter_for_fraud, generate_fraud_warning
-        )
-
-        # Попередня обробка
-        text = preprocess_text(text)
-
-        # РОЗШИРЕНИЙ АНАЛІЗ
-        analysis = analyze_text_advanced(text)
-        letter_type, classification_details = classify_letter_type_advanced(text)
-
-        # РОЗУМНИЙ АНАЛІЗ ЗАКОНІВ
-        smart_analysis = analyze_letter_smart(text, user['language'])
-        law_info = smart_analysis['law_info']
-        is_personal = smart_analysis.get('is_personal', False)
-
-        # Отримуємо закони на основі типу листа
-        laws = get_laws_for_letter(letter_type, text)
-
-        logger.info(f"Тип листа: {letter_type}, Організація: {law_info.get('organization', 'N/A')}, Особистий: {is_personal}")
-        logger.info(f"Параграфи: {law_info.get('paragraphs', [])}")
-
-        # Anti-Fraud аналіз
-        fraud_analysis = analyze_letter_for_fraud(text, {})
-        fraud_warning = generate_fraud_warning(fraud_analysis)
-
-        # Використовуємо ПОКРАЩЕНУ відповідь (v4.5) з автоматичним заповненням даних
-        lang = user['language']
-
-        # Заголовки для відповідей
-        response_titles = {
-            'uk': {'title': 'ВІДПОВІДЬ', 'lang': 'UK'},
-            'ru': {'title': 'ОТВЕТ', 'lang': 'RU'},
-            'de': {'title': 'ANTWORT', 'lang': 'DE'},
-            'en': {'title': 'RESPONSE', 'lang': 'EN'}
-        }
-
-        # Отримуємо ПОКРАЩЕНУ відповідь з автоматичним заповненням даних
-        if IMPROVED_RESPONSES:
-            # Нова версія v4.5: автоматичне заповнення [ДАТА], [ЧАС], [СУМА] тощо
-            user_response, _ = generate_response_smart_improved(text, lang)
-        else:
-            # Стара версія (fallback)
-            if lang == 'uk':
-                user_response = smart_analysis.get('response_uk', smart_analysis['response_de'])
-            elif lang == 'ru':
-                user_response = smart_analysis.get('response_ru', smart_analysis.get('response_uk', smart_analysis['response_de']))
-            elif lang == 'de':
-                user_response = smart_analysis.get('response_de', '')
-            elif lang == 'en':
-                user_response = smart_analysis.get('response_en', smart_analysis.get('response_de', ''))
-            else:
-                user_response = smart_analysis.get('response_uk', smart_analysis['response_de'])
-
-        title = response_titles.get(lang, response_titles['uk'])
-        response = f"**{title['lang']}:**\n{user_response}"
-
-        # Додаємо поради з розумного аналізу
-        tips_titles = {'uk': 'ПОРАДИ', 'ru': 'СОВЕТЫ', 'de': 'TIPPS', 'en': 'TIPS'}
-        tips_title = tips_titles.get(lang, 'ПОРАДИ')
-        smart_tips = f"\n\n💡 **{tips_title}:**\n" + "\n".join(smart_analysis['tips'])
-
-        # Збереження в БД
-        conn = sqlite3.connect('users.db')
-        c = conn.cursor()
-        photos_list = context.user_data.get('letter_photos', [])
-        first_photo = photos_list[0] if photos_list else None
-        c.execute("""
-            INSERT INTO letters (chat_id, text, letter_type, analysis, response, photo_path)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (chat_id, text[:500], letter_type, str(analysis), response, first_photo))
-        conn.commit()
-        conn.close()
-
-        # Формування результату
-        type_names = {
-            'debt_collection': '💰 Боргові зобов\'язання',
-            'tenancy': '🏠 Оренда житла',
-            'employment': '💼 Праця / Jobcenter',
-            'administrative': '📋 Адміністративний лист',
-            'personal': '👨‍👩‍👦 Особисте листування',
-            'insurance': '🏥 Страхова каса',
-            'utility': '💡 Комунальні послуги',
-            'general': '📄 Загальний лист'
-        }
-
-        # Додамо інформацію про впевненість класифікації
-        scores = classification_details.get('scores', {})
-        max_score = max(scores.values()) if scores else 0
-        confidence = "✅ Впевнено" if max_score > 5 else "⚠️ Потребує перевірки" if max_score > 0 else "❓ Невизначено"
-
-        # Витягнуті контактні дані
-        phones = extract_phone_numbers(text)
-        emails = extract_emails(text)
-        websites = extract_websites(text)
-
-        contacts_info = ""
-        if phones:
-            contacts_info += f"📞 **Телефони:** {', '.join(phones)}\n"
-        if emails:
-            contacts_info += f"📧 **Email:** {', '.join(emails)}\n"
-        if websites:
-            contacts_info += f"🌐 **Сайти:** {', '.join(websites)}\n"
-
-        if contacts_info:
-            contacts_info = f"🔍 **Контактні дані:**\n{contacts_info}\n"
-
-        # Формування результату
-        analysis_titles = {
-            'uk': 'Аналіз завершено!',
-            'ru': 'Анализ завершен!',
-            'de': 'Analyse abgeschlossen!',
-            'en': 'Analysis complete!'
-        }
-        analysis_title = analysis_titles.get(lang, 'Аналіз завершено!')
-
-        if is_personal:
-            # Особистий лист - простий формат
-            result = (
-                f"✅ **{analysis_title}**\n\n"
-                f"📌 **Тип листа:** 👨‍👩‍👦 Особисте листування\n"
-                f"🏢 **Організація:** {law_info.get('organization', 'Не визначено')}\n\n"
-                f"📝 **{title['title']}:**\n\n{response}{smart_tips}"
-            )
-        else:
-            # Офіційний лист - повний формат з законами
-            result = (
-                f"✅ **{analysis_title}**\n\n"
-                f"📌 **Тип листа:** {type_names.get(letter_type, letter_type)}\n"
-                f"🏢 **Організація:** {law_info.get('organization', 'Не визначено')}\n"
-                f"📋 **Ситуація:** {law_info.get('situation', 'Не визначено')}\n"
-                f"🔍 **Впевненість:** {confidence}\n\n"
-                f"📚 **ПАРАГРАФИ ДЛЯ ПОСИЛАННЯ:**\n"
-                f"{chr(10).join('• ' + para for para in law_info.get('paragraphs', []))}\n\n"
-                f"{contacts_info}"
-                f"🔍 **Ключові слова:**\n"
-                f"{', '.join(analysis['keywords'][:8]) if analysis['keywords'] else 'Не визначено'}\n\n"
-                f"⚠️ **Наслідки:**\n{law_info.get('consequences', 'Не визначено')}\n\n"
-                f"━━━━━━━━━━━━━━━━━━━━\n\n"
-                f"{fraud_warning}\n\n"
-                f"━━━━━━━━━━━━━━━━━━━━\n\n"
-                f"📝 **{title['title']}:**\n\n{response}{smart_tips}"
-            )
-
-        # Відправка перекладу (якщо є)
-        if translated_text and user['language'] in ['uk', 'ru']:
-            # Екрануємо Markdown символи
-            safe_translated = translated_text.replace('*', '\\*').replace('_', '\\_').replace('`', '\\`').replace('[', '\\[').replace(']', '\\]')
-            lang_name = 'українська' if user['language'] == 'uk' else 'русский'
-            translation_msg = f"🌐 **Переклад листа ({lang_name}):**\n\n{safe_translated}"
-            for i in range(0, len(translation_msg), 4000):
-                await update.message.reply_text(
-                    translation_msg[i:i+4000],
-                    parse_mode='Markdown'
-                )
-
-        # Екрануємо Markdown символи в результаті
-        safe_result = result.replace('*', '\\*').replace('_', '\\_').replace('`', '\\`').replace('[', '\\[').replace(']', '\\]')
-
-        # Відправка результату аналізу частинами
-        for i in range(0, len(safe_result), 4000):
-            await update.message.reply_text(
-                safe_result[i:i+4000],
-                parse_mode='Markdown'
-            )
-
-        # 🇩🇪 ДОДАТКОВО: Показуємо готовий лист німецькою для ВСІХ офіційних листів
-        # Завжди показуємо німецьку версію якщо це не особистий лист
-        show_german = (not is_personal) and LETTER_GENERATOR
-        logger.info(f"🇩🇪 Показ німецької версії: {show_german} (is_personal={is_personal}, LETTER_GENERATOR={LETTER_GENERATOR})")
-        
-        if show_german:
-            # 📝 ГЕНЕРУЄМО ПОВНИЙ ЛИСТ У ФОРМАТІ DIN 5008 З FALLBACK
-            # Визначаємо тип відповіді
-            response_type = org_key if org_key else 'general'
-
-            # Отримуємо ім'я користувача для підпису
-            sender_name = user.get('username', '[Ihr Name]') if user else '[Ihr Name]'
-
-            # Генеруємо повний лист з автоматичним fallback
-            full_german_letter = generate_german_letter_with_fallback(
-                text=text,
-                response_type=response_type,
-                sender_name=sender_name
-            )
-
-            # Додаємо інформацію про класифікацію якщо доступно
-            classification_info = ""
-            if ADVANCED_CLASSIFICATION:
-                try:
-                    class_result = classify_letter_combined(text)
-                    if class_result['is_confident']:
-                        classification_info = f"\n\n🔍 **Класифікація:**\n{get_classification_description(class_result)}"
-                except Exception as e:
-                    logger.warning(f"Помилка класифікації: {e}")
-
-            # Формуємо повідомлення з німецькою версією
-            german_msg = f'''
-
-━━━━━━━━━━━━━━━━━━━━
-
-🇩🇪 **ГОТОВИЙ ЛИСТ НІМЕЦЬКОЮ (DIN 5008)**
-
-Цей лист можна скопіювати та відправити відправнику оригінального листа:
-
-────────────────────
-
-{full_german_letter}
-
-────────────────────
-{classification_info}
-💡 **Порада:** Скопіюйте цей текст та відправте на email або поштою.
-📋 **Формат:** DIN 5008 (німецький стандарт)
-✉️ **Адреси:** Автоматично заповнені з вашого листа
-🔄 **Fallback:** Автоматично для коротких листів'''
-            
-            # Відправляємо німецьку версію
-            try:
-                for i in range(0, len(german_msg), 4000):
-                    await update.message.reply_text(
-                        german_msg[i:i+4000],
-                        parse_mode='Markdown'
-                    )
-            except Exception as e:
-                logger.error(f"Помилка відправки німецької версії: {e}")
-
-        logger.info(f"Аналіз завершено для chat_id={chat_id}, тип={letter_type}")
-
-    except Exception as e:
-        logger.error(f"Помилка аналізу: {e}", exc_info=True)
-        await update.message.reply_text(
-            f"❌ Помилка аналізу: {str(e)}\n\n"
-            "Спробуйте ще раз або зверніться до підтримки."
-        )
-
-    # Очищаємо тимчасове сховище
-    context.user_data['letter_photos'] = []
-    context.user_data['letter_text'] = ''
-
-    # Повернення до меню з урахуванням мови користувача
-    lang = user['language'] if user else 'uk'
-    t = INTERFACE_TRANSLATIONS.get(lang, INTERFACE_TRANSLATIONS['uk'])
-
-    keyboard = [
-        [t['menu']['upload']],
-        [t['menu']['history']],
-        [t['menu']['lawyer']],
-        [t['menu']['settings'], t['menu']['help']]
-    ]
-    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-    await update.message.reply_text(
-        f"{t['welcome']}\n\n"
-        "Що ще бажаєте зробити?",
-        reply_markup=reply_markup
-    )
-
-    return ConversationHandler.END
+    # 🧠 ВИКОРИСТОВУЄМО LLM ORCHESTRATOR ЗАМІСТЬ СТАРОГО АНАЛІЗУ
+    return await analyze_and_respond(update, context, text)
 
 async def analyze_and_respond(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str) -> int:
     """Аналіз тексту та відповідь користувачу."""
@@ -1191,6 +929,7 @@ async def analyze_and_respond(update: Update, context: ContextTypes.DEFAULT_TYPE
 
         # Відправка результату аналізу
         logger.info(f"Відправка результату аналізу ({len(safe_result)} символів)")
+        logger.info(f"📝 ТЕКСТ ВІДПОВІДІ:\n{safe_result[:2000]}")  # Детальне логування
         try:
             for i in range(0, len(safe_result), 4000):
                 await update.message.reply_text(
@@ -1850,13 +1589,13 @@ async def cmd_reminders(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Моя статистика."""
     chat_id = update.effective_chat.id
-    
+
     if not STATS_AVAILABLE:
         await update.message.reply_text("⚠️ Статистика тимчасово недоступна.")
         return
-    
+
     user_stats = get_user_stats(chat_id)
-    
+
     msg = (
         f"📊 **Ваша статистика**\n\n"
         f"📝 Листів оброблено: **{user_stats['total_letters']}**\n"
@@ -1864,8 +1603,99 @@ async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         f"🕒 Остання активність: **{user_stats['last_activity'] or 'Ніколи'}**\n\n"
         f"Дякуємо за використання бота!"
     )
-    
+
     await update.message.reply_text(msg, parse_mode='Markdown')
+
+
+# ============================================================================
+# RAG КОМАНДИ
+# ============================================================================
+
+async def cmd_law(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Пошук закону по назві.
+    Використання: /law BGB або /law SGB_2 § 196
+    """
+    if not RAG_INTEGRATION:
+        await update.message.reply_text("⚠️ RAG пошук тимчасово недоступний.")
+        return
+    
+    chat_id = update.effective_chat.id
+    lang = get_user(chat_id)['language'] if get_user(chat_id) else 'uk'
+    
+    # Отримуємо запит
+    query = ' '.join(context.args) if context.args else ''
+    
+    if not query:
+        if lang == 'uk':
+            await update.message.reply_text(
+                "📚 **Пошук закону**\n\n"
+                "Використання:\n"
+                "`/law BGB` - пошук по закону\n"
+                "`/law BGB § 196` - пошук параграфу\n"
+                "`/law Kündigung frist` - пошук по темі",
+                parse_mode='Markdown'
+            )
+        else:
+            await update.message.reply_text(
+                "📚 **Law Search**\n\n"
+                "Usage:\n"
+                "`/law BGB` - search by law\n"
+                "`/law BGB § 196` - search paragraph\n"
+                "`/law Kündigung frist` - search by topic",
+                parse_mode='Markdown'
+            )
+        return
+    
+    # Пошук закону
+    result = search_paragraph(query, language=lang)
+    
+    await update.message.reply_text(
+        result['message'],
+        parse_mode=result.get('parse_mode', 'Markdown'),
+        disable_web_page_preview=True
+    )
+
+
+async def cmd_rag_search(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Розширений RAG пошук.
+    Використання: /search текст запиту
+    """
+    if not RAG_INTEGRATION:
+        await update.message.reply_text("⚠️ RAG пошук тимчасово недоступний.")
+        return
+    
+    chat_id = update.effective_chat.id
+    lang = get_user(chat_id)['language'] if get_user(chat_id) else 'uk'
+    
+    query = ' '.join(context.args) if context.args else ''
+    
+    if not query:
+        if lang == 'uk':
+            await update.message.reply_text(
+                "🔍 **RAG Пошук**\n\n"
+                "Використання:\n"
+                "`/search текст вашого запиту`",
+                parse_mode='Markdown'
+            )
+        else:
+            await update.message.reply_text(
+                "🔍 **RAG Search**\n\n"
+                "Usage:\n"
+                "`/search your query text`",
+                parse_mode='Markdown'
+            )
+        return
+    
+    # RAG пошук
+    result = rag_search_handler(query, language=lang)
+    
+    await update.message.reply_text(
+        result['message'],
+        parse_mode='Markdown',
+        disable_web_page_preview=True
+    )
 
 async def cmd_verification(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Перевірка організації."""
@@ -1886,6 +1716,17 @@ def main():
     # Ство��ення додатку
     application = Application.builder().token(BOT_TOKEN).build()
 
+    # Кнопки меню для обробки всередині ConversationHandler
+    menu_button_filter = filters.Regex(
+        "^(📋 Історія листів|📋 История писем|📋 Briefverlauf|📋 Letter history|"
+        "⚖️ Замовити перевірку адвоката|⚖️ Заказать проверку адвоката|⚖️ Anwalt prüfen|⚖️ Lawyer review|"
+        "❓ Допомога|❓ Помощь|❓ Hilfe|❓ Help|"
+        "⚙️ Налаштування|⚙️ Настройки|⚙️ Einstellungen|⚙️ Settings|"
+        "🌐 Мова / Language|🌐 Язык / Language|🌐 Sprache / Language|🌐 Language|"
+        "🔙 Назад|🔙 Zurück|🔙 Back|"
+        "🇺🇦|🇷🇺|🇩🇪|🇬🇧|Українська|Русский|Deutsch|English|UK|RU|DE|EN)$"
+    )
+
     # Conversation handler
     conv_handler = ConversationHandler(
         entry_points=[
@@ -1898,6 +1739,12 @@ def main():
             MessageHandler(filters.Regex("^📤 Загрузить письмо$"), upload_start),
             MessageHandler(filters.Regex("^📤 Brief hochladen$"), upload_start),
             MessageHandler(filters.Regex("^📤 Upload letter$"), upload_start),
+            # Кнопки меню також є entry points
+            MessageHandler(filters.Regex("^(📋 Історія листів|📋 История писем|📋 Briefverlauf|📋 Letter history)$"), show_history),
+            MessageHandler(filters.Regex("^(⚖️ Замовити перевірку адвоката|⚖️ Заказать проверку адвоката|⚖️ Anwalt prüfen|⚖️ Lawyer review)$"), lawyer_help),
+            MessageHandler(filters.Regex("^(❓ Допомога|❓ Помощь|❓ Hilfe|❓ Help)$"), help_command),
+            MessageHandler(filters.Regex("^(⚙️ Налаштування|⚙️ Настройки|⚙️ Einstellungen|⚙️ Settings)$"), settings_menu),
+            MessageHandler(filters.Regex("^(🌐 Мова / Language|🌐 Язык / Language|🌐 Sprache / Language|🌐 Language)$"), settings_language),
         ],
         states={
             WAITING_FOR_USERNAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, register_username)],
@@ -1905,11 +1752,29 @@ def main():
             WAITING_FOR_COUNTRY: [MessageHandler(filters.TEXT & ~filters.COMMAND, register_country)],
             WAITING_FOR_STATUS: [MessageHandler(filters.TEXT & ~filters.COMMAND, register_status)],
             WAITING_FOR_LETTER: [
+                # Кнопки меню мають пріоритет над handle_letter
+                MessageHandler(filters.Regex("^(📋 Історія листів|📋 История писем|📋 Briefverlauf|📋 Letter history)$"), show_history),
+                MessageHandler(filters.Regex("^(⚖️ Замовити перевірку адвоката|⚖️ Заказать проверку адвоката|⚖️ Anwalt prüfen|⚖️ Lawyer review)$"), lawyer_help),
+                MessageHandler(filters.Regex("^(❓ Допомога|❓ Помощь|❓ Hilfe|❓ Help)$"), help_command),
+                MessageHandler(filters.Regex("^(⚙️ Налаштування|⚙️ Настройки|⚙️ Einstellungen|⚙️ Settings)$"), settings_menu),
+                MessageHandler(filters.Regex("^(🌐 Мова / Language|🌐 Язык / Language|🌐 Sprache / Language|🌐 Language)$"), settings_language),
+                MessageHandler(filters.Regex("^(🔙 Назад|🔙 Zurück|🔙 Back)$"), settings_menu),
+                MessageHandler(filters.Regex("^(🇺🇦|🇷🇺|🇩🇪|🇬🇧|Українська|Русский|Deutsch|English|UK|RU|DE|EN)$"), settings_language_selected),
+                # Решта - це листи
                 MessageHandler(filters.PHOTO, handle_letter),
                 MessageHandler(filters.Document.ALL, handle_letter),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, handle_letter),
             ],
             WAITING_FOR_MORE_PAGES: [
+                # Кнопки меню мають пріоритет
+                MessageHandler(filters.Regex("^(📋 Історія листів|📋 История писем|📋 Briefverlauf|📋 Letter history)$"), show_history),
+                MessageHandler(filters.Regex("^(⚖️ Замовити перевірку адвоката|⚖️ Заказать проверку адвоката|⚖️ Anwalt prüfen|⚖️ Lawyer review)$"), lawyer_help),
+                MessageHandler(filters.Regex("^(❓ Допомога|❓ Помощь|❓ Hilfe|❓ Help)$"), help_command),
+                MessageHandler(filters.Regex("^(⚙️ Налаштування|⚙️ Настройки|⚙️ Einstellungen|⚙️ Settings)$"), settings_menu),
+                MessageHandler(filters.Regex("^(🌐 Мова / Language|🌐 Язык / Language|🌐 Sprache / Language|🌐 Language)$"), settings_language),
+                MessageHandler(filters.Regex("^(🔙 Назад|🔙 Zurück|🔙 Back)$"), settings_menu),
+                MessageHandler(filters.Regex("^(🇺🇦|🇷🇺|🇩🇪|🇬🇧|Українська|Русский|Deutsch|English|UK|RU|DE|EN)$"), settings_language_selected),
+                # Решта - це ще сторінки
                 MessageHandler(filters.TEXT & ~filters.COMMAND, handle_more_pages),
             ],
             WAITING_FOR_SETTINGS_LANGUAGE: [MessageHandler(filters.TEXT & ~filters.COMMAND, settings_language_selected)],
@@ -1930,6 +1795,12 @@ def main():
         application.add_handler(CommandHandler("reminders", cmd_reminders))
         application.add_handler(CommandHandler("stats", cmd_stats))
         application.add_handler(CommandHandler("verify", cmd_verification))
+    
+    # RAG команди
+    if RAG_INTEGRATION:
+        application.add_handler(CommandHandler("law", cmd_law))
+        application.add_handler(CommandHandler("search", cmd_rag_search))
+        logger.info("✅ RAG команди додано: /law, /search")
     
     application.add_handler(MessageHandler(filters.Regex("^(📋 Історія листів|📋 История писем|📋 Briefverlauf|📋 Letter history)$"), show_history))
     application.add_handler(MessageHandler(filters.Regex("^(⚖️ Замовити перевірку адвоката|⚖️ Заказать проверку адвоката|⚖️ Anwalt prüfen|⚖️ Lawyer review)$"), lawyer_help))

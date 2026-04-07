@@ -1,0 +1,123 @@
+version: '3.8'
+
+services:
+  # Головний бот - Telegram Client Bot v4.0 Full Integration
+  gov-de-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gov-de-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      # Додаткові змінні оточення
+      - PYTHONUNBUFFERED=1
+      - LOG_LEVEL=INFO
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      # Зберігання даних
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./uploads:/app/uploads
+      - ./users.db:/app/users.db
+      - .env:/app/.env:ro
+    ports:
+      - "5001:5000"  # Flask вебхук
+    networks:
+      - gov-de-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sys; sys.path.insert(0, '/app/src'); print('Bot OK')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  # Ollama для локальної LLM (опціонально - для LLM Orchestrator)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: gov-de-ollama
+    restart: unless-stopped
+    volumes:
+      - ollama-data:/root/.ollama
+    ports:
+      - "11434:11434"
+    networks:
+      - gov-de-network
+    profiles:
+      - llm  # Запускається тільки з профілем llm
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    # Якщо немає GPU, використовуємо CPU
+    # comment out the deploy section above if no GPU
+
+  # PostgreSQL для бази даних (опціонально)
+  postgres:
+    image: postgres:15-alpine
+    container_name: gov-de-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: govde
+      POSTGRES_USER: govde
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme123}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - gov-de-network
+    profiles:
+      - database
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U govde"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis для кешування (опціонально)
+  redis:
+    image: redis:7-alpine
+    container_name: gov-de-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - gov-de-network
+    profiles:
+      - cache
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  gov-de-network:
+    driver: bridge
+
+volumes:
+  ollama-data:
+  postgres-data:
+  redis-data:

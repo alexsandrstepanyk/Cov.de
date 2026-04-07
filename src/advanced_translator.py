@@ -99,6 +99,158 @@ LEGAL_DICTIONARY = {
         'ru': 'Центр занятости (Jobcenter)',
         'de': 'Jobcenter'
     },
+    # Додані терміни для кращого перекладу
+    'Einladung': {
+        'uk': 'Запрошення',
+        'ru': 'Приглашение',
+        'de': 'Einladung'
+    },
+    'Kundennummer': {
+        'uk': 'Номер клієнта',
+        'ru': 'Номер клиента',
+        'de': 'Kundennummer'
+    },
+    'BG-Nummer': {
+        'uk': 'BG-номер (номер справи)',
+        'ru': 'BG-номер (номер дела)',
+        'de': 'BG-Nummer'
+    },
+    'Gespräch': {
+        'uk': 'Співбесіда',
+        'ru': 'Собеседование',
+        'de': 'Gespräch'
+    },
+    'Termin': {
+        'uk': 'Термін зустрічі',
+        'ru': 'Срок встречи',
+        'de': 'Termin'
+    },
+    'Uhr': {
+        'uk': 'година',
+        'ru': 'час',
+        'de': 'Uhr'
+    },
+    'Raum': {
+        'uk': 'Кімната',
+        'ru': 'Комната',
+        'de': 'Raum'
+    },
+    'Kontaktperson': {
+        'uk': 'Контактна особа',
+        'ru': 'Контактное лицо',
+        'de': 'Kontaktperson'
+    },
+    'Mitwirkungspflicht': {
+        'uk': "Обов'язок співпраці",
+        'ru': 'Обязанность сотрудничества',
+        'de': 'Mitwirkungspflicht'
+    },
+    'Rechtsfolgenbelehrung': {
+        'uk': 'Інструкція про правові наслідки',
+        'ru': 'Инструкция о правовых последствиях',
+        'de': 'Rechtsfolgenbelehrung'
+    },
+    'Leistungen zur Sicherung des Lebensunterhalts': {
+        'uk': 'Допомога для забезпечення життєвих потреб',
+        'ru': 'Пособие для обеспечения жизненных потребностей',
+        'de': 'Leistungen zur Sicherung des Lebensunterhalts'
+    },
+    'ärztliche Bescheinigung': {
+        'uk': 'Лікарняний лист',
+        'ru': 'Больничный лист',
+        'de': 'ärztliche Bescheinigung'
+    },
+    'ohne wichtigen Grund': {
+        'uk': 'без важливої причини',
+        'ru': 'без важной причины',
+        'de': 'ohne wichtigen Grund'
+    },
+    'Personalausweis': {
+        'uk': 'Посвідчення особи',
+        'ru': 'Удостоверение личности',
+        'de': 'Personalausweis'
+    },
+    'Reisepass': {
+        'uk': 'Закордонний паспорт',
+        'ru': 'Заграничный паспорт',
+        'de': 'Reisepass'
+    },
+    'Meldebescheinigung': {
+        'uk': 'Свідоцтво про реєстрацію',
+        'ru': 'Свидетельство о регистрации',
+        'de': 'Meldebescheinigung'
+    },
+    'Bewerbungsunterlagen': {
+        'uk': 'Документи для заявки (резюме)',
+        'ru': 'Документы для заявки (резюме)',
+        'de': 'Bewerbungsunterlagen'
+    },
+    'Lebenslauf': {
+        'uk': 'Резюме (CV)',
+        'ru': 'Резюме (CV)',
+        'de': 'Lebenslauf'
+    },
+    'SGB II': {
+        'uk': 'SGB II (Соціальний кодекс II)',
+        'ru': 'SGB II (Социальный кодекс II)',
+        'de': 'SGB II'
+    },
+    'SGB III': {
+        'uk': 'SGB III (Соціальний кодекс III)',
+        'ru': 'SGB III (Социальный кодекс III)',
+        'de': 'SGB III'
+    },
+    'Sozialgesetzbuch': {
+        'uk': 'Соціальний кодекс (Sozialgesetzbuch)',
+        'ru': 'Социальный кодекс (Sozialgesetzbuch)',
+        'de': 'Sozialgesetzbuch'
+    },
+    'Bürgergeld': {
+        'uk': 'Допомога для громадян (Bürgergeld)',
+        'ru': 'Пособие для граждан (Bürgergeld)',
+        'de': 'Bürgergeld'
+    },
+    'Arbeitsagentur': {
+        'uk': 'Агентство з праці (Arbeitsagentur)',
+        'ru': 'Агентство по труду (Arbeitsagentur)',
+        'de': 'Arbeitsagentur'
+    },
+    'Vorsprache': {
+        'uk': 'Особиста явка',
+        'ru': 'Личная явка',
+        'de': 'Vorsprache'
+    },
+    'Beratungsgespräch': {
+        'uk': 'Консультаційна співбесіда',
+        'ru': 'Консультационная беседа',
+        'de': 'Beratungsgespräch'
+    },
+    'Teilnahmepflicht': {
+        'uk': "Обов'язкова участь",
+        'ru': 'Обязательное участие',
+        'de': 'Teilnahmepflicht'
+    },
+    'Sanktion': {
+        'uk': 'Санкція (зменшення виплат)',
+        'ru': 'Санкция (уменьшение выплат)',
+        'de': 'Sanktion'
+    },
+    'Leistungskürzung': {
+        'uk': 'Зменшення виплат',
+        'ru': 'Уменьшение выплат',
+        'de': 'Leistungskürzung'
+    },
+    'Frist': {
+        'uk': 'Термін (дедлайн)',
+        'ru': 'Срок (дедлайн)',
+        'de': 'Frist'
+    },
+    'Datum': {
+        'uk': 'Дата',
+        'ru': 'Дата',
+        'de': 'Datum'
+    },
+    },
     'Einladung': {
         'uk': 'Запрошення',
         'ru': 'Приглашение',
@@ -281,13 +433,9 @@ class AdvancedTranslator:
     
     def _init_services(self):
         """Ініціалізація сервісів перекладу."""
-        # Google Translate
-        try:
-            from googletrans import Translator
-            self.services['googletrans'] = Translator()
-            logger.info("✅ Google Translate ініціалізовано")
-        except Exception as e:
-            logger.warning(f"❌ Google Translate недоступний: {e}")
+        # Google Translate через deep-translator
+        # (інші сервіси ініціалізуються нижче)
+        pass
         
         # DeepL (якщо доступний)
         try:
@@ -312,6 +460,14 @@ class AdvancedTranslator:
             logger.info("✅ LibreTranslate ініціалізовано")
         except Exception as e:
             logger.info(f"ℹ️ LibreTranslate недоступний: {e}")
+        
+        # deep-translator (Google Translate)
+        try:
+            from deep_translator import GoogleTranslator
+            GoogleTranslator(source='de', target='en').translate('test')
+            logger.info("✅ deep-translator (Google) ініціалізовано")
+        except Exception as e:
+            logger.warning(f"⚠️ deep-translator недоступний: {e}")
     
     def _load_cache(self):
         """Завантаження кешу перекладів."""
@@ -415,16 +571,23 @@ class AdvancedTranslator:
         return result
     
     async def translate_with_google(self, text: str, src: str, dest: str) -> Optional[str]:
-        """Переклад через Google Translate."""
-        if 'googletrans' not in self.services:
-            return None
-        
+        """Переклад через Google Translate (deep-translator)."""
         try:
-            translator = self.services['googletrans']
-            result = await translator.translate(text, src=src, dest=dest)
-            return result.text
+            from deep_translator import GoogleTranslator
+            
+            # Маппінг мов для deep-translator
+            lang_map = {
+                'de': 'de',
+                'en': 'en',
+                'uk': 'uk',
+                'ru': 'ru'
+            }
+            
+            translator = GoogleTranslator(source=src, target=dest)
+            result = translator.translate(text)
+            return result
         except Exception as e:
-            logger.error(f"Google Translate помилка: {e}")
+            logger.error(f"Google Translate (deep-translator) помилка: {e}")
             return None
     
     async def translate_with_libre(self, text: str, src: str, dest: str) -> Optional[str]:

@@ -1,110 +1,22 @@
 version: '3.8'
 
 services:
-  # Головний бот
   gov-de-bot:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     container_name: gov-de-bot
     restart: unless-stopped
     env_file:
       - .env
     volumes:
-      # Зберігання даних
       - ./data:/app/data
       - ./logs:/app/logs
       - ./uploads:/app/uploads
-      # Можна додати зовнішнє сховище
-      # - bot-data:/app/data
+      - ./users.db:/app/users.db
     ports:
-      - "5000:5000"  # Flask вебхук
+      - "5001:5000"
     networks:
       - gov-de-network
-    depends_on:
-      - ollama
-    healthcheck:
-      test: ["CMD", "python", "-c", "import sys; sys.path.insert(0, 'src'); print('Bot OK')"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-
-  # Ollama для локальної LLM (опціонально)
-  ollama:
-    image: ollama/ollama:latest
-    container_name: gov-de-ollama
-    restart: unless-stopped
-    volumes:
-      - ollama-data:/root/.ollama
-    ports:
-      - "11434:11434"
-    networks:
-      - gov-de-network
-    profiles:
-      - llm  # Запускається тільки з профілем llm
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
-
-  # PostgreSQL для бази даних (опціонально)
-  postgres:
-    image: postgres:15-alpine
-    container_name: gov-de-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: govde
-      POSTGRES_USER: govde
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme123}
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    networks:
-      - gov-de-network
-    profiles:
-      - database
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U govde"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # Redis для кешування (опціонально)
-  redis:
-    image: redis:7-alpine
-    container_name: gov-de-redis
-    restart: unless-stopped
-    command: redis-server --appendonly yes
-    volumes:
-      - redis-data:/data
-    ports:
-      - "6379:6379"
-    networks:
-      - gov-de-network
-    profiles:
-      - cache
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
 networks:
   gov-de-network:
     driver: bridge
-
-volumes:
-  bot-data:
-  ollama-data:
-  postgres-data:
-  redis-data:
