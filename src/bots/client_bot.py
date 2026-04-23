@@ -1801,6 +1801,7 @@ def main():
 
     # Conversation handler
     conv_handler = ConversationHandler(
+        allow_reentry=True,
         entry_points=[
             CommandHandler("start", start),
             MessageHandler(filters.Regex("^📝 Реєстрація$"), register_start),
