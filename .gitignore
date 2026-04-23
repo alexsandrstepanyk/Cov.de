@@ -35,7 +35,8 @@ users.db
 
 # Uploads
 uploads/
-data/
+data/*
+!data/legal_database.db
 
 # IDE
 .idea/
