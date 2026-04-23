@@ -1,0 +1,70 @@
+# Docker ignore file for Gov.de
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+!data/
+!data/legal_database.db
+data/*
+!data/legal_database.db
+
+# Uploads
+uploads/
+test_letters/
+test_results/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+!README.md
+docs/
+
+# Tests
+test_*.py
+*_test.py
+tests/
+
+# Scripts
+*.sh
+*.bat
+
+# NoHup
+nohup.out
