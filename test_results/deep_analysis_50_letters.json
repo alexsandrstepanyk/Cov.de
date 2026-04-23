@@ -1,0 +1,670 @@
+{
+  "total": 50,
+  "rag_tests": [
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    },
+    {
+      "found": false,
+      "error": "RAG не доступний"
+    }
+  ],
+  "translation_tests": [
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    },
+    {
+      "success": false,
+      "error": "Translator не доступний"
+    }
+  ],
+  "classification_tests": [
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    },
+    {
+      "success": false,
+      "error": "Classifier не доступний"
+    }
+  ],
+  "summary": {
+    "rag_success": 0,
+    "translation_success": 0,
+    "classification_success": 0,
+    "by_type": {
+      "Jobcenter": {
+        "total": 5,
+        "rag_ok": 0,
+        "trans_ok": 0,
+        "class_ok": 0
+      },
+      "Finanzamt": {
+        "total": 5,
+        "rag_ok": 0,
+        "trans_ok": 0,
+        "class_ok": 0
+      },
+      "Vermieter": {
+        "total": 5,
+        "rag_ok": 0,
+        "trans_ok": 0,
+        "class_ok": 0
+      },
+      "Inkasso": {
+        "total": 5,
+        "rag_ok": 0,
+        "trans_ok": 0,
+        "class_ok": 0
+      },
+      "Gericht": {
+        "total": 5,
+        "rag_ok": 0,
+        "trans_ok": 0,
+        "class_ok": 0
+      },
+      "Versicherung": {
+        "total": 5,
+        "rag_ok": 0,
+        "trans_ok": 0,
+        "class_ok": 0
+      },
+      "Krankenkasse": {
+        "total": 5,
+        "rag_ok": 0,
+        "trans_ok": 0,
+        "class_ok": 0
+      },
+      "Arbeitsagentur": {
+        "total": 5,
+        "rag_ok": 0,
+        "trans_ok": 0,
+        "class_ok": 0
+      },
+      "Gemischt": {
+        "total": 10,
+        "rag_ok": 0,
+        "trans_ok": 0,
+        "class_ok": 0
+      }
+    }
+  }
+}

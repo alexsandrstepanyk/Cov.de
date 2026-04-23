@@ -250,7 +250,6 @@ LEGAL_DICTIONARY = {
         'ru': 'Дата',
         'de': 'Datum'
     },
-    },
     'Einladung': {
         'uk': 'Запрошення',
         'ru': 'Приглашение',

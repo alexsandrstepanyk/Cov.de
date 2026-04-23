@@ -208,30 +208,34 @@ class GermanLegalDocumentsDownloader:
 
 
 def create_ollama_modelfile():
-    """Створення Modelfile для тренування Ollama."""
+    """Створення Modelfile для Gemma LLM з RAG."""
     
     modelfile_content = """
-FROM llama3.2:3b
+FROM gemma:7b
 
 # System prompt for German legal analysis
 SYSTEM \"\"\"
-Ти - експерт з німецького права. Твоє завдання:
+Ти - експерт з німецького права та Gemma LLM. Твоє завдання:
 1. Аналізувати німецькі юридичні листи
 2. Витягувати організації, типи листів, параграфи
 3. Надавати точні посилання на закони (BGB, SGB, AO тощо)
 4. Генерувати професійні відповіді німецькою та українською
+5. Працювати з RAG базою даних локально
 
 Відповідай професійно, використовуй юридичні терміни правильно.
 НЕ використовуй суржик (суміш німецьких/англійських слів з українською).
 \"\"\"
 
-# Training data
-# TRAIN data/german_legal_docs/ollama_training.jsonl
+# RAG Context Integration
+# Base model: Gemma 7B (fast, efficient)
+# Context size: 8k tokens
+# Temperature: 0.1 (for legal accuracy)
 
-# Parameters
+# Parameters optimized for Gemma
 PARAMETER temperature 0.1
 PARAMETER top_p 0.8
-PARAMETER repeat_penalty 2.0
+PARAMETER repeat_penalty 2.5
+PARAMETER num_ctx 8192
 """
     
     output_file = Path('data/ollama_legal_modelfile')
@@ -253,6 +257,7 @@ if __name__ == '__main__':
     print("  ✅ ЗАВАНТАЖЕННЯ ЗАВЕРШЕНО!")
     print("="*80)
     print("\nНаступні кроки:")
-    print("1. ollama create legal-llama3.2 -f data/ollama_legal_modelfile")
-    print("2. ollama run legal-llama3.2")
-    print("3. Тестування на реальних листах")
+    print("1. ollama pull gemma:7b          # завантажити модель")
+    print("2. ollama create legal-gemma -f data/ollama_legal_modelfile")
+    print("3. ollama run legal-gemma")
+    print("4. Тестування на реальних листах")

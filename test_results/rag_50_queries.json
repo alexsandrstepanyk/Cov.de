@@ -1,0 +1,1082 @@
+{
+  "timestamp": "2026-03-31T00:34:35.569017",
+  "total": 50,
+  "success": 24,
+  "success_rate": "48.0%",
+  "results": [
+    {
+      "id": 1,
+      "query": "§ 59 SGB II Einladung Vorsprache",
+      "expected": [
+        "SGB_II",
+        "SGB II"
+      ],
+      "type": "Jobcenter",
+      "match": true,
+      "found": {
+        "law_name": "Unknown",
+        "paragraph": "§ 195",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "SGB § 195\n, 199 Abs. 1 und 2 und",
+        "source": "german_laws",
+        "file_name": "",
+        "distance": 0.30933570861816406,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 2,
+      "query": "SGB II Leistungen Lebensunterhalt Bürgergeld",
+      "expected": [
+        "SGB_II",
+        "SGB II"
+      ],
+      "type": "Jobcenter",
+      "match": true,
+      "found": {
+        "law_name": "Unknown",
+        "paragraph": "§ 1626d",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "SGB § 1626d\nAbsatz 2 des\nBürgerlichen Gesetzbuchs, die Mitteilungen nach",
+        "source": "german_laws",
+        "file_name": "",
+        "distance": 0.2590392827987671,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 3,
+      "query": "§ 60 SGB I Vermögenserklärung",
+      "expected": [
+        "SGB_I",
+        "SGB I"
+      ],
+      "type": "Jobcenter",
+      "match": false,
+      "found": {
+        "law_name": "Unknown",
+        "paragraph": "§ 128e",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "SGB § 128e\n*   Hilfsmerkmale\n*    *",
+        "source": "german_laws",
+        "file_name": "",
+        "distance": 0.3616778254508972,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 4,
+      "query": "Jobcenter Beratung § 14 SGB II",
+      "expected": [
+        "SGB_II",
+        "SGB II"
+      ],
+      "type": "Jobcenter",
+      "match": true,
+      "found": {
+        "law_name": "SGB_II",
+        "paragraph": "§ 43",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "§ 43 Aufrechnung\n(1) Die Jobcenter können gegen Ansprüche von leistungsberechtigten Personen auf Geldleistungen zur Sicherung des Lebensunterhalts aufrechnen mit 1. 2. 3. 4. Erstattungsansprüchen nach",
+        "source": "PDF",
+        "file_name": "",
+        "distance": 0.3170657157897949,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 5,
+      "query": "Mitwirkungspflicht SGB II",
+      "expected": [
+        "SGB_II"
+      ],
+      "type": "Jobcenter",
+      "match": false,
+      "found": {
+        "law_name": "Unknown",
+        "paragraph": "§ 184",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "SGB § 184\nRücklage\nAbweichend von",
+        "source": "german_laws",
+        "file_name": "",
+        "distance": 0.3021305203437805,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 6,
+      "query": "§ 172 AO Steuerbescheid",
+      "expected": [
+        "AO",
+        "AO_1977"
+      ],
+      "type": "Finanzamt",
+      "match": true,
+      "found": {
+        "law_name": "AO",
+        "paragraph": "§ 174",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "§ 174 § 175\nWiderstreitende Steuerfestsetzungen Änderung von Steuerbescheiden auf Grund von Grundlagenbescheiden und bei rückwirkenden Ereignissen",
+        "source": "PDF",
+        "file_name": "",
+        "distance": 0.35063982009887695,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 7,
+      "query": "Einkommensteuererklärung EStG Pflicht",
+      "expected": [
+        "EStG"
+      ],
+      "type": "Finanzamt",
+      "match": false,
+      "found": {
+        "law_name": "Unknown",
+        "paragraph": "§ 140",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "StPO § 140\ndie Bestellung eines\nPflichtverteidigers nach Maßgabe des",
+        "source": "german_laws",
+        "file_name": "",
+        "distance": 0.40986573696136475,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 8,
+      "query": "§ 250 AO Vollstreckung Steuern",
+      "expected": [
+        "AO",
+        "AO_1977"
+      ],
+      "type": "Finanzamt",
+      "match": true,
+      "found": {
+        "law_name": "SGB_VI",
+        "paragraph": "§ 154a",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "§ 154a Sicherungsniveau vor Steuern",
+        "source": "PDF",
+        "file_name": "",
+        "distance": 0.2256585955619812,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 9,
+      "query": "§ 240 AO Säumniszuschlag",
+      "expected": [
+        "AO",
+        "AO_1977"
+      ],
+      "type": "Finanzamt",
+      "match": true,
+      "found": {
+        "law_name": "AO",
+        "paragraph": "§ 240",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "§ 240 Säumniszuschläge\n2 . U n t e r a b s c h n i t t S ä u m n i s z u s c h l ä g e D r i t t e r A b s c h n i t t S i c h e r h e i t s l e i s t u n g",
+        "source": "PDF",
+        "file_name": "",
+        "distance": 0.3245939612388611,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 10,
+      "query": "§ 196 AO Außenprüfung Finanzamt",
+      "expected": [
+        "AO",
+        "AO_1977"
+      ],
+      "type": "Finanzamt",
+      "match": true,
+      "found": {
+        "law_name": "Unknown",
+        "paragraph": "§ 196",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "AO § 196\nder\nAbgabenordnung) zu einer Außenprüfung nach",
+        "source": "german_laws",
+        "file_name": "",
+        "distance": 0.2751306891441345,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 11,
+      "query": "§ 543 BGB Kündigung Zahlungsverzug",
+      "expected": [
+        "BGB"
+      ],
+      "type": "Vermieter",
+      "match": true,
+      "found": {
+        "law_name": "Unknown",
+        "paragraph": "§ 2202",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "OTHER § 2202\nBGB) sowie die Kündigung\n        dieses Amtes (",
+        "source": "german_laws",
+        "file_name": "",
+        "distance": 0.3335774540901184,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 12,
+      "query": "§ 558 BGB Mieterhöhung",
+      "expected": [
+        "BGB"
+      ],
+      "type": "Vermieter",
+      "match": true,
+      "found": {
+        "law_name": "BGB",
+        "paragraph": "§ 556f",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "§ 556f u. Art. 229 § 35 BGBEG +++)\n(+++ Zur Anwendung d. §",
+        "source": "PDF",
+        "file_name": "",
+        "distance": 0.29371410608291626,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 13,
+      "query": "§ 555 BGB Modernisierung Duldung",
+      "expected": [
+        "BGB"
+      ],
+      "type": "Vermieter",
+      "match": true,
+      "found": {
+        "law_name": "BGB",
+        "paragraph": "§ 35",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "§ 35 BGBEG +++)\n(+++ Zur Nichtanwendung d. §",
+        "source": "PDF",
+        "file_name": "",
+        "distance": 0.30944186449050903,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 14,
+      "query": "Nebenkostenabrechnung BGB Nachzahlung",
+      "expected": [
+        "BGB"
+      ],
+      "type": "Vermieter",
+      "match": false,
+      "found": {
+        "law_name": "Unknown",
+        "paragraph": "§ 37x",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "BGB § 37x\nin der Fassung des Gesetzes vom 20. November 2015 (BGBl. I\nS. 2029) ist erstmals auf Zahlungsberichte und Konzernzahlungsberichte\nfür ein nach dem 26. November 2015 beginnendes Geschäftsjahr\nanzuwenden.\n###",
+        "source": "german_laws",
+        "file_name": "",
+        "distance": 0.374176561832428,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 15,
+      "query": "§ 535 BGB Mietvertrag Pflichten",
+      "expected": [
+        "BGB"
+      ],
+      "type": "Vermieter",
+      "match": true,
+      "found": {
+        "law_name": "BGB",
+        "paragraph": "§ 35",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "§ 35 BGBEG +++)\n(+++ Zur Nichtanwendung d. §",
+        "source": "PDF",
+        "file_name": "",
+        "distance": 0.32158899307250977,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 16,
+      "query": "§ 286 BGB Mahnung Verzug",
+      "expected": [
+        "BGB"
+      ],
+      "type": "Inkasso",
+      "match": true,
+      "found": {
+        "law_name": "BGB",
+        "paragraph": "§ 35",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "§ 35 BGBEG +++)\n(+++ Zur Nichtanwendung d. §",
+        "source": "PDF",
+        "file_name": "",
+        "distance": 0.293968141078949,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 17,
+      "query": "§ 280 BGB Schadensersatz Forderung",
+      "expected": [
+        "BGB"
+      ],
+      "type": "Inkasso",
+      "match": true,
+      "found": {
+        "law_name": "BGB",
+        "paragraph": "§ 35",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "§ 35 BGBEG +++)\n(+++ Zur Nichtanwendung d. §",
+        "source": "PDF",
+        "file_name": "",
+        "distance": 0.270175039768219,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 18,
+      "query": "Zahlungsaufforderung Fristsetzung",
+      "expected": [
+        "BGB"
+      ],
+      "type": "Inkasso",
+      "match": true,
+      "found": {
+        "law_name": "BGB",
+        "paragraph": "§ 675o",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "§ 675o Ablehnung von Zahlungsaufträgen\n(1) Lehnt der Zahlungsdienstleister die Ausführung oder Auslösung eines Zahlungsauftrags ab, ist er verpflichtet, den Zahlungsdienstnutzer hierüber unverzüglich, auf jeden Fall aber innerhalb der Fristen gemäß",
+        "source": "PDF",
+        "file_name": "",
+        "distance": 0.29414552450180054,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 19,
+      "query": "Inkasso Gericht Mahnbescheid",
+      "expected": [
+        "ZPO"
+      ],
+      "type": "Inkasso",
+      "match": false,
+      "found": {
+        "law_name": "Unknown",
+        "paragraph": "§ 197a",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "GG § 197a\ndes Sozialgerichtsgesetzes, die vor dem\nInkrafttreten dieses Gesetzes rechtshängig waren, gilt",
+        "source": "german_laws",
+        "file_name": "",
+        "distance": 0.47551578283309937,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 20,
+      "query": "§ 688 ZPO Zahlungsbefehl",
+      "expected": [
+        "ZPO"
+      ],
+      "type": "Inkasso",
+      "match": false,
+      "found": {
+        "law_name": "Unknown",
+        "paragraph": "§ 615",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "ZPO § 615\nbis 687 (weggefallen)\n## Buch 7 - Mahnverfahren\n###",
+        "source": "german_laws",
+        "file_name": "",
+        "distance": 0.3153696656227112,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 21,
+      "query": "§ 380 ZPO Zeuge Ladung",
+      "expected": [
+        "ZPO"
+      ],
+      "type": "Gericht",
+      "match": false,
+      "found": {
+        "law_name": "Unknown",
+        "paragraph": "§ 181",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "ZPO § 181\nErsatzzustellung durch Niederlegung\n(1) Ist die Zustellung nach",
+        "source": "german_laws",
+        "file_name": "",
+        "distance": 0.3602256774902344,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 22,
+      "query": "§ 114 ZPO Prozesskostenhilfe",
+      "expected": [
+        "ZPO"
+      ],
+      "type": "Gericht",
+      "match": false,
+      "found": {
+        "law_name": "Unknown",
+        "paragraph": "§ 166",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "VwGO § 166\n(1) Die Vorschriften der Zivilprozeßordnung über die\nProzesskostenhilfe sowie",
+        "source": "german_laws",
+        "file_name": "",
+        "distance": 0.3159787058830261,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 23,
+      "query": "§ 163a StPO Vernehmung Beschuldigter",
+      "expected": [
+        "StPO",
+        "StGB"
+      ],
+      "type": "Gericht",
+      "match": true,
+      "found": {
+        "law_name": "StGB",
+        "paragraph": "§ 163",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "§ 163 (weggefallen)\n- Zehnter Abschnitt Falsche Verdächtigung",
+        "source": "PDF",
+        "file_name": "",
+        "distance": 0.26497793197631836,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 24,
+      "query": "§ 263 StGB Betrug Strafe",
+      "expected": [
+        "StGB"
+      ],
+      "type": "Gericht",
+      "match": false,
+      "found": {
+        "law_name": "Unknown",
+        "paragraph": "§ 46b",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "StGB § 46b\ndes Strafgesetzbuches und",
+        "source": "german_laws",
+        "file_name": "",
+        "distance": 0.21668565273284912,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 25,
+      "query": "Urteil Zivilprozess Rechtsmittel",
+      "expected": [
+        "ZPO"
+      ],
+      "type": "Gericht",
+      "match": false,
+      "found": {
+        "law_name": "Unknown",
+        "paragraph": "§ 727",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "ZPO § 727\nVollstreckbare Ausfertigung für und gegen Rechtsnachfolger\n(1) Eine vollstreckbare Ausfertigung kann für den Rechtsnachfolger des\nin dem Urteil bezeichneten Gläubigers sowie gegen denjenigen\nRechtsnachfolger des in dem Urteil bezeichneten Schuldners und\ndenjenigen Besitzer der in Streit befangenen Sache, gegen die das\nUrteil nach",
+        "source": "german_laws",
+        "file_name": "",
+        "distance": 0.34060877561569214,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 26,
+      "query": "§ 38 VVG Beitragserhöhung",
+      "expected": [
+        "VVG"
+      ],
+      "type": "Versicherung",
+      "match": false,
+      "found": {
+        "law_name": "AO",
+        "paragraph": "§ 384",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "§ 384 Verfolgungsverjährung",
+        "source": "PDF",
+        "file_name": "",
+        "distance": 0.3020938038825989,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 27,
+      "query": "VVG Versicherung Leistung Ablehnung",
+      "expected": [
+        "VVG"
+      ],
+      "type": "Versicherung",
+      "match": false,
+      "found": {
+        "law_name": "Unknown",
+        "paragraph": "§ 140e",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "SGB § 140e\nVerträge mit Leistungserbringern europäischer Staaten\nKrankenkassen dürfen zur Versorgung ihrer Versicherten nach Maßgabe\ndes Dritten Kapitels und des dazugehörigen untergesetzlichen Rechts\nVerträge mit Leistungserbringern nach",
+        "source": "german_laws",
+        "file_name": "",
+        "distance": 0.4235914945602417,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 28,
+      "query": "§ 11 VVG Vertragskündigung",
+      "expected": [
+        "VVG"
+      ],
+      "type": "Versicherung",
+      "match": false,
+      "found": {
+        "law_name": "SGB_VI",
+        "paragraph": "§ 292",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "§ 292 Verordnungsermächtigung",
+        "source": "PDF",
+        "file_name": "",
+        "distance": 0.25574082136154175,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 29,
+      "query": "Police Versicherung Prämie",
+      "expected": [
+        "VVG"
+      ],
+      "type": "Versicherung",
+      "match": false,
+      "found": {
+        "law_name": "Unknown",
+        "paragraph": "§ 178i",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "BGB § 178i\ndes Gesetzes\nüber den Versicherungsvertrag mit der Maßgabe, daß dem Versicherer das\nRecht zusteht, die Prämie entsprechend den berichtigten\nBerechnungsgrundlagen neu festzusetzen, wenn ein unabhängiger\nTreuhänder die Berechnungsgrundlage überprüft und der Prämienanpassung\nzugestimmt hat.\n##",
+        "source": "german_laws",
+        "file_name": "",
+        "distance": 0.4354206919670105,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 30,
+      "query": "Schadenmeldung Versicherung Frist",
+      "expected": [
+        "VVG"
+      ],
+      "type": "Versicherung",
+      "match": false,
+      "found": {
+        "law_name": "SGB_VI",
+        "paragraph": "§ 5",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "§ 5 § 6\nVersicherungsfreiheit Befreiung von der Versicherungspflicht Zweiter Abschnitt Freiwillige Versicherung",
+        "source": "PDF",
+        "file_name": "",
+        "distance": 0.3837381601333618,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 31,
+      "query": "§ 242 SGB V Beitragsnachzahlung",
+      "expected": [
+        "SGB_V",
+        "SGB V"
+      ],
+      "type": "Krankenkasse",
+      "match": true,
+      "found": {
+        "law_name": "Unknown",
+        "paragraph": "§ 32a",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "SGB § 32a\n*   Zeitliche Zuordnung von Beiträgen\n*    *",
+        "source": "german_laws",
+        "file_name": "",
+        "distance": 0.30229997634887695,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 32,
+      "query": "SGB V Heilbehandlung Genehmigung",
+      "expected": [
+        "SGB_V",
+        "SGB V"
+      ],
+      "type": "Krankenkasse",
+      "match": true,
+      "found": {
+        "law_name": "Unknown",
+        "paragraph": "§ 168a",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "GG § 168a\nGenehmigungen im Bereich der Erweiterung des Küstenmeeres\nBestehende Rechte im Bereich der Erweiterung des Küstenmeeres nach dem\nBeschluß der Bundesregierung vom 19. Oktober 1994 (BGBl. I s. 3428),\ninsbesondere Genehmigungen zur Vornahme von Forschungshandlungen im\nSinne des",
+        "source": "german_laws",
+        "file_name": "",
+        "distance": 0.39086538553237915,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 33,
+      "query": "§ 25 SGB V Check-up Gesundheit",
+      "expected": [
+        "SGB_V",
+        "SGB V"
+      ],
+      "type": "Krankenkasse",
+      "match": true,
+      "found": {
+        "law_name": "SGB_V",
+        "paragraph": "§ 291a",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "§ 291a SGB  V  mittels  der  elektronischen\nGesundheitskarte zu verarbeiten sind. Gemäß",
+        "source": "PDF",
+        "file_name": "",
+        "distance": 0.3767564296722412,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 34,
+      "query": "Krankenkasse Beitrag Anpassung",
+      "expected": [
+        "SGB_V",
+        "SGB V"
+      ],
+      "type": "Krankenkasse",
+      "match": true,
+      "found": {
+        "law_name": "SGB_V",
+        "paragraph": "§ 242",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "§ 242 nach\nMaßgabe der folgenden Absätze ein vollständiger Ausgleich der beitragspflichtigen Einnahmen ihrer Mitglieder durchgeführt. (2) Die Krankenkassen, die einen Zusatzbeitrag nach",
+        "source": "PDF",
+        "file_name": "",
+        "distance": 0.34914863109588623,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 35,
+      "query": "Zahnersatz Kosten SGB V",
+      "expected": [
+        "SGB_V",
+        "SGB V"
+      ],
+      "type": "Krankenkasse",
+      "match": true,
+      "found": {
+        "law_name": "SGB_V",
+        "paragraph": "§ 54",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "§ 54 (weggefallen)\n- Siebter Abschnitt Zahnersatz",
+        "source": "PDF",
+        "file_name": "",
+        "distance": 0.3290836215019226,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 36,
+      "query": "§ 309 SGB III Einladung Beratung",
+      "expected": [
+        "SGB_III",
+        "SGB III"
+      ],
+      "type": "Arbeitsagentur",
+      "match": false,
+      "found": {
+        "law_name": "Unknown",
+        "paragraph": "§ 354",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "SGB § 354\nGrundsatz\nDie Mittel für die ergänzenden Leistungen nach",
+        "source": "german_laws",
+        "file_name": "",
+        "distance": 0.31476324796676636,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 37,
+      "query": "SGB III Arbeitslosengeld Sperrzeit",
+      "expected": [
+        "SGB_III",
+        "SGB III"
+      ],
+      "type": "Arbeitsagentur",
+      "match": false,
+      "found": {
+        "law_name": "Unknown",
+        "paragraph": "§ 203a",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "SGB § 203a\nMeldepflicht bei Bezug von Arbeitslosengeld, Arbeitslosengeld II oder Unterhaltsgeld\nDie Agenturen für Arbeit oder in den Fällen des",
+        "source": "german_laws",
+        "file_name": "",
+        "distance": 0.3318479657173157,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 38,
+      "query": "Arbeitssuchend Meldung SGB III",
+      "expected": [
+        "SGB_III",
+        "SGB III"
+      ],
+      "type": "Arbeitsagentur",
+      "match": false,
+      "found": {
+        "law_name": "Unknown",
+        "paragraph": "§ 184",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "SGB § 184\nRücklage\nAbweichend von",
+        "source": "german_laws",
+        "file_name": "",
+        "distance": 0.36862123012542725,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 39,
+      "query": "Vermittlungsvorschlag Agentur Arbeit",
+      "expected": [
+        "SGB_III",
+        "SGB III"
+      ],
+      "type": "Arbeitsagentur",
+      "match": true,
+      "found": {
+        "law_name": "SGB_II",
+        "paragraph": "§ 48",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "§ 48 des\nZehnten Buches bleibt unberührt. (3) Entscheidet die Agentur für Arbeit, dass ein Anspruch auf Leistungen der Grundsicherung für Arbeitsuchende nicht besteht, stehen ihr und dem kommunalen Träger Erstattungsansprüche nach",
+        "source": "PDF",
+        "file_name": "",
+        "distance": 0.3400561213493347,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 40,
+      "query": "§ 138 SGB III Arbeitslosmeldung",
+      "expected": [
+        "SGB_III",
+        "SGB III"
+      ],
+      "type": "Arbeitsagentur",
+      "match": false,
+      "found": {
+        "law_name": "Unknown",
+        "paragraph": "§ 141m",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "SGB_III § 141m\nAbs. 1 des Arbeitsförderungsgesetzes oder nach",
+        "source": "german_laws",
+        "file_name": "",
+        "distance": 0.2593393921852112,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 41,
+      "query": "§ 355 BGB Widerruf Online-Kauf",
+      "expected": [
+        "BGB"
+      ],
+      "type": "Verbraucherschutz",
+      "match": true,
+      "found": {
+        "law_name": "BGB",
+        "paragraph": "§ 35",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "§ 35 BGBEG +++)\n(+++ Zur Nichtanwendung d. §",
+        "source": "PDF",
+        "file_name": "",
+        "distance": 0.3464518189430237,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 42,
+      "query": "§ 631 BGB Werkvertrag Handwerker",
+      "expected": [
+        "BGB"
+      ],
+      "type": "Verbraucherschutz",
+      "match": true,
+      "found": {
+        "law_name": "BGB",
+        "paragraph": "§ 35",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "§ 35 BGBEG +++)\n(+++ Zur Nichtanwendung d. §",
+        "source": "PDF",
+        "file_name": "",
+        "distance": 0.35574692487716675,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 43,
+      "query": "Stromrechnung EnWG Verbrauch",
+      "expected": [
+        "EnWG"
+      ],
+      "type": "Versorger",
+      "match": false,
+      "found": {
+        "law_name": "Unknown",
+        "paragraph": "§ 23",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "StGB § 23\nStrafbarkeit des Versuchs\n(1) Der Versuch eines Verbrechens ist stets strafbar, der Versuch\neines Vergehens nur dann, wenn das Gesetz es ausdrücklich bestimmt.\n(2) Der Versuch kann milder bestraft werden als die vollendete Tat (",
+        "source": "german_laws",
+        "file_name": "",
+        "distance": 0.3968695402145386,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 44,
+      "query": "Fitnessstudio Vertrag Kündigung BGB",
+      "expected": [
+        "BGB"
+      ],
+      "type": "Verbraucherschutz",
+      "match": false,
+      "found": {
+        "law_name": "Unknown",
+        "paragraph": "§ 650h",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "BGB § 650h\nSchriftform der Kündigung\nDie Kündigung des Bauvertrags bedarf der schriftlichen Form.\n###### Kapitel 3 - Verbraucherbauvertrag\n######",
+        "source": "german_laws",
+        "file_name": "",
+        "distance": 0.4559338092803955,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 45,
+      "query": "Bußgeld OWiG Falschparken",
+      "expected": [
+        "OWiG"
+      ],
+      "type": "Ordnungsamt",
+      "match": false,
+      "found": {
+        "law_name": "Unknown",
+        "paragraph": "§ 92",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "EnWG § 92\nAbs. 3 für die Zukunft angepasst.\n### Abschnitt 5 - Sanktionen, Bußgeldverfahren\n####",
+        "source": "german_laws",
+        "file_name": "",
+        "distance": 0.3880288600921631,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 46,
+      "query": "§ 22 SGB VIII Kindergarten Kita",
+      "expected": [
+        "SGB_VIII",
+        "SGB VIII"
+      ],
+      "type": "Jugendamt",
+      "match": false,
+      "found": {
+        "law_name": "Unknown",
+        "paragraph": "§ 284a",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "SGB § 284a\n(weggefallen)\n######",
+        "source": "german_laws",
+        "file_name": "",
+        "distance": 0.4475770592689514,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 47,
+      "query": "Hundesteuer Kommunalabgabe",
+      "expected": [
+        "KommAbgG"
+      ],
+      "type": "Stadt",
+      "match": false,
+      "found": {
+        "law_name": "EStG",
+        "paragraph": "§ 3",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "§ 3 Nummer 62 steuerfreien Zuschüsse, die unter\nBerücksichtigung der als Lohnsteuerabzugsmerkmal bereitgestellten Beiträge nach",
+        "source": "PDF",
+        "file_name": "",
+        "distance": 0.4827868938446045,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 48,
+      "query": "Rundfunkbeitrag ARD ZDF RStV",
+      "expected": [
+        "RStV"
+      ],
+      "type": "Stadt",
+      "match": false,
+      "found": {
+        "law_name": "Unknown",
+        "paragraph": "§ 802f",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "ZPO § 802f\nund 802g der\n    Zivilprozessordnung);\n17. das Verfahren auf Löschung der Eintragung im Schuldnerverzeichnis (",
+        "source": "german_laws",
+        "file_name": "",
+        "distance": 0.5705667734146118,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 49,
+      "query": "§ 312c BGB Fernabsatzvertrag Online",
+      "expected": [
+        "BGB"
+      ],
+      "type": "Verbraucherschutz",
+      "match": false,
+      "found": {
+        "law_name": "Unknown",
+        "paragraph": "§ 314",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "HGB § 314\nAbs. 1 Nr. 6 Buchstabe a Satz 1,",
+        "source": "german_laws",
+        "file_name": "",
+        "distance": 0.38390541076660156,
+        "collection": "german_laws"
+      }
+    },
+    {
+      "id": 50,
+      "query": "§ 433 BGB Kaufvertrag Pflichten",
+      "expected": [
+        "BGB"
+      ],
+      "type": "Verbraucherschutz",
+      "match": true,
+      "found": {
+        "law_name": "BGB",
+        "paragraph": "§ 35",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "content": "§ 35 BGBEG +++)\n(+++ Zur Nichtanwendung d. §",
+        "source": "PDF",
+        "file_name": "",
+        "distance": 0.3247857093811035,
+        "collection": "german_laws"
+      }
+    }
+  ],
+  "by_category": {
+    "Jobcenter": {
+      "total": 5,
+      "ok": 3
+    },
+    "Finanzamt": {
+      "total": 5,
+      "ok": 4
+    },
+    "Vermieter": {
+      "total": 5,
+      "ok": 4
+    },
+    "Inkasso": {
+      "total": 5,
+      "ok": 3
+    },
+    "Gericht": {
+      "total": 5,
+      "ok": 1
+    },
+    "Versicherung": {
+      "total": 5,
+      "ok": 0
+    },
+    "Krankenkasse": {
+      "total": 5,
+      "ok": 5
+    },
+    "Arbeitsagentur": {
+      "total": 5,
+      "ok": 1
+    },
+    "Verbraucherschutz": {
+      "total": 5,
+      "ok": 3
+    },
+    "Versorger": {
+      "total": 1,
+      "ok": 0
+    },
+    "Ordnungsamt": {
+      "total": 1,
+      "ok": 0
+    },
+    "Stadt": {
+      "total": 2,
+      "ok": 0
+    },
+    "Jugendamt": {
+      "total": 1,
+      "ok": 0
+    }
+  }
+}

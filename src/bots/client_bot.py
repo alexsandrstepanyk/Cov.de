@@ -23,6 +23,7 @@ from telegram.ext import (
     ConversationHandler,
     CallbackQueryHandler
 )
+from deep_translator import GoogleTranslator
 
 # Налаштування логування
 logging.basicConfig(
@@ -803,23 +804,36 @@ async def analyze_and_respond(update: Update, context: ContextTypes.DEFAULT_TYPE
         try:
             await update.message.reply_text(t['upload']['processing_translation'])
             dest_lang = user['language']
+            clean_text = text[:3000].replace('[', '').replace(']', '')
             
             # Використовуємо advanced_translator якщо доступний
             if ADVANCED_TRANSLATOR:
-                from advanced_translator import translate_text_async
-                clean_text = text[:3000].replace('[', '').replace(']', '')
-                result = await translate_text_async(clean_text, 'de', dest_lang)
-                # translate_text_async повертає Dict, отримуємо текст
-                translated_text = result.get('text', '') if isinstance(result, dict) else str(result)
-                # Пост-обробка з юридичним словником
-                translated_text = post_process_translation(translated_text)
-                logger.info(f"Переклад через advanced_translator: {len(translated_text)} символів, сервіс: {result.get('service', 'unknown')}")
-            else:
-                # Fallback на googletrans
-                clean_text = text[:3000].replace('[', '').replace(']', '')
-                translation = await translator.translate(clean_text, src='de', dest=dest_lang)
-                translated_text = translation.text
-                logger.info(f"Переклад через googletrans: {len(translated_text)} символів")
+                try:
+                    from advanced_translator import translate_text
+                    result = translate_text(clean_text, 'de', dest_lang)
+                    # translate_text повертає Dict, отримуємо текст
+                    translated_text = result.get('text', '') if isinstance(result, dict) else str(result)
+                    # Пост-обробка з юридичним словником
+                    translated_text = post_process_translation(translated_text)
+                    logger.info(f"Переклад через advanced_translator: {len(translated_text)} символів")
+                except Exception as e:
+                    logger.warning(f"advanced_translator помилка: {e}, використовуємо deep_translator")
+                    ADVANCED_TRANSLATOR = False  # Відключаємо на цей раз
+            
+            # Fallback на deep_translator (GoogleTranslator)
+            if not translated_text:
+                try:
+                    # Встановлюємо правильні коди мов
+                    lang_map = {'uk': 'uk', 'ru': 'ru', 'de': 'de', 'en': 'en'}
+                    src_lang = lang_map.get('de', 'de')
+                    target_lang = lang_map.get(dest_lang, 'uk')
+                    
+                    translator_gt = GoogleTranslator(source_language=src_lang, target_language=target_lang)
+                    translated_text = translator_gt.translate(clean_text)
+                    logger.info(f"Переклад через deep_translator (de→{target_lang}): {len(translated_text)} символів")
+                except Exception as e2:
+                    logger.error(f"deep_translator помилка: {e2}")
+                    raise
                 
         except Exception as e:
             logger.warning(f"Переклад не вдався: {e}")
@@ -827,19 +841,25 @@ async def analyze_and_respond(update: Update, context: ContextTypes.DEFAULT_TYPE
             try:
                 short_text = text[:500].replace('[', '').replace(']', '')
                 if ADVANCED_TRANSLATOR:
-                    from advanced_translator import translate_text_async
-                    result = await translate_text_async(short_text, 'de', dest_lang)
-                    translated_text = result.get('text', '') if isinstance(result, dict) else str(result)
-                else:
-                    translation = await translator.translate(short_text, src='de', dest=dest_lang)
-                    translated_text = translation.text
+                    try:
+                        from advanced_translator import translate_text
+                        result = translate_text(short_text, 'de', dest_lang)
+                        translated_text = result.get('text', '') if isinstance(result, dict) else str(result)
+                    except:
+                        ADVANCED_TRANSLATOR = False
+                
+                if not translated_text:
+                    lang_map = {'uk': 'uk', 'ru': 'ru', 'de': 'de', 'en': 'en'}
+                    target_lang = lang_map.get(dest_lang, 'uk')
+                    translator_gt = GoogleTranslator(source_language='de', target_language=target_lang)
+                    translated_text = translator_gt.translate(short_text)
+                
                 # Пост-обробка
                 translated_text = post_process_translation(translated_text)
                 translated_text += "\n\n[Перекладено скорочену версію]"
                 logger.info(f"Переклад скороченої версії виконано")
             except Exception as e2:
-                logger.error(f"Переклад остаточно не вдався: {e2}")
-                translated_text = "[Переклад тимчасово недоступний - спробуйте ще раз]"
+                logger.error(f"Остаточна помилка перекладу: {e2}")
     
     # Відправка тексту на обробку
     await update.message.reply_text(t['upload']['processing_analysis'])
