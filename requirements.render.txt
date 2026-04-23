@@ -1,0 +1,9 @@
+deep-translator>=1.9.0
+pdfminer.six
+python-telegram-bot[job-queue]==20.7
+pytesseract
+pillow
+werkzeug
+reportlab>=4.0.0
+requests>=2.31.0
+
