@@ -32,6 +32,12 @@ logging.basicConfig(
 )
 logger = logging.getLogger('client_bot')
 
+BASE_DIR = Path(__file__).resolve().parents[2]
+DATA_DIR = Path(os.getenv('DATA_DIR', str(BASE_DIR / 'data')))
+STORAGE_DIR = Path(os.getenv('STORAGE_DIR', str(BASE_DIR / 'storage')))
+UPLOADS_DIR = Path(os.getenv('UPLOADS_DIR', str(STORAGE_DIR / 'uploads')))
+DATABASE_PATH = Path(os.getenv('DATABASE_PATH', str(STORAGE_DIR / 'users.db')))
+
 # Юридичний словник для пост-обробки перекладу
 LEGAL_TRANSLATION_FIXES = {
     # Параграфи та закони
@@ -219,7 +225,7 @@ if not ADVANCED_TRANSLATOR:
     translator = GoogleTranslator()
 
 # Токен бота
-BOT_TOKEN = "8594681397:AAE7Y2OsQI8DOAK44Subfw8NwAf0ITgtqY0"
+BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN') or os.getenv('BOT_TOKEN')
 
 # Стани діалогу
 WAITING_FOR_USERNAME = 1
@@ -369,7 +375,9 @@ INTERFACE_TRANSLATIONS = {
 # Database setup
 def init_db():
     """Ініціалізація бази даних."""
-    conn = sqlite3.connect('users.db')
+    STORAGE_DIR.mkdir(parents=True, exist_ok=True)
+    UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(DATABASE_PATH)
     c = conn.cursor()
 
     # Таблиця користувачів
@@ -412,11 +420,11 @@ def init_db():
     logger.info("База даних ініціалізована")
 
 # Ensure upload folder
-Path('uploads').mkdir(exist_ok=True)
+UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 
 def get_user(chat_id: int) -> dict:
     """Отримати дані користувача."""
-    conn = sqlite3.connect('users.db')
+    conn = sqlite3.connect(DATABASE_PATH)
     c = conn.cursor()
     c.execute("SELECT * FROM users WHERE chat_id=?", (chat_id,))
     row = c.fetchone()
@@ -570,7 +578,7 @@ async def register_status(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     context.user_data['status'] = 'resident' if 'Резидент' in update.message.text else 'citizen'
 
     chat_id = update.effective_chat.id
-    conn = sqlite3.connect('users.db')
+    conn = sqlite3.connect(DATABASE_PATH)
     c = conn.cursor()
 
     try:
@@ -672,7 +680,7 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         file = await photo.get_file()
 
         # Завантаження фото
-        file_path = f'uploads/{chat_id}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.jpg'
+        file_path = str(UPLOADS_DIR / f"{chat_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jpg")
         await file.download_to_drive(file_path)
 
         # OCR з використанням advanced_ocr якщо доступний
@@ -734,7 +742,7 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 
         doc = update.message.document
         file = await doc.get_file()
-        file_path = f'uploads/{chat_id}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
+        file_path = str(UPLOADS_DIR / f"{chat_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf")
         await file.download_to_drive(file_path)
 
         # Спроба витягнути текст з PDF
@@ -752,6 +760,47 @@ async def handle_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     elif update.message.text:
         # Текстовий лист
         text = update.message.text
+        
+        # ⚠️ ПЕРЕВІРКА: Це не текст листа, а натиснута кнопка
+        button_patterns = [
+            "📋 Історія листів", "📋 История писем", "📋 Briefverlauf", "📋 Letter history",
+            "⚖️ Замовити перевірку адвоката", "⚖️ Заказать проверку адвоката", "⚖️ Anwalt prüfen", "⚖️ Lawyer review",
+            "❓ Допомога", "❓ Помощь", "❓ Hilfe", "❓ Help",
+            "⚙️ Налаштування", "⚙️ Настройки", "⚙️ Einstellungen", "⚙️ Settings",
+            "🌐 Мова / Language", "🌐 Язык / Language", "🌐 Sprache / Language", "🌐 Language",
+            "🔙 Назад", "🔙 Zurück", "🔙 Back",
+            "📤 Завантажити лист", "📤 Загрузить письмо", "📤 Brief hochladen", "📤 Upload letter",
+            "📝 Реєстрація", "📝 Регистрация", "📝 Registrierung", "📝 Registration",
+            "✅ Все, аналізуй", "✅ Все, анализируй", "✅ Fertig, analysieren", "✅ Done, analyze",
+            "📄 Ще сторінку", "📄 Еще страницу", "📄 Weitere Seite", "📄 Another page",
+            "🇺🇦", "🇷🇺", "🇩🇪", "🇬🇧", "Українська", "Русский", "Deutsch", "English", "UK", "RU", "DE", "EN"
+        ]
+        
+        # Якщо текст це кнопка, то надсилаємо помилку
+        if text.strip() in button_patterns:
+            await update.message.reply_text(
+                "❌ **Помилка обробки**\n\n"
+                "Вибачте, здається ви натиснули кнопку замість того щоб надіслати листок.\n\n"
+                "📌 Будь ласка:\n"
+                "1️⃣ Надішліть **фото листа** 📸\n"
+                "2️⃣ Або **скопіюйте текст листа** і надішліть його мені 📝\n\n"
+                "Я чекаю на ваш листок...",
+                parse_mode='Markdown'
+            )
+            return WAITING_FOR_LETTER
+        
+        # Якщо текст занадто короткий (менше 50 символів), вверніть помилку
+        if len(text.strip()) < 50:
+            await update.message.reply_text(
+                "⚠️ **Занадто короткий текст**\n\n"
+                f"Отримано лише {len(text)} символів.\n\n"
+                "Листок повинен бути **довшим** - це має бути офіційне письмо, а не просто кілька слів.\n\n"
+                "📌 Попробуйте:\n"
+                "• Надішліть повне письмо\n"
+                "• Або загрузіть фото листа 📸",
+                parse_mode='Markdown'
+            )
+            return WAITING_FOR_LETTER
         
         # Запитуємо чи це все (multi-page support для тексту)
         if 'letter_photos' not in context.user_data:
@@ -1133,7 +1182,7 @@ async def show_history(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     user = get_user(chat_id)
     lang = user['language'] if user else 'uk'
 
-    conn = sqlite3.connect('users.db')
+    conn = sqlite3.connect(DATABASE_PATH)
     c = conn.cursor()
     c.execute("""
         SELECT id, letter_type, timestamp, text
@@ -1219,7 +1268,7 @@ async def view_letter(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     user = get_user(chat_id)
     lang = user['language'] if user else 'uk'
 
-    conn = sqlite3.connect('users.db')
+    conn = sqlite3.connect(DATABASE_PATH)
     c = conn.cursor()
     c.execute("""
         SELECT text, letter_type, analysis, response, photo_path, timestamp
@@ -1447,7 +1496,7 @@ async def settings_language_selected(update: Update, context: ContextTypes.DEFAU
         return await settings_menu(update, context)
 
     # Оновлюємо мову в БД
-    conn = sqlite3.connect('users.db')
+    conn = sqlite3.connect(DATABASE_PATH)
     c = conn.cursor()
     c.execute("UPDATE users SET language=? WHERE chat_id=?", (selected_lang, chat_id))
     conn.commit()
@@ -1729,6 +1778,9 @@ async def cmd_verification(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 def main():
     """Запуск бота."""
     logger.info("Запуск Client Bot v4.0...")
+
+    if not BOT_TOKEN:
+        raise RuntimeError("TELEGRAM_BOT_TOKEN is required")
 
     # Ініціалізація БД
     init_db()

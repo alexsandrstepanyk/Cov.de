@@ -41,12 +41,10 @@ RUN pip install --upgrade pip wheel setuptools && \
 
 # Копіюємо код
 COPY src/ ./src/
+COPY data/legal_database.db ./data/legal_database.db
 
 # Створюємо директорії
-RUN mkdir -p /app/data /app/logs /app/uploads && chmod -R 755 /app
-
-# Порт
-EXPOSE 5000
+RUN mkdir -p /app/data /app/logs /app/uploads /app/storage/uploads && chmod -R 755 /app
 
 # Запуск бота
 CMD ["python", "src/bots/client_bot.py"]

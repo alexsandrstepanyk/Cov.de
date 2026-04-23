@@ -1,0 +1,28 @@
+services:
+  - type: worker
+    name: gov-de-bot
+    runtime: docker
+    plan: starter
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    autoDeployTrigger: commit
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: BOT_TOKEN
+        sync: false
+      - key: STORAGE_DIR
+        value: /app/storage
+      - key: UPLOADS_DIR
+        value: /app/storage/uploads
+      - key: DATABASE_PATH
+        value: /app/storage/users.db
+      - key: DATA_DIR
+        value: /app/data
+      - key: OLLAMA_BASE_URL
+        sync: false
+      - key: DEFAULT_LLM_MODEL
+        value: gemma:7b
